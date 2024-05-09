@@ -39,7 +39,7 @@ def get_indices(data, labels):
 
 
 # File paths 
-input_path =r'/scratch/users/s184063/RBD_restructured_1_10/' # select correct path and folder
+input_path =r'/scratch/users/s184063/RBD subsample/' # select correct path and folder
 
 
 temp_patientID_2E_E1E2=[]
@@ -623,13 +623,6 @@ temp_P1_beta_6E_E6=[]
 temp_P1_gamma_6E_E6=[]
 
 
-# 30 second coherence 
-temp_delta30=[]
-temp_theta30=[]
-temp_alpha30=[]
-temp_beta30=[]
-temp_gamma30=[]
-
 
 temp_deltacoh_av30_2E_E1E2=[]
 temp_thetacoh_av30_2E_E1E2=[]
@@ -987,6 +980,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['F3M2','F4M1','C3M2','C4M1','O1M2','O2M1']
             Signals=np.vstack((F3M2_signal,F4M1_signal,C3M2_signal,C4M1_signal,O1M2_signal,O2M1_signal))
+            Signal_headers = [F3M2_signalheader,F4M1_signalheader,C3M2_signalheader,C4M1_signalheader,O1M2_signalheader,O2M1_signalheader]
 
             del F3M2_index,F4M1_index,C3M2_index,C4M1_index,O1M2_index,O2M1_index
 
@@ -999,6 +993,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['F3M2','F4M1','C4M1','O1M2']
             Signals=np.vstack((F3M2_signal,F4M1_signal,C4M1_signal,O1M2_signal))
+            Signal_headers = [F3M2_signalheader,F4M1_signalheader,C4M1_signalheader,O1M2_signalheader]
 
             del F3M2_index,F4M1_index,C4M1_index,O1M2_index
 
@@ -1011,6 +1006,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['F3M2','C3M2','C4M1']
             Signals=np.vstack((F3M2_signal,C3M2_signal,C4M1_signal))
+            Signal_headers = [F3M2_signalheader,C3M2_signalheader,C4M1_signalheader]
 
             del F3M2_index,C3M2_index,C4M1_index
 
@@ -1023,6 +1019,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['F3M2','C3M2','C4M1','O1M2','O2M1']
             Signals=np.vstack((F3M2_signal,C3M2_signal,C4M1_signal,O1M2_signal,O2M1_signal))
+            Signal_headers = [F3M2_signalheader,C3M2_signalheader,C4M1_signalheader,O1M2_signalheader,O2M1_signalheader]
 
             del F3M2_index,C3M2_index,C4M1_index,O1M2_index,O2M1_index
 
@@ -1035,6 +1032,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['F3M2','F4M1','C3M2','C4M1','O1M2']
             Signals=np.vstack((F3M2_signal,F4M1_signal,C3M2_signal,C4M1_signal,O1M2_signall))
+            Signal_headers = [F3M2_signalheader,F4M1_signalheader,C3M2_signalheader,C4M1_signalheader,O1M2_signallheader]
 
             del F3M2_index,F4M1_index,C3M2_index,C4M1_index,O1M2_index
 
@@ -1047,6 +1045,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['F3M2','F4M1','C3M2','C4M1','O2M1']
             Signals=np.vstack((F3M2_signal,F4M1_signal,C3M2_signal,C4M1_signal,O2M1_signal))
+            Signal_headers = [F3M2_signalheader,F4M1_signalheader,C3M2_signalheader,C4M1_signalheader,O2M1_signalheader]
 
             del F3M2_index,F4M1_index,C3M2_index,C4M1_index,O2M1_index
 
@@ -1058,6 +1057,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['F3M2','C3M2','O1M2']
             Signals=np.vstack((F3M2_signal,C3M2_signal,O1M2_signal))
+            Signal_headers = [F3M2_signalheader,C3M2_signalheader,O1M2_signalheader]
 
             del F3M2_index,C3M2_index,O1M2_index
 
@@ -1070,6 +1070,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['C3M2','C4M1','O1M2','O2M1']
             Signals=np.vstack((C3M2_signal,C4M1_signal,O1M2_signal,O2M1_signal))
+            Signal_headers = [C3M2_signalheader,C4M1_signalheader,O1M2_signalheader,O2M1_signalheader]
 
 
             del C3M2_index,C4M1_index,O1M2_index,O2M1_index
@@ -1081,6 +1082,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['C3M2','C4M1','O2M1'] 
             Signals=np.vstack((C3M2_signal,C4M1_signal,O2M1_signal))
+            Signal_headers = [C3M2_signalheader,C4M1_signalheader,O2M1_signalheader]
 
             del C3M2_index,C4M1_index,O2M1_index
 
@@ -1092,6 +1094,7 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['C3M2','C4M1','O1M2']
             Signals=np.vstack((C3M2_signal,C4M1_signal,O1M2_signal))
+            Signal_headers = [C3M2_signalheader,C4M1_signalheader,O1M2_signalheader]
 
             del C3M2_index,C4M1_index,O1M2_index
 
@@ -1103,14 +1106,16 @@ for edf_file in edf_files_list:
             # Stacking values having a specific order (frontal, central, occipital)
             Electrodes=['C3M2','C4M1']
             Signals=np.vstack((C3M2_signal,C4M1_signal))
+            Signal_headers = [C3M2_signalheader,C4M1_signalheader]
 
             del C3M2_index,C4M1_index
 
         
-
+        
 
         ### Loop over electrodes to get one band power analysis per electrode ####
         
+
         for loop_factor in range(len(Electrodes)): 
             
             print('Bandpower loop')
@@ -1118,6 +1123,9 @@ for edf_file in edf_files_list:
             
             print('Electrodes')
             print(Electrodes)
+
+            #print('Signal headers')
+            #print(Signal_headers)
 
             print('Signals matrix information')
             print(Signals.shape)
@@ -1135,8 +1143,14 @@ for edf_file in edf_files_list:
             print(type(Electrode_single))
             #print(Electrode_single)
 
+            print('Signal header for bandpower preprocessing')
+            #print(f"{Electrode_for_naming}_signalheader")
+            Signal_headers_single=Signal_headers[loop_factor]
+            print(type(Signal_headers_single))
+            print(Signal_headers_single)
 
-            signal_new_single, fs_new_single, time_filtered_HP_single = preprocessing(Electrode_single)#, f'{Electrode_for_naming}_signalheader')
+
+            signal_new_single, fs_new_single, time_filtered_HP_single = preprocessing(Electrode_single, Signal_headers_single)
 
 
 
@@ -1212,22 +1226,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_2E_E1.append(P1_beta)
                     temp_P1_gamma_2E_E1.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_2E_E1=np.stack(temp_P1_patientID_2E_E1)
-                    P1_delta_2E_E1=np.stack(temp_P1_delta_2E_E1)
-                    P1_theta_2E_E1=np.stack(temp_P1_theta_2E_E1)
-                    P1_alpha_2E_E1=np.stack(temp_P1_alpha_2E_E1)
-                    P1_beta_2E_E1=np.stack(temp_P1_beta_2E_E1)
-                    P1_gamma_2E_E1=np.stack(temp_P1_gamma_2E_E1)
+                
 
                     # Packing data in dictonary 
                     Bandpower_values_2E_E1 = {
                         'PatientID': P1_patientID_2E_E1,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_2E_E1.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_2E_E1.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_2E_E1.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_2E_E1.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_2E_E1.tolist(),
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_patientID_2E_E1,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_delta_2E_E1,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_theta_2E_E1,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_alpha_2E_E1,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_2E_E1,
 
                         }
                     
@@ -1243,22 +1251,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_2E_E2.append(P1_beta)
                     temp_P1_gamma_2E_E2.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_2E_E2=np.stack(temp_P1_patientID_2E_E2)
-                    P1_delta_2E_E2=np.stack(temp_P1_delta_2E_E2)
-                    P1_theta_2E_E2=np.stack(temp_P1_theta_2E_E2)
-                    P1_alpha_2E_E2=np.stack(temp_P1_alpha_2E_E2)
-                    P1_beta_2E_E2=np.stack(temp_P1_beta_2E_E2)
-                    P1_gamma_2E_E2=np.stack(temp_P1_gamma_2E_E2)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_2E_E2 = {
-                        'PatientID': P1_patientID_2E_E2,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_2E_E2.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_2E_E2.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_2E_E2.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_2E_E2.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_2E_E2.tolist(),
+                        'PatientID': temp_P1_patientID_2E_E2,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_2E_E2,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_2E_E2,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_2E_E2,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_2E_E2,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_2E_E2,
 
                         }
                     
@@ -1278,22 +1280,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_3E_E1.append(P1_beta)
                     temp_P1_gamma_3E_E1.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_3E_E1=np.stack(temp_P1_patientID_3E_E1)
-                    P1_delta_3E_E1=np.stack(temp_P1_delta_3E_E1)
-                    P1_theta_3E_E1=np.stack(temp_P1_theta_3E_E1)
-                    P1_alpha_3E_E1=np.stack(temp_P1_alpha_3E_E1)
-                    P1_beta_3E_E1=np.stack(temp_P1_beta_3E_E1)
-                    P1_gamma_3E_E1=np.stack(temp_P1_gamma_3E_E1)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_3E_E1 = {
-                        'PatientID': P1_patientID_3E_E1,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_3E_E1.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_3E_E1.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_3E_E1.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_3E_E1.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_3E_E1.tolist(),
+                        'PatientID': temp_P1_patientID_3E_E1,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_3E_E1,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_3E_E1,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_3E_E1,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_3E_E1,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_3E_E1,
 
                         }
                     
@@ -1309,22 +1305,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_3E_E2.append(P1_beta)
                     temp_P1_gamma_3E_E2.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_3E_E2=np.stack(temp_P1_patientID_3E_E2)
-                    P1_delta_3E_E2=np.stack(temp_P1_delta_3E_E2)
-                    P1_theta_3E_E2=np.stack(temp_P1_theta_3E_E2)
-                    P1_alpha_3E_E2=np.stack(temp_P1_alpha_3E_E2)
-                    P1_beta_3E_E2=np.stack(temp_P1_beta_3E_E2)
-                    P1_gamma_3E_E2=np.stack(temp_P1_gamma_3E_E2)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_3E_E2 = {
-                        'PatientID': P1_patientID_3E_E2,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_3E_E2.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_3E_E2.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_3E_E2.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_3E_E2.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_3E_E2.tolist(),
+                        'PatientID': temp_P1_patientID_3E_E2,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_3E_E2,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_3E_E2,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_3E_E2,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_3E_E2,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_3E_E2,
 
                         }
                     
@@ -1341,22 +1331,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_3E_E3.append(P1_beta)
                     temp_P1_gamma_3E_E3.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_3E_E3=np.stack(temp_P1_patientID_3E_E3)
-                    P1_delta_3E_E3=np.stack(temp_P1_delta_3E_E3)
-                    P1_theta_3E_E3=np.stack(temp_P1_theta_3E_E3)
-                    P1_alpha_3E_E3=np.stack(temp_P1_alpha_3E_E3)
-                    P1_beta_3E_E3=np.stack(temp_P1_beta_3E_E3)
-                    P1_gamma_3E_E3=np.stack(temp_P1_gamma_3E_E3)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_3E_E3 = {
-                        'PatientID': P1_patientID_3E_E3,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_3E_E3.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_3E_E3.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_3E_E3.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_3E_E3.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_3E_E3.tolist(),
+                        'PatientID': temp_P1_patientID_3E_E3,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_3E_E3,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_3E_E3,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_3E_E3,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_3E_E3,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_3E_E3,
 
                         }
                     
@@ -1375,22 +1359,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_4E_E1.append(P1_beta)
                     temp_P1_gamma_4E_E1.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_4E_E1=np.stack(temp_P1_patientID_4E_E1)
-                    P1_delta_4E_E1=np.stack(temp_P1_delta_4E_E1)
-                    P1_theta_4E_E1=np.stack(temp_P1_theta_4E_E1)
-                    P1_alpha_4E_E1=np.stack(temp_P1_alpha_4E_E1)
-                    P1_beta_4E_E1=np.stack(temp_P1_beta_4E_E1)
-                    P1_gamma_4E_E1=np.stack(temp_P1_gamma_4E_E1)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_4E_E1 = {
-                        'PatientID': P1_patientID_4E_E1,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_4E_E1.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_4E_E1.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_4E_E1.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_4E_E1.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_4E_E1.tolist(),
+                        'PatientID': temp_P1_patientID_4E_E1,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_4E_E1,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_4E_E1,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_4E_E1,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_4E_E1,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_4E_E1,
 
                         }
                     
@@ -1406,22 +1384,15 @@ for edf_file in edf_files_list:
                     temp_P1_beta_4E_E2.append(P1_beta)
                     temp_P1_gamma_4E_E2.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_4E_E2=np.stack(temp_P1_patientID_4E_E2)
-                    P1_delta_4E_E2=np.stack(temp_P1_delta_4E_E2)
-                    P1_theta_4E_E2=np.stack(temp_P1_theta_4E_E2)
-                    P1_alpha_4E_E2=np.stack(temp_P1_alpha_4E_E2)
-                    P1_beta_4E_E2=np.stack(temp_P1_beta_4E_E2)
-                    P1_gamma_4E_E2=np.stack(temp_P1_gamma_4E_E2)
 
                     # Packing data in dictonary 
                     Bandpower_values_4E_E2 = {
-                        'PatientID': P1_patientID_4E_E2,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_4E_E2.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_4E_E2.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_4E_E2.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_4E_E2.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_4E_E2.tolist(),
+                        'PatientID': temp_P1_patientID_4E_E2,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_4E_E2,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_4E_E2,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_4E_E2,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_4E_E2,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_4E_E2,
 
                         }
                     
@@ -1438,22 +1409,15 @@ for edf_file in edf_files_list:
                     temp_P1_beta_4E_E3.append(P1_beta)
                     temp_P1_gamma_4E_E3.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_4E_E3=np.stack(temp_P1_patientID_4E_E3)
-                    P1_delta_4E_E3=np.stack(temp_P1_delta_4E_E3)
-                    P1_theta_4E_E3=np.stack(temp_P1_theta_4E_E3)
-                    P1_alpha_4E_E3=np.stack(temp_P1_alpha_4E_E3)
-                    P1_beta_4E_E3=np.stack(temp_P1_beta_4E_E3)
-                    P1_gamma_4E_E3=np.stack(temp_P1_gamma_4E_E3)
 
                     # Packing data in dictonary 
                     Bandpower_values_4E_E3 = {
-                        'PatientID': P1_patientID_4E_E3,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_4E_E3.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_4E_E3.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_4E_E3.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_4E_E3.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_4E_E3.tolist(),
+                        'PatientID': temp_P1_patientID_4E_E3,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_4E_E3,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_4E_E3,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_4E_E3,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_4E_E3,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_4E_E3,
 
                         }
                     
@@ -1469,22 +1433,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_4E_E4.append(P1_beta)
                     temp_P1_gamma_4E_E4.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_4E_E4=np.stack(temp_P1_patientID_4E_E4)
-                    P1_delta_4E_E4=np.stack(temp_P1_delta_4E_E4)
-                    P1_theta_4E_E4=np.stack(temp_P1_theta_4E_E4)
-                    P1_alpha_4E_E4=np.stack(temp_P1_alpha_4E_E4)
-                    P1_beta_4E_E4=np.stack(temp_P1_beta_4E_E4)
-                    P1_gamma_4E_E4=np.stack(temp_P1_gamma_4E_E4)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_4E_E4 = {
-                        'PatientID': P1_patientID_4E_E4,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_4E_E4.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_4E_E4.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_4E_E4.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_4E_E4.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_4E_E4.tolist(),
+                        'PatientID': temp_P1_patientID_4E_E4,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_4E_E4,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_4E_E4,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_4E_E4,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_4E_E4,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_4E_E4,
 
                         }
                     
@@ -1503,22 +1461,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_5E_E1.append(P1_beta)
                     temp_P1_gamma_5E_E1.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_5E_E1=np.stack(temp_P1_patientID_5E_E1)
-                    P1_delta_5E_E1=np.stack(temp_P1_delta_5E_E1)
-                    P1_theta_5E_E1=np.stack(temp_P1_theta_5E_E1)
-                    P1_alpha_5E_E1=np.stack(temp_P1_alpha_5E_E1)
-                    P1_beta_5E_E1=np.stack(temp_P1_beta_5E_E1)
-                    P1_gamma_5E_E1=np.stack(temp_P1_gamma_5E_E1)
+        
 
                     # Packing data in dictonary 
                     Bandpower_values_5E_E1 = {
-                        'PatientID': P1_patientID_5E_E1,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_5E_E1.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_5E_E1.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_5E_E1.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_5E_E1.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_5E_E1.tolist(),
+                        'PatientID': temp_P1_patientID_5E_E1,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_5E_E1,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_5E_E1,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_5E_E1,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_5E_E1,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_5E_E1,
 
                         }
                     
@@ -1534,22 +1486,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_5E_E2.append(P1_beta)
                     temp_P1_gamma_5E_E2.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_5E_E2=np.stack(temp_P1_patientID_5E_E2)
-                    P1_delta_5E_E2=np.stack(temp_P1_delta_5E_E2)
-                    P1_theta_5E_E2=np.stack(temp_P1_theta_5E_E2)
-                    P1_alpha_5E_E2=np.stack(temp_P1_alpha_5E_E2)
-                    P1_beta_5E_E2=np.stack(temp_P1_beta_5E_E2)
-                    P1_gamma_5E_E2=np.stack(temp_P1_gamma_5E_E2)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_5E_E2 = {
-                        'PatientID': P1_patientID_5E_E2,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_5E_E2.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_5E_E2.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_5E_E2.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_5E_E2.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_5E_E2.tolist(),
+                        'PatientID': temp_P1_patientID_5E_E2,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_5E_E2,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_5E_E2,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_5E_E2,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_5E_E2,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_5E_E2,
 
                         }
                     
@@ -1566,22 +1512,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_5E_E3.append(P1_beta)
                     temp_P1_gamma_5E_E3.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_5E_E3=np.stack(temp_P1_patientID_5E_E3)
-                    P1_delta_5E_E3=np.stack(temp_P1_delta_5E_E3)
-                    P1_theta_5E_E3=np.stack(temp_P1_theta_5E_E3)
-                    P1_alpha_5E_E3=np.stack(temp_P1_alpha_5E_E3)
-                    P1_beta_5E_E3=np.stack(temp_P1_beta_5E_E3)
-                    P1_gamma_5E_E3=np.stack(temp_P1_gamma_5E_E3)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_5E_E3 = {
-                        'PatientID': P1_patientID_5E_E3,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_5E_E3.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_5E_E3.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_5E_E3.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_5E_E3.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_5E_E3.tolist(),
+                        'PatientID': temp_P1_patientID_5E_E3,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_5E_E3,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_5E_E3,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_5E_E3,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_5E_E3,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_5E_E3,
 
                         }
                     
@@ -1597,22 +1537,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_5E_E4.append(P1_beta)
                     temp_P1_gamma_5E_E4.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_5E_E4=np.stack(temp_P1_patientID_5E_E4)
-                    P1_delta_5E_E4=np.stack(temp_P1_delta_5E_E4)
-                    P1_theta_5E_E4=np.stack(temp_P1_theta_5E_E4)
-                    P1_alpha_5E_E4=np.stack(temp_P1_alpha_5E_E4)
-                    P1_beta_5E_E4=np.stack(temp_P1_beta_5E_E4)
-                    P1_gamma_5E_E4=np.stack(temp_P1_gamma_5E_E4)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_5E_E4 = {
-                        'PatientID': P1_patientID_5E_E4,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_5E_E4.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_5E_E4.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_5E_E4.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_5E_E4.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_5E_E4.tolist(),
+                        'PatientID': temp_P1_patientID_5E_E4,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_5E_E4,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_5E_E4,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_5E_E4,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_5E_E4,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_5E_E4,
 
                         }
                     
@@ -1629,22 +1563,15 @@ for edf_file in edf_files_list:
                     temp_P1_beta_5E_E5.append(P1_beta)
                     temp_P1_gamma_5E_E5.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_5E_E5=np.stack(temp_P1_patientID_5E_E5)
-                    P1_delta_5E_E5=np.stack(temp_P1_delta_5E_E5)
-                    P1_theta_5E_E5=np.stack(temp_P1_theta_5E_E5)
-                    P1_alpha_5E_E5=np.stack(temp_P1_alpha_5E_E5)
-                    P1_beta_5E_E5=np.stack(temp_P1_beta_5E_E5)
-                    P1_gamma_5E_E5=np.stack(temp_P1_gamma_5E_E5)
-
+                    
                     # Packing data in dictonary 
                     Bandpower_values_5E_E5 = {
-                        'PatientID': P1_patientID_5E_E5,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_5E_E5.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_5E_E5.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_5E_E5.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_5E_E5.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_5E_E5.tolist(),
+                        'PatientID': temp_P1_patientID_5E_E5,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_5E_E5,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_5E_E5,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_5E_E5,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_5E_E5,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_5E_E5,
 
                         }
                     
@@ -1663,27 +1590,29 @@ for edf_file in edf_files_list:
                     temp_P1_beta_6E_E1.append(P1_beta)
                     temp_P1_gamma_6E_E1.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_6E_E1=np.stack(temp_P1_patientID_6E_E1)
-                    P1_delta_6E_E1=np.stack(temp_P1_delta_6E_E1)
-                    P1_theta_6E_E1=np.stack(temp_P1_theta_6E_E1)
-                    P1_alpha_6E_E1=np.stack(temp_P1_alpha_6E_E1)
-                    P1_beta_6E_E1=np.stack(temp_P1_beta_6E_E1)
-                    P1_gamma_6E_E1=np.stack(temp_P1_gamma_6E_E1)
+                    print('Testing temp variable delta - checking the size after all patients')
+                    print(P1_delta)
+                    print('Testing the temp patientID variable')
+                    print(P1_patientID)
+
+                
 
                     # Packing data in dictonary 
                     Bandpower_values_6E_E1 = {
-                        'PatientID': P1_patientID_6E_E1,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_6E_E1.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_6E_E1.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_6E_E1.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_6E_E1.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_6E_E1.tolist(),
+                        'PatientID': temp_P1_patientID_6E_E1,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_6E_E1,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_6E_E1,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_6E_E1,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_6E_E1,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_6E_E1,
 
                         }
                     
                     print('Bandpower 6E was packed - E1')
                     print(Bandpower_values_6E_E1)
+                    
+                
+                    
 
                 elif Electrodes[1]==Electrodes[loop_factor]:
             
@@ -1694,22 +1623,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_6E_E2.append(P1_beta)
                     temp_P1_gamma_6E_E2.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_6E_E2=np.stack(temp_P1_patientID_6E_E2)
-                    P1_delta_6E_E2=np.stack(temp_P1_delta_6E_E2)
-                    P1_theta_6E_E2=np.stack(temp_P1_theta_6E_E2)
-                    P1_alpha_6E_E2=np.stack(temp_P1_alpha_6E_E2)
-                    P1_beta_6E_E2=np.stack(temp_P1_beta_6E_E2)
-                    P1_gamma_6E_E2=np.stack(temp_P1_gamma_6E_E2)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_6E_E2 = {
-                        'PatientID': P1_patientID_6E_E2,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_6E_E2.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_6E_E2.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_6E_E2.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_6E_E2.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_6E_E2.tolist(),
+                        'PatientID': temp_P1_patientID_6E_E2,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_6E_E2,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_6E_E2,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_6E_E2,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_6E_E2,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_6E_E2,
 
                         }
                     
@@ -1726,22 +1649,15 @@ for edf_file in edf_files_list:
                     temp_P1_beta_6E_E3.append(P1_beta)
                     temp_P1_gamma_6E_E3.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_6E_E3=np.stack(temp_P1_patientID_6E_E3)
-                    P1_delta_6E_E3=np.stack(temp_P1_delta_6E_E3)
-                    P1_theta_6E_E3=np.stack(temp_P1_theta_6E_E3)
-                    P1_alpha_6E_E3=np.stack(temp_P1_alpha_6E_E3)
-                    P1_beta_6E_E3=np.stack(temp_P1_beta_6E_E3)
-                    P1_gamma_6E_E3=np.stack(temp_P1_gamma_6E_E3)
-
+                    
                     # Packing data in dictonary 
                     Bandpower_values_6E_E3 = {
-                        'PatientID': P1_patientID_6E_E3,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_6E_E3.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_6E_E3.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_6E_E3.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_6E_E3.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_6E_E3.tolist(),
+                        'PatientID': temp_P1_patientID_6E_E3,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_6E_E3,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_6E_E3,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_6E_E3,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_6E_E3,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_6E_E3,
 
                         }
                     
@@ -1757,22 +1673,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_6E_E4.append(P1_beta)
                     temp_P1_gamma_6E_E4.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_6E_E4=np.stack(temp_P1_patientID_6E_E4)
-                    P1_delta_6E_E4=np.stack(temp_P1_delta_6E_E4)
-                    P1_theta_6E_E4=np.stack(temp_P1_theta_6E_E4)
-                    P1_alpha_6E_E4=np.stack(temp_P1_alpha_6E_E4)
-                    P1_beta_6E_E4=np.stack(temp_P1_beta_6E_E4)
-                    P1_gamma_6E_E4=np.stack(temp_P1_gamma_6E_E4)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_6E_E4 = {
-                        'PatientID': P1_patientID_6E_E4,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_6E_E4.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_6E_E4.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_6E_E4.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_6E_E4.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_6E_E4.tolist(),
+                        'PatientID': temp_P1_patientID_6E_E4,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_6E_E4,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_6E_E4,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_6E_E4,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_6E_E4,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_6E_E4,
 
                         }
                     
@@ -1789,22 +1699,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_6E_E5.append(P1_beta)
                     temp_P1_gamma_6E_E5.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_6E_E5=np.stack(temp_P1_patientID_6E_E5)
-                    P1_delta_6E_E5=np.stack(temp_P1_delta_6E_E5)
-                    P1_theta_6E_E5=np.stack(temp_P1_theta_6E_E5)
-                    P1_alpha_6E_E5=np.stack(temp_P1_alpha_6E_E5)
-                    P1_beta_6E_E5=np.stack(temp_P1_beta_6E_E5)
-                    P1_gamma_6E_E5=np.stack(temp_P1_gamma_6E_E5)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_6E_E5 = {
-                        'PatientID': P1_patientID_6E_E5,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_6E_E5.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_6E_E5.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_6E_E5.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_6E_E5.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_6E_E5.tolist(),
+                        'PatientID': temp_P1_patientID_6E_E5,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_6E_E5,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_6E_E5,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_6E_E5,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_6E_E5,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_6E_E5,
 
                         }
                     
@@ -1821,22 +1725,16 @@ for edf_file in edf_files_list:
                     temp_P1_beta_6E_E6.append(P1_beta)
                     temp_P1_gamma_6E_E6.append(P1_gamma)
 
-                    # Stack values
-                    P1_patientID_6E_E6=np.stack(temp_P1_patientID_6E_E6)
-                    P1_delta_6E_E6=np.stack(temp_P1_delta_6E_E6)
-                    P1_theta_6E_E6=np.stack(temp_P1_theta_6E_E6)
-                    P1_alpha_6E_E6=np.stack(temp_P1_alpha_6E_E6)
-                    P1_beta_6E_E6=np.stack(temp_P1_beta_6E_E6)
-                    P1_gamma_6E_E6=np.stack(temp_P1_gamma_6E_E6)
+                    
 
                     # Packing data in dictonary 
                     Bandpower_values_6E_E6 = {
-                        'PatientID': P1_patientID_6E_E6,
-                        'P1_delta_'+str(Electrode_for_naming): P1_delta_6E_E6.tolist(),
-                        'P1_theta_'+str(Electrode_for_naming): P1_theta_6E_E6.tolist(),
-                        'P1_alpha_'+str(Electrode_for_naming): P1_alpha_6E_E6.tolist(),
-                        'P1_beta_'+str(Electrode_for_naming): P1_beta_6E_E6.tolist(),
-                        'P1_gamma_'+str(Electrode_for_naming): P1_gamma_6E_E6.tolist(),
+                        'PatientID': temp_P1_patientID_6E_E6,
+                        'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_6E_E6,
+                        'P1_theta_'+str(Electrode_for_naming): temp_P1_theta_6E_E6,
+                        'P1_alpha_'+str(Electrode_for_naming): temp_P1_alpha_6E_E6,
+                        'P1_beta_'+str(Electrode_for_naming): temp_P1_beta_6E_E6,
+                        'P1_gamma_'+str(Electrode_for_naming): temp_P1_gamma_6E_E6,
 
                         }
                     
@@ -2118,10 +2016,10 @@ for edf_file in edf_files_list:
             ##### Pre-processing the two electrodes #####################
 
             # Calling pre-processing function for channel 1 
-            signal_new_chan1, fs_new_chan1, time_filtered_HP_chan1 = preprocessing(Electrode1)#, Signalheader1)
+            signal_new_chan1, fs_new_chan1, time_filtered_HP_chan1 = preprocessing(Electrode1, Signalheader1)
 
             # Calling pre-processing function for channel 2
-            signal_new_chan2, fs_new_chan2, time_filtered_HP_chan2 = preprocessing(Electrode2)#,Signalheader2)
+            signal_new_chan2, fs_new_chan2, time_filtered_HP_chan2 = preprocessing(Electrode2,Signalheader2)
 
             # Deleting to release memory
             del Electrode1, Electrode2
@@ -2135,13 +2033,13 @@ for edf_file in edf_files_list:
             # Using coherence function in python 
             #Coherence=(abs(Pxy_den**2))/(Pxx_den*Pyy_den)
             f, Cxy = scipy.signal.coherence(time_filtered_HP_chan1, time_filtered_HP_chan2, fs_new_chan1, nperseg=1024)
-            '''
-            matplotlib,pyplot.semilogy(f, Cxy)
-            matplotlib,pyplot.title('Coherence of time signal channel 1 and 2')
-            matplotlib,pyplot.xlabel('frequency [Hz]')
-            matplotlib,pyplot.ylabel('Coherence')
-            matplotlib,pyplot.show()
-            '''
+            
+            #matplotlib,pyplot.semilogy(f, Cxy)
+            #matplotlib,pyplot.title('Coherence of time signal channel 1 and 2')
+            #matplotlib,pyplot.xlabel('frequency [Hz]')
+            #matplotlib,pyplot.ylabel('Coherence')
+            #matplotlib,pyplot.show()
+            
 
             ##### Extracting coherence features ######
             # Average coherence value for each EEG frequency band 
@@ -2169,8 +2067,13 @@ for edf_file in edf_files_list:
             time_30s_calculate=fs*30 # fs is the sampling frequency (number of samples per second) and we would like the amount of samples for 30 seconds
             idx_30=time_30s_calculate
             
+            temp_delta30=[]
+            temp_theta30=[]
+            temp_alpha30=[]
+            temp_beta30=[]
+            temp_gamma30=[]
             
-            # Indexing for 30 seconds intervals using the amount of samples for 30 seconds 'idx_30'
+            # Indexing for 30 seconds intervals using the amount of samples for 30 seconds 'idpreprocessingx_30'
             for i in range(0,len(time_filtered_HP_chan1),time_30s_calculate):
                 
                 # indexing in the two signals for 30 second intervals 
@@ -2196,12 +2099,18 @@ for edf_file in edf_files_list:
                 temp_beta30.append(betaband_coh_30sec)
                 temp_gamma30.append(gammaband_coh_30sec)
 
-                # Stacking the temporary variables 
-                delta_coh30=np.stack(temp_delta30)
-                theta_coh30=np.stack(temp_theta30)
-                alpha_coh30=np.stack(temp_alpha30)
-                beta_coh30=np.stack(temp_beta30)
-                gamma_coh30=np.stack(temp_gamma30)
+            
+            print('Size of temp_delta30 - should remain same size for each EDF file')
+            print(len(temp_delta30))
+            
+            # Stacking the temporary variables 
+            delta_coh30=np.stack(temp_delta30)
+            theta_coh30=np.stack(temp_theta30)
+            alpha_coh30=np.stack(temp_alpha30)
+            beta_coh30=np.stack(temp_beta30)
+            gamma_coh30=np.stack(temp_gamma30)
+
+            del temp_delta30, temp_theta30, temp_alpha30, temp_beta30, temp_gamma30
 
 
             # Step 5) 
@@ -2244,32 +2153,21 @@ for edf_file in edf_files_list:
                 temp_betacoh_av30_2E_E1E2.append(beta_coh_av_30)
                 temp_gammacoh_av30_2E_E1E2.append(gamma_coh_av_30)
 
-                # stacking variables 
-                patientID_stacked_2E_E1E2=np.stack(temp_patientID_2E_E1E2)
-                delta_coh_2E_E1E2=np.stack(temp_deltaband_coh_2E_E1E2)
-                theta_coh_2E_E1E2=np.stack(temp_thetaband_coh_2E_E1E2)
-                alpha_coh_2E_E1E2=np.stack(temp_alphaband_coh_2E_E1E2)
-                beta_coh_2E_E1E2=np.stack(temp_betaband_coh_2E_E1E2)
-                gamma_coh_2E_E1E2=np.stack(temp_gammaband_coh_2E_E1E2)
-                deltacoh_av30_2E_E1E2=np.stack(temp_deltacoh_av30_2E_E1E2)
-                thetacoh_av30_2E_E1E2=np.stack(temp_thetacoh_av30_2E_E1E2)
-                alphacoh_av30_2E_E1E2=np.stack(temp_alphacoh_av30_2E_E1E2)
-                betacoh_av30_2E_E1E2=np.stack(temp_betacoh_av30_2E_E1E2)
-                gammacoh_av30_2E_E1E2=np.stack(temp_gammacoh_av30_2E_E1E2)
+        
 
                 # Packing data in dictonary 
                 Coherence_values_2E_E1E2 = {
-                    'PatientID_2E': patientID_stacked_2E_E1E2,
-                    'Delta_coh_'+str(Electrode_combination_naming): delta_coh_2E_E1E2.tolist(),
-                    'Theta_coh_'+str(Electrode_combination_naming): theta_coh_2E_E1E2.tolist(),
-                    'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_2E_E1E2.tolist(),
-                    'Beta_coh_'+str(Electrode_combination_naming): beta_coh_2E_E1E2.tolist(),
-                    'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_2E_E1E2.tolist(),
-                    'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_2E_E1E2.tolist(),
-                    'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_2E_E1E2.tolist(),
-                    'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_2E_E1E2.tolist(),
-                    'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_2E_E1E2.tolist(),
-                    'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_2E_E1E2.tolist(),
+                    'PatientID_2E': temp_patientID_2E_E1E2,
+                    'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_2E_E1E2,
+                    'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_2E_E1E2,
+                    'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_2E_E1E2,
+                    'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_2E_E1E2,
+                    'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_2E_E1E2,
+                    'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_2E_E1E2,
+                    'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_2E_E1E2,
+                    'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_2E_E1E2,
+                    'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_2E_E1E2,
+                    'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_2E_E1E2,
                     }
                 
                 print('Coherence 2E values dictonary')
@@ -2300,32 +2198,21 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_3E_E1E2.append(beta_coh_av_30)
                     temp_gammacoh_av30_3E_E1E2.append(gamma_coh_av_30)
 
-                    # stacking variables 
-                    patientID_stacked_3E_E1E2=np.stack(temp_patientID_3E_E1E2)
-                    delta_coh_3E_E1E2=np.stack(temp_deltaband_coh_3E_E1E2)
-                    theta_coh_3E_E1E2=np.stack(temp_thetaband_coh_3E_E1E2)
-                    alpha_coh_3E_E1E2=np.stack(temp_alphaband_coh_3E_E1E2)
-                    beta_coh_3E_E1E2=np.stack(temp_betaband_coh_3E_E1E2)
-                    gamma_coh_3E_E1E2=np.stack(temp_gammaband_coh_3E_E1E2)
-                    deltacoh_av30_3E_E1E2=np.stack(temp_deltacoh_av30_3E_E1E2)
-                    thetacoh_av30_3E_E1E2=np.stack(temp_thetacoh_av30_3E_E1E2)
-                    alphacoh_av30_3E_E1E2=np.stack(temp_alphacoh_av30_3E_E1E2)
-                    betacoh_av30_3E_E1E2=np.stack(temp_betacoh_av30_3E_E1E2)
-                    gammacoh_av30_3E_E1E2=np.stack(temp_gammacoh_av30_3E_E1E2)
+                
 
                     # Packing data in dictonary 
                     Coherence_values_3E_E1E2 = {
-                        'PatientID': patientID_stacked_3E_E1E2,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_3E_E1E2.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_3E_E1E2.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_3E_E1E2.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_3E_E1E2.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_3E_E1E2.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_3E_E1E2.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_3E_E1E2.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_3E_E1E2.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_3E_E1E2.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_3E_E1E2.tolist(),
+                        'PatientID': temp_patientID_3E_E1E2,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_3E_E1E2,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_3E_E1E2,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_3E_E1E2,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_3E_E1E2,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_3E_E1E2,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_3E_E1E2,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_3E_E1E2,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_3E_E1E2,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_3E_E1E2,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_3E_E1E2,
                         }
                     
                     print('Coherence 3E values dictonary - first combination')
@@ -2350,33 +2237,19 @@ for edf_file in edf_files_list:
                     temp_gammacoh_av30_3E_E1E3.append(gamma_coh_av_30)
 
 
-                        
-                    # stacking variables 
-                    patientID_stacked_3E_E1E3=np.stack(temp_patientID_3E_E1E3)
-                    delta_coh_3E_E1E3=np.stack(temp_deltaband_coh_3E_E1E3)
-                    theta_coh_3E_E1E3=np.stack(temp_thetaband_coh_3E_E1E3)
-                    alpha_coh_3E_E1E3=np.stack(temp_alphaband_coh_3E_E1E3)
-                    beta_coh_3E_E1E3=np.stack(temp_betaband_coh_3E_E1E3)
-                    gamma_coh_3E_E1E3=np.stack(temp_gammaband_coh_3E_E1E3)
-                    deltacoh_av30_3E_E1E3=np.stack(temp_deltacoh_av30_3E_E1E3)
-                    thetacoh_av30_3E_E1E3=np.stack(temp_thetacoh_av30_3E_E1E3)
-                    alphacoh_av30_3E_E1E3=np.stack(temp_alphacoh_av30_3E_E1E3)
-                    betacoh_av30_3E_E1E3=np.stack(temp_betacoh_av30_3E_E1E3)
-                    gammacoh_av30_3E_E1E3=np.stack(temp_gammacoh_av30_3E_E1E3)
-
                     # Packing data in dictonary 
                     Coherence_values_3E_E1E3 = {
-                        'PatientID': patientID_stacked_3E_E1E3,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_3E_E1E3.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_3E_E1E3.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_3E_E1E3.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_3E_E1E3.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_3E_E1E3.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_3E_E1E3.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_3E_E1E3.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_3E_E1E3.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_3E_E1E3.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_3E_E1E3.tolist(),
+                        'PatientID': temp_patientID_3E_E1E3,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_3E_E1E3,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_3E_E1E3,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_3E_E1E3,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_3E_E1E3,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_3E_E1E3,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_3E_E1E3,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_3E_E1E3,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_3E_E1E3,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_3E_E1E3,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_3E_E1E3,
                         }
                     
                     print('Coherence 3E values dictonary - second combination')
@@ -2399,32 +2272,21 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_3E_E2E3.append(beta_coh_av_30)
                     temp_gammacoh_av30_3E_E2E3.append(gamma_coh_av_30)
                         
-                    # stacking variables 
-                    patientID_stacked_3E_E2E3=np.stack(temp_patientID_3E_E2E3)
-                    delta_coh_3E_E2E3=np.stack(temp_deltaband_coh_3E_E2E3)
-                    theta_coh_3E_E2E3=np.stack(temp_thetaband_coh_3E_E2E3)
-                    alpha_coh_3E_E2E3=np.stack(temp_alphaband_coh_3E_E2E3)
-                    beta_coh_3E_E2E3=np.stack(temp_betaband_coh_3E_E2E3)
-                    gamma_coh_3E_E2E3=np.stack(temp_gammaband_coh_3E_E2E3)
-                    deltacoh_av30_3E_E2E3=np.stack(temp_deltacoh_av30_3E_E2E3)
-                    thetacoh_av30_3E_E2E3=np.stack(temp_thetacoh_av30_3E_E2E3)
-                    alphacoh_av30_3E_E2E3=np.stack(temp_alphacoh_av30_3E_E2E3)
-                    betacoh_av30_3E_E2E3=np.stack(temp_betacoh_av30_3E_E2E3)
-                    gammacoh_av30_3E_E2E3=np.stack(temp_gammacoh_av30_3E_E2E3)
+                
 
                     # Packing data in dictonary 
                     Coherence_values_3E_E2E3 = {
-                        'PatientID': patientID_stacked_3E_E2E3,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_3E_E2E3.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_3E_E2E3.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_3E_E2E3.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_3E_E2E3.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_3E_E2E3.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_3E_E2E3.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_3E_E2E3.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_3E_E2E3.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_3E_E2E3.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_3E_E2E3.tolist(),
+                        'PatientID': temp_patientID_3E_E2E3,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_3E_E2E3,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_3E_E2E3,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_3E_E2E3,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_3E_E2E3,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_3E_E2E3,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_3E_E2E3,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_3E_E2E3,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_3E_E2E3,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_3E_E2E3,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_3E_E2E3,
                         }
                     
                     print('Coherence 3E values dictonary - third combination')
@@ -2458,32 +2320,21 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_4E_E1E2.append(beta_coh_av_30)
                     temp_gammacoh_av30_4E_E1E2.append(gamma_coh_av_30)
                             
-                    # stacking variables 
-                    patientID_stacked_4E_E1E2=np.stack(temp_patientID_4E_E1E2)
-                    delta_coh_4E_E1E2=np.stack(temp_deltaband_coh_4E_E1E2)
-                    theta_coh_4E_E1E2=np.stack(temp_thetaband_coh_4E_E1E2)
-                    alpha_coh_4E_E1E2=np.stack(temp_alphaband_coh_4E_E1E2)
-                    beta_coh_4E_E1E2=np.stack(temp_betaband_coh_4E_E1E2)
-                    gamma_coh_4E_E1E2=np.stack(temp_gammaband_coh_4E_E1E2)
-                    deltacoh_av30_4E_E1E2=np.stack(temp_deltacoh_av30_4E_E1E2)
-                    thetacoh_av30_4E_E1E2=np.stack(temp_thetacoh_av30_4E_E1E2)
-                    alphacoh_av30_4E_E1E2=np.stack(temp_alphacoh_av30_4E_E1E2)
-                    betacoh_av30_4E_E1E2=np.stack(temp_betacoh_av30_4E_E1E2)
-                    gammacoh_av30_4E_E1E2=np.stack(temp_gammacoh_av30_4E_E1E2)
+                
 
                     # Packing data in dictonary 
                     Coherence_values_4E_E1E2 = {
-                        'PatientID': patientID_stacked_4E_E1E2,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_4E_E1E2.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_4E_E1E2.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_4E_E1E2.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_4E_E1E2.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_4E_E1E2.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_4E_E1E2.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_4E_E1E2.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_4E_E1E2.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_4E_E1E2.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_4E_E1E2.tolist(),
+                        'PatientID': temp_patientID_4E_E1E2,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_4E_E1E2,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_4E_E1E2,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_4E_E1E2,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_4E_E1E2,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_4E_E1E2,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_4E_E1E2,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_4E_E1E2,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_4E_E1E2,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_4E_E1E2,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_4E_E1E2,
                         }
                         
                     
@@ -2509,32 +2360,21 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_4E_E1E3.append(beta_coh_av_30)
                     temp_gammacoh_av30_4E_E1E3.append(gamma_coh_av_30)
                             
-                    # stacking variables 
-                    patientID_stacked_4E_E1E3=np.stack(temp_patientID_4E_E1E3)
-                    delta_coh_4E_E1E3=np.stack(temp_deltaband_coh_4E_E1E3)
-                    theta_coh_4E_E1E3=np.stack(temp_thetaband_coh_4E_E1E3)
-                    alpha_coh_4E_E1E3=np.stack(temp_alphaband_coh_4E_E1E3)
-                    beta_coh_4E_E1E3=np.stack(temp_betaband_coh_4E_E1E3)
-                    gamma_coh_4E_E1E3=np.stack(temp_gammaband_coh_4E_E1E3)
-                    deltacoh_av30_4E_E1E3=np.stack(temp_deltacoh_av30_4E_E1E3)
-                    thetacoh_av30_4E_E1E3=np.stack(temp_thetacoh_av30_4E_E1E3)
-                    alphacoh_av30_4E_E1E3=np.stack(temp_alphacoh_av30_4E_E1E3)
-                    betacoh_av30_4E_E1E3=np.stack(temp_betacoh_av30_4E_E1E3)
-                    gammacoh_av30_4E_E1E3=np.stack(temp_gammacoh_av30_4E_E1E3)
+                
 
                     # Packing data in dictonary 
                     Coherence_values_4E_E1E3 = {
-                        'PatientID': patientID_stacked_4E_E1E3,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_4E_E1E3.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_4E_E1E3.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_4E_E1E3.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_4E_E1E3.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_4E_E1E3.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_4E_E1E3.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_4E_E1E3.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_4E_E1E3.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_4E_E1E3.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_4E_E1E3.tolist(),
+                        'PatientID': temp_patientID_4E_E1E3,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_4E_E1E3,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_4E_E1E3,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_4E_E1E3,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_4E_E1E3,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_4E_E1E3,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_4E_E1E3,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_4E_E1E3,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_4E_E1E3,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_4E_E1E3,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_4E_E1E3,
                         }
                         
                     print('Patient dictionary 4E_E1E3 - four electrodes, second combination')
@@ -2560,32 +2400,21 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_4E_E2E3.append(beta_coh_av_30)
                     temp_gammacoh_av30_4E_E2E3.append(gamma_coh_av_30)
                             
-                    # stacking variables 
-                    patientID_stacked_4E_E2E3=np.stack(temp_patientID_4E_E2E3)
-                    delta_coh_4E_E2E3=np.stack(temp_deltaband_coh_4E_E2E3)
-                    theta_coh_4E_E2E3=np.stack(temp_thetaband_coh_4E_E2E3)
-                    alpha_coh_4E_E2E3=np.stack(temp_alphaband_coh_4E_E2E3)
-                    beta_coh_4E_E2E3=np.stack(temp_betaband_coh_4E_E2E3)
-                    gamma_coh_4E_E2E3=np.stack(temp_gammaband_coh_4E_E2E3)
-                    deltacoh_av30_4E_E2E3=np.stack(temp_deltacoh_av30_4E_E2E3)
-                    thetacoh_av30_4E_E2E3=np.stack(temp_thetacoh_av30_4E_E2E3)
-                    alphacoh_av30_4E_E2E3=np.stack(temp_alphacoh_av30_4E_E2E3)
-                    betacoh_av30_4E_E2E3=np.stack(temp_betacoh_av30_4E_E2E3)
-                    gammacoh_av30_4E_E2E3=np.stack(temp_gammacoh_av30_4E_E2E3)
+                
 
                     # Packing data in dictonary 
                     Coherence_values_4E_E2E3 = {
-                        'PatientID': patientID_stacked_4E_E2E3,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_4E_E2E3.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_4E_E2E3.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_4E_E2E3.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_4E_E2E3.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_4E_E2E3.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_4E_E2E3.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_4E_E2E3.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_4E_E2E3.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_4E_E2E3.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_4E_E2E3.tolist(),
+                        'PatientID': temp_patientID_4E_E2E3,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_4E_E2E3,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_4E_E2E3,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_4E_E2E3,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_4E_E2E3,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_4E_E2E3,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_4E_E2E3,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_4E_E2E3,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_4E_E2E3,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_4E_E2E3,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_4E_E2E3,
                         }
                         
                     print('Patient dictionary 4E_E2E3 - four electrodes, third combination')
@@ -2610,33 +2439,20 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_4E_E1E4.append(alpha_coh_av_30)
                     temp_betacoh_av30_4E_E1E4.append(beta_coh_av_30)
                     temp_gammacoh_av30_4E_E1E4.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_4E_E1E4=np.stack(temp_patientID_4E_E1E4)
-                    delta_coh_4E_E1E4=np.stack(temp_deltaband_coh_4E_E1E4)
-                    theta_coh_4E_E1E4=np.stack(temp_thetaband_coh_4E_E1E4)
-                    alpha_coh_4E_E1E4=np.stack(temp_alphaband_coh_4E_E1E4)
-                    beta_coh_4E_E1E4=np.stack(temp_betaband_coh_4E_E1E4)
-                    gamma_coh_4E_E1E4=np.stack(temp_gammaband_coh_4E_E1E4)
-                    deltacoh_av30_4E_E1E4=np.stack(temp_deltacoh_av30_4E_E1E4)
-                    thetacoh_av30_4E_E1E4=np.stack(temp_thetacoh_av30_4E_E1E4)
-                    alphacoh_av30_4E_E1E4=np.stack(temp_alphacoh_av30_4E_E1E4)
-                    betacoh_av30_4E_E1E4=np.stack(temp_betacoh_av30_4E_E1E4)
-                    gammacoh_av30_4E_E1E4=np.stack(temp_gammacoh_av30_4E_E1E4)
 
                     # Packing data in dictonary 
                     Coherence_values_4E_E1E4 = {
-                        'PatientID': patientID_stacked_4E_E1E4,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_4E_E1E4.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_4E_E1E4.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_4E_E1E4.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_4E_E1E4.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_4E_E1E4.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_4E_E1E4.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_4E_E1E4.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_4E_E1E4.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_4E_E1E4.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_4E_E1E4.tolist(),
+                        'PatientID': temp_patientID_4E_E1E4,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_4E_E1E4,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_4E_E1E4,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_4E_E1E4,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_4E_E1E4,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_4E_E1E4,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_4E_E1E4,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_4E_E1E4,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_4E_E1E4,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_4E_E1E4,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_4E_E1E4,
                         }
                         
                     print('Patient dictionary 4E_E1E4 - four electrodes, fourth combination')
@@ -2660,33 +2476,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_4E_E2E4.append(alpha_coh_av_30)
                     temp_betacoh_av30_4E_E2E4.append(beta_coh_av_30)
                     temp_gammacoh_av30_4E_E2E4.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_4E_E2E4=np.stack(temp_patientID_4E_E2E4)
-                    delta_coh_4E_E2E4=np.stack(temp_deltaband_coh_4E_E2E4)
-                    theta_coh_4E_E2E4=np.stack(temp_thetaband_coh_4E_E2E4)
-                    alpha_coh_4E_E2E4=np.stack(temp_alphaband_coh_4E_E2E4)
-                    beta_coh_4E_E2E4=np.stack(temp_betaband_coh_4E_E2E4)
-                    gamma_coh_4E_E2E4=np.stack(temp_gammaband_coh_4E_E2E4)
-                    deltacoh_av30_4E_E2E4=np.stack(temp_deltacoh_av30_4E_E2E4)
-                    thetacoh_av30_4E_E2E4=np.stack(temp_thetacoh_av30_4E_E2E4)
-                    alphacoh_av30_4E_E2E4=np.stack(temp_alphacoh_av30_4E_E2E4)
-                    betacoh_av30_4E_E2E4=np.stack(temp_betacoh_av30_4E_E2E4)
-                    gammacoh_av30_4E_E2E4=np.stack(temp_gammacoh_av30_4E_E2E4)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_4E_E2E4 = {
-                        'PatientID': patientID_stacked_4E_E2E4,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_4E_E2E4.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_4E_E2E4.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_4E_E2E4.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_4E_E2E4.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_4E_E2E4.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_4E_E2E4.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_4E_E2E4.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_4E_E2E4.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_4E_E2E4.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_4E_E2E4.tolist(),
+                        'PatientID': temp_patientID_4E_E2E4,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_4E_E2E4,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_4E_E2E4,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_4E_E2E4,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_4E_E2E4,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_4E_E2E4,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_4E_E2E4,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_4E_E2E4,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_4E_E2E4,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_4E_E2E4,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_4E_E2E4,
                         }
                         
                     print('Patient dictionary 4E_E2E4 - four electrodes, fifth combination')
@@ -2711,33 +2515,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_4E_E3E4.append(alpha_coh_av_30)
                     temp_betacoh_av30_4E_E3E4.append(beta_coh_av_30)
                     temp_gammacoh_av30_4E_E3E4.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_4E_E3E4=np.stack(temp_patientID_4E_E3E4)
-                    delta_coh_4E_E3E4=np.stack(temp_deltaband_coh_4E_E3E4)
-                    theta_coh_4E_E3E4=np.stack(temp_thetaband_coh_4E_E3E4)
-                    alpha_coh_4E_E3E4=np.stack(temp_alphaband_coh_4E_E3E4)
-                    beta_coh_4E_E3E4=np.stack(temp_betaband_coh_4E_E3E4)
-                    gamma_coh_4E_E3E4=np.stack(temp_gammaband_coh_4E_E3E4)
-                    deltacoh_av30_4E_E3E4=np.stack(temp_deltacoh_av30_4E_E3E4)
-                    thetacoh_av30_4E_E3E4=np.stack(temp_thetacoh_av30_4E_E3E4)
-                    alphacoh_av30_4E_E3E4=np.stack(temp_alphacoh_av30_4E_E3E4)
-                    betacoh_av30_4E_E3E4=np.stack(temp_betacoh_av30_4E_E3E4)
-                    gammacoh_av30_4E_E3E4=np.stack(temp_gammacoh_av30_4E_E3E4)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_4E_E3E4 = {
-                        'PatientID': patientID_stacked_4E_E3E4,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_4E_E3E4.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_4E_E3E4.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_4E_E3E4.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_4E_E3E4.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_4E_E3E4.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_4E_E3E4.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_4E_E3E4.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_4E_E3E4.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_4E_E3E4.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_4E_E3E4.tolist(),
+                        'PatientID': temp_patientID_4E_E3E4,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_4E_E3E4,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_4E_E3E4,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_4E_E3E4,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_4E_E3E4,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_4E_E3E4,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_4E_E3E4,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_4E_E3E4,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_4E_E3E4,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_4E_E3E4,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_4E_E3E4,
                         }
                         
                     print('Patient dictionary 4E_E3E4 - four electrodes, sixth combination')
@@ -2770,33 +2562,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_5E_E1E2.append(alpha_coh_av_30)
                     temp_betacoh_av30_5E_E1E2.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E1E2.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_5E_E1E2=np.stack(temp_patientID_5E_E1E2)
-                    delta_coh_5E_E1E2=np.stack(temp_deltaband_coh_5E_E1E2)
-                    theta_coh_5E_E1E2=np.stack(temp_thetaband_coh_5E_E1E2)
-                    alpha_coh_5E_E1E2=np.stack(temp_alphaband_coh_5E_E1E2)
-                    beta_coh_5E_E1E2=np.stack(temp_betaband_coh_5E_E1E2)
-                    gamma_coh_5E_E1E2=np.stack(temp_gammaband_coh_5E_E1E2)
-                    deltacoh_av30_5E_E1E2=np.stack(temp_deltacoh_av30_5E_E1E2)
-                    thetacoh_av30_5E_E1E2=np.stack(temp_thetacoh_av30_5E_E1E2)
-                    alphacoh_av30_5E_E1E2=np.stack(temp_alphacoh_av30_5E_E1E2)
-                    betacoh_av30_5E_E1E2=np.stack(temp_betacoh_av30_5E_E1E2)
-                    gammacoh_av30_5E_E1E2=np.stack(temp_gammacoh_av30_5E_E1E2)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_5E_E1E2 = {
-                        'PatientID': patientID_stacked_5E_E1E2,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E1E2.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E1E2.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E1E2.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E1E2.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E1E2.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E1E2.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E1E2.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E1E2.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E1E2.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E1E2.tolist(),
+                        'PatientID': temp_patientID_5E_E1E2,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E1E2,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E1E2,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E1E2,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E1E2,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E1E2,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E1E2,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E1E2,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E1E2,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E1E2,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E1E2,
                         }
                     
                     print('Patient dictionary E1E2_5 - five electrodes, first combination')
@@ -2821,33 +2601,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_5E_E1E3.append(alpha_coh_av_30)
                     temp_betacoh_av30_5E_E1E3.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E1E3.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_5E_E1E3=np.stack(temp_patientID_5E_E1E3)
-                    delta_coh_5E_E1E3=np.stack(temp_deltaband_coh_5E_E1E3)
-                    theta_coh_5E_E1E3=np.stack(temp_thetaband_coh_5E_E1E3)
-                    alpha_coh_5E_E1E3=np.stack(temp_alphaband_coh_5E_E1E3)
-                    beta_coh_5E_E1E3=np.stack(temp_betaband_coh_5E_E1E3)
-                    gamma_coh_5E_E1E3=np.stack(temp_gammaband_coh_5E_E1E3)
-                    deltacoh_av30_5E_E1E3=np.stack(temp_deltacoh_av30_5E_E1E3)
-                    thetacoh_av30_5E_E1E3=np.stack(temp_thetacoh_av30_5E_E1E3)
-                    alphacoh_av30_5E_E1E3=np.stack(temp_alphacoh_av30_5E_E1E3)
-                    betacoh_av30_5E_E1E3=np.stack(temp_betacoh_av30_5E_E1E3)
-                    gammacoh_av30_5E_E1E3=np.stack(temp_gammacoh_av30_5E_E1E3)
+                
 
                     # Packing data in dictonary 
                     Coherence_values_5E_E1E3 = {
-                        'PatientID': patientID_stacked_5E_E1E3,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E1E3.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E1E3.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E1E3.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E1E3.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E1E3.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E1E3.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E1E3.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E1E3.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E1E3.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E1E3.tolist(),
+                        'PatientID': temp_patientID_5E_E1E3,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E1E3,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E1E3,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E1E3,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E1E3,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E1E3,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E1E3,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E1E3,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E1E3,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E1E3,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E1E3,
                         }
                         
                     print('Patient dictionary E1E3_5 - five electrodes, second combination')
@@ -2872,33 +2640,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_5E_E2E3.append(alpha_coh_av_30)
                     temp_betacoh_av30_5E_E2E3.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E2E3.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_5E_E2E3=np.stack(temp_patientID_5E_E2E3)
-                    delta_coh_5E_E2E3=np.stack(temp_deltaband_coh_5E_E2E3)
-                    theta_coh_5E_E2E3=np.stack(temp_thetaband_coh_5E_E2E3)
-                    alpha_coh_5E_E2E3=np.stack(temp_alphaband_coh_5E_E2E3)
-                    beta_coh_5E_E2E3=np.stack(temp_betaband_coh_5E_E2E3)
-                    gamma_coh_5E_E2E3=np.stack(temp_gammaband_coh_5E_E2E3)
-                    deltacoh_av30_5E_E2E3=np.stack(temp_deltacoh_av30_5E_E2E3)
-                    thetacoh_av30_5E_E2E3=np.stack(temp_thetacoh_av30_5E_E2E3)
-                    alphacoh_av30_5E_E2E3=np.stack(temp_alphacoh_av30_5E_E2E3)
-                    betacoh_av30_5E_E2E3=np.stack(temp_betacoh_av30_5E_E2E3)
-                    gammacoh_av30_5E_E2E3=np.stack(temp_gammacoh_av30_5E_E2E3)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_5E_E2E3 = {
-                        'PatientID': patientID_stacked_5E_E2E3,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E2E3.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E2E3.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E2E3.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E2E3.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E2E3.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E2E3.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E2E3.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E2E3.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E2E3.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E2E3.tolist(),
+                        'PatientID': temp_patientID_5E_E2E3,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E2E3,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E2E3,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E2E3,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E2E3,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E2E3,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E2E3,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E2E3,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E2E3,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E2E3,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E2E3,
                         }
                     
                     print('Patient dictionary E2E3_5 - five electrodes, third combination')
@@ -2924,33 +2680,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_5E_E1E4.append(alpha_coh_av_30)
                     temp_betacoh_av30_5E_E1E4.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E1E4.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_5E_E1E4=np.stack(temp_patientID_5E_E1E4)
-                    delta_coh_5E_E1E4=np.stack(temp_deltaband_coh_5E_E1E4)
-                    theta_coh_5E_E1E4=np.stack(temp_thetaband_coh_5E_E1E4)
-                    alpha_coh_5E_E1E4=np.stack(temp_alphaband_coh_5E_E1E4)
-                    beta_coh_5E_E1E4=np.stack(temp_betaband_coh_5E_E1E4)
-                    gamma_coh_5E_E1E4=np.stack(temp_gammaband_coh_5E_E1E4)
-                    deltacoh_av30_5E_E1E4=np.stack(temp_deltacoh_av30_5E_E1E4)
-                    thetacoh_av30_5E_E1E4=np.stack(temp_thetacoh_av30_5E_E1E4)
-                    alphacoh_av30_5E_E1E4=np.stack(temp_alphacoh_av30_5E_E1E4)
-                    betacoh_av30_5E_E1E4=np.stack(temp_betacoh_av30_5E_E1E4)
-                    gammacoh_av30_5E_E1E4=np.stack(temp_gammacoh_av30_5E_E1E4)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_5E_E1E4 = {
-                        'PatientID': patientID_stacked_5E_E1E4,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E1E4.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E1E4.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E1E4.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E1E4.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E1E4.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E1E4.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E1E4.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E1E4.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E1E4.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E1E4.tolist(),
+                        'PatientID': temp_patientID_5E_E1E4,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E1E4,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E1E4,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E1E4,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E1E4,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E1E4,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E1E4,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E1E4,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E1E4,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E1E4,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E1E4,
                         }
                     
                     print('Patient dictionary E1E4_5 - five electrodes, fourth combination')
@@ -2975,33 +2719,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_5E_E2E4.append(alpha_coh_av_30)
                     temp_betacoh_av30_5E_E2E4.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E2E4.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_5E_E2E4=np.stack(temp_patientID_5E_E2E4)
-                    delta_coh_5E_E2E4=np.stack(temp_deltaband_coh_5E_E2E4)
-                    theta_coh_5E_E2E4=np.stack(temp_thetaband_coh_5E_E2E4)
-                    alpha_coh_5E_E2E4=np.stack(temp_alphaband_coh_5E_E2E4)
-                    beta_coh_5E_E2E4=np.stack(temp_betaband_coh_5E_E2E4)
-                    gamma_coh_5E_E2E4=np.stack(temp_gammaband_coh_5E_E2E4)
-                    deltacoh_av30_5E_E2E4=np.stack(temp_deltacoh_av30_5E_E2E4)
-                    thetacoh_av30_5E_E2E4=np.stack(temp_thetacoh_av30_5E_E2E4)
-                    alphacoh_av30_5E_E2E4=np.stack(temp_alphacoh_av30_5E_E2E4)
-                    betacoh_av30_5E_E2E4=np.stack(temp_betacoh_av30_5E_E2E4)
-                    gammacoh_av30_5E_E2E4=np.stack(temp_gammacoh_av30_5E_E2E4)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_5E_E2E4 = {
-                        'PatientID': patientID_stacked_5E_E2E4,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E2E4.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E2E4.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E2E4.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E2E4.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E2E4.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E2E4.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E2E4.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E2E4.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E2E4.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E2E4.tolist(),
+                        'PatientID': temp_patientID_5E_E2E4,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E2E4,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E2E4,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E2E4,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E2E4,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E2E4,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E2E4,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E2E4,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E2E4,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E2E4,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E2E4,
                         }
                     
                     print('Patient dictionary E2E4_5 - five electrodes, fifth combination')
@@ -3027,33 +2759,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_5E_E3E4.append(alpha_coh_av_30)
                     temp_betacoh_av30_5E_E3E4.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E3E4.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_5E_E3E4=np.stack(temp_patientID_5E_E3E4)
-                    delta_coh_5E_E3E4=np.stack(temp_deltaband_coh_5E_E3E4)
-                    theta_coh_5E_E3E4=np.stack(temp_thetaband_coh_5E_E3E4)
-                    alpha_coh_5E_E3E4=np.stack(temp_alphaband_coh_5E_E3E4)
-                    beta_coh_5E_E3E4=np.stack(temp_betaband_coh_5E_E3E4)
-                    gamma_coh_5E_E3E4=np.stack(temp_gammaband_coh_5E_E3E4)
-                    deltacoh_av30_5E_E3E4=np.stack(temp_deltacoh_av30_5E_E3E4)
-                    thetacoh_av30_5E_E3E4=np.stack(temp_thetacoh_av30_5E_E3E4)
-                    alphacoh_av30_5E_E3E4=np.stack(temp_alphacoh_av30_5E_E3E4)
-                    betacoh_av30_5E_E3E4=np.stack(temp_betacoh_av30_5E_E3E4)
-                    gammacoh_av30_5E_E3E4=np.stack(temp_gammacoh_av30_5E_E3E4)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_5E_E3E4 = {
-                        'PatientID': patientID_stacked_5E_E3E4,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E3E4.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E3E4.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E3E4.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E3E4.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E3E4.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E3E4.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E3E4.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E3E4.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E3E4.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E3E4.tolist(),
+                        'PatientID': temp_patientID_5E_E3E4,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E3E4,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E3E4,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E3E4,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E3E4,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E3E4,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E3E4,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E3E4,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E3E4,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E3E4,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E3E4,
                         }
                     
                     print('Patient dictionary E3E4_5 - five electrodes, sixth combination')
@@ -3079,32 +2799,20 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_5E_E1E5.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E1E5.append(gamma_coh_av_30)
                             
-                    # stacking variables 
-                    patientID_stacked_5E_E1E5=np.stack(temp_patientID_5E_E1E5)
-                    delta_coh_5E_E1E5=np.stack(temp_deltaband_coh_5E_E1E5)
-                    theta_coh_5E_E1E5=np.stack(temp_thetaband_coh_5E_E1E5)
-                    alpha_coh_5E_E1E5=np.stack(temp_alphaband_coh_5E_E1E5)
-                    beta_coh_5E_E1E5=np.stack(temp_betaband_coh_5E_E1E5)
-                    gamma_coh_5E_E1E5=np.stack(temp_gammaband_coh_5E_E1E5)
-                    deltacoh_av30_5E_E1E5=np.stack(temp_deltacoh_av30_5E_E1E5)
-                    thetacoh_av30_5E_E1E5=np.stack(temp_thetacoh_av30_5E_E1E5)
-                    alphacoh_av30_5E_E1E5=np.stack(temp_alphacoh_av30_5E_E1E5)
-                    betacoh_av30_5E_E1E5=np.stack(temp_betacoh_av30_5E_E1E5)
-                    gammacoh_av30_5E_E1E5=np.stack(temp_gammacoh_av30_5E_E1E5)
-
+                    
                     # Packing data in dictonary 
                     Coherence_values_5E_E1E5 = {
-                        'PatientID': patientID_stacked_5E_E1E5,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E1E5.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E1E5.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E1E5.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E1E5.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E1E5.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E1E5.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E1E5.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E1E5.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E1E5.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E1E5.tolist(),
+                        'PatientID': temp_patientID_5E_E1E5,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E1E5,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E1E5,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E1E5,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E1E5,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E1E5,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E1E5,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E1E5,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E1E5,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E1E5,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E1E5,
                         }
                     
                     print('Patient dictionary E1E5_5 - five electrodes, seventh combination')
@@ -3130,33 +2838,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_5E_E2E5.append(alpha_coh_av_30)
                     temp_betacoh_av30_5E_E2E5.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E2E5.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_5E_E2E5=np.stack(temp_patientID_5E_E2E5)
-                    delta_coh_5E_E2E5=np.stack(temp_deltaband_coh_5E_E2E5)
-                    theta_coh_5E_E2E5=np.stack(temp_thetaband_coh_5E_E2E5)
-                    alpha_coh_5E_E2E5=np.stack(temp_alphaband_coh_5E_E2E5)
-                    beta_coh_5E_E2E5=np.stack(temp_betaband_coh_5E_E2E5)
-                    gamma_coh_5E_E2E5=np.stack(temp_gammaband_coh_5E_E2E5)
-                    deltacoh_av30_5E_E2E5=np.stack(temp_deltacoh_av30_5E_E2E5)
-                    thetacoh_av30_5E_E2E5=np.stack(temp_thetacoh_av30_5E_E2E5)
-                    alphacoh_av30_5E_E2E5=np.stack(temp_alphacoh_av30_5E_E2E5)
-                    betacoh_av30_5E_E2E5=np.stack(temp_betacoh_av30_5E_E2E5)
-                    gammacoh_av30_5E_E2E5=np.stack(temp_gammacoh_av30_5E_E2E5)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_5E_E2E5 = {
-                        'PatientID': patientID_stacked_5E_E2E5,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E2E5.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E2E5.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E2E5.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E2E5.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E2E5.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E2E5.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E2E5.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E2E5.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E2E5.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E2E5.tolist(),
+                        'PatientID': temp_patientID_5E_E2E5,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E2E5,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E2E5,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E2E5,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E2E5,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E2E5,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E2E5,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E2E5,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E2E5,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E2E5,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E2E5,
                         }
                     
                     print('Patient dictionary E2E5_5 - five electrodes, 8th combination')
@@ -3181,33 +2877,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_5E_E3E5.append(alpha_coh_av_30)
                     temp_betacoh_av30_5E_E3E5.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E3E5.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_5E_E3E5=np.stack(temp_patientID_5E_E3E5)
-                    delta_coh_5E_E3E5=np.stack(temp_deltaband_coh_5E_E3E5)
-                    theta_coh_5E_E3E5=np.stack(temp_thetaband_coh_5E_E3E5)
-                    alpha_coh_5E_E3E5=np.stack(temp_alphaband_coh_5E_E3E5)
-                    beta_coh_5E_E3E5=np.stack(temp_betaband_coh_5E_E3E5)
-                    gamma_coh_5E_E3E5=np.stack(temp_gammaband_coh_5E_E3E5)
-                    deltacoh_av30_5E_E3E5=np.stack(temp_deltacoh_av30_5E_E3E5)
-                    thetacoh_av30_5E_E3E5=np.stack(temp_thetacoh_av30_5E_E3E5)
-                    alphacoh_av30_5E_E3E5=np.stack(temp_alphacoh_av30_5E_E3E5)
-                    betacoh_av30_5E_E3E5=np.stack(temp_betacoh_av30_5E_E3E5)
-                    gammacoh_av30_5E_E3E5=np.stack(temp_gammacoh_av30_5E_E3E5)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_5E_E3E5 = {
-                        'PatientID': patientID_stacked_5E_E3E5,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E3E5.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E3E5.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E3E5.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E3E5.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E3E5.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E3E5.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E3E5.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E3E5.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E3E5.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E3E5.tolist(),
+                        'PatientID': temp_patientID_5E_E3E5,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E3E5,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E3E5,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E3E5,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E3E5,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E3E5,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E3E5,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E3E5,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E3E5,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E3E5,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E3E5,
                         }
                     
                     print('Patient dictionary E3E5_5 - five electrodes, 9th combination')
@@ -3233,33 +2917,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_5E_E4E5.append(alpha_coh_av_30)
                     temp_betacoh_av30_5E_E4E5.append(beta_coh_av_30)
                     temp_gammacoh_av30_5E_E4E5.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_5E_E4E5=np.stack(temp_patientID_5E_E4E5)
-                    delta_coh_5E_E4E5=np.stack(temp_deltaband_coh_5E_E4E5)
-                    theta_coh_5E_E4E5=np.stack(temp_thetaband_coh_5E_E4E5)
-                    alpha_coh_5E_E4E5=np.stack(temp_alphaband_coh_5E_E4E5)
-                    beta_coh_5E_E4E5=np.stack(temp_betaband_coh_5E_E4E5)
-                    gamma_coh_5E_E4E5=np.stack(temp_gammaband_coh_5E_E4E5)
-                    deltacoh_av30_5E_E4E5=np.stack(temp_deltacoh_av30_5E_E4E5)
-                    thetacoh_av30_5E_E4E5=np.stack(temp_thetacoh_av30_5E_E4E5)
-                    alphacoh_av30_5E_E4E5=np.stack(temp_alphacoh_av30_5E_E4E5)
-                    betacoh_av30_5E_E4E5=np.stack(temp_betacoh_av30_5E_E4E5)
-                    gammacoh_av30_5E_E4E5=np.stack(temp_gammacoh_av30_5E_E4E5)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_5E_E4E5 = {
-                        'PatientID': patientID_stacked_5E_E4E5,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_5E_E4E5.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_5E_E4E5.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_5E_E4E5.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_5E_E4E5.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_5E_E4E5.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_5E_E4E5.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_5E_E4E5.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_5E_E4E5.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_5E_E4E5.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_5E_E4E5.tolist(),
+                        'PatientID': temp_patientID_5E_E4E5,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_5E_E4E5,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_5E_E4E5,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_5E_E4E5,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_5E_E4E5,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_5E_E4E5,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_5E_E4E5,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_5E_E4E5,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_5E_E4E5,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_5E_E4E5,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_5E_E4E5,
                         }
                     
                     print('Patient dictionary E4E5_5 - five electrodes, 10th combination')
@@ -3289,37 +2961,28 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E1E2.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E1E2.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E1E2.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E1E2=np.stack(temp_patientID_6E_E1E2)
-                    delta_coh_6E_E1E2=np.stack(temp_deltaband_coh_6E_E1E2)
-                    theta_coh_6E_E1E2=np.stack(temp_thetaband_coh_6E_E1E2)
-                    alpha_coh_6E_E1E2=np.stack(temp_alphaband_coh_6E_E1E2)
-                    beta_coh_6E_E1E2=np.stack(temp_betaband_coh_6E_E1E2)
-                    gamma_coh_6E_E1E2=np.stack(temp_gammaband_coh_6E_E1E2)
-                    deltacoh_av30_6E_E1E2=np.stack(temp_deltacoh_av30_6E_E1E2)
-                    thetacoh_av30_6E_E1E2=np.stack(temp_thetacoh_av30_6E_E1E2)
-                    alphacoh_av30_6E_E1E2=np.stack(temp_alphacoh_av30_6E_E1E2)
-                    betacoh_av30_6E_E1E2=np.stack(temp_betacoh_av30_6E_E1E2)
-                    gammacoh_av30_6E_E1E2=np.stack(temp_gammacoh_av30_6E_E1E2)
 
+                    print('Testing temp_deltaband_coh_6E_E1E2 - and if it can be saved directly in the dict ')
+                    print(deltaband_coh)
+                            
+                    
                     # Packing data in dictonary 
                     Coherence_values_6E_E1E2 = {
-                        'PatientID': patientID_stacked_6E_E1E2,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E1E2.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E1E2.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E1E2.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E1E2.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E1E2.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E1E2.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E1E2.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E1E2.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E1E2.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E1E2.tolist(),
+                        'PatientID': temp_patientID_6E_E1E2,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E1E2,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E1E2,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E1E2,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E1E2,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E1E2,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E1E2,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E1E2,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E1E2,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E1E2,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E1E2,
                         }
                     
                     print('Patient dictionary E1E2_6 - six electrodes, first combination')
-                    #print(Coherence_values_6E_E1E2)
+                    print(Coherence_values_6E_E1E2)
                     
                 # Storing the second combination E1E3_6
                 elif E_combinations[1]==E_combinations[d]:
@@ -3339,33 +3002,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E1E3.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E1E3.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E1E3.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E1E3=np.stack(temp_patientID_6E_E1E3)
-                    delta_coh_6E_E1E3=np.stack(temp_deltaband_coh_6E_E1E3)
-                    theta_coh_6E_E1E3=np.stack(temp_thetaband_coh_6E_E1E3)
-                    alpha_coh_6E_E1E3=np.stack(temp_alphaband_coh_6E_E1E3)
-                    beta_coh_6E_E1E3=np.stack(temp_betaband_coh_6E_E1E3)
-                    gamma_coh_6E_E1E3=np.stack(temp_gammaband_coh_6E_E1E3)
-                    deltacoh_av30_6E_E1E3=np.stack(temp_deltacoh_av30_6E_E1E3)
-                    thetacoh_av30_6E_E1E3=np.stack(temp_thetacoh_av30_6E_E1E3)
-                    alphacoh_av30_6E_E1E3=np.stack(temp_alphacoh_av30_6E_E1E3)
-                    betacoh_av30_6E_E1E3=np.stack(temp_betacoh_av30_6E_E1E3)
-                    gammacoh_av30_6E_E1E3=np.stack(temp_gammacoh_av30_6E_E1E3)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E1E3 = {
-                        'PatientID': patientID_stacked_6E_E1E3,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E1E3.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E1E3.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E1E3.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E1E3.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E1E3.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E1E3.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E1E3.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E1E3.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E1E3.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E1E3.tolist(),
+                        'PatientID': temp_patientID_6E_E1E3,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E1E3,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E1E3,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E1E3,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E1E3,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E1E3,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E1E3,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E1E3,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E1E3,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E1E3,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E1E3,
                         }
                     
                     print('Patient dictionary E1E3_6 - six electrodes, second combination')
@@ -3389,33 +3040,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E2E3.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E2E3.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E2E3.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E2E3=np.stack(temp_patientID_6E_E2E3)
-                    delta_coh_6E_E2E3=np.stack(temp_deltaband_coh_6E_E2E3)
-                    theta_coh_6E_E2E3=np.stack(temp_thetaband_coh_6E_E2E3)
-                    alpha_coh_6E_E2E3=np.stack(temp_alphaband_coh_6E_E2E3)
-                    beta_coh_6E_E2E3=np.stack(temp_betaband_coh_6E_E2E3)
-                    gamma_coh_6E_E2E3=np.stack(temp_gammaband_coh_6E_E2E3)
-                    deltacoh_av30_6E_E2E3=np.stack(temp_deltacoh_av30_6E_E2E3)
-                    thetacoh_av30_6E_E2E3=np.stack(temp_thetacoh_av30_6E_E2E3)
-                    alphacoh_av30_6E_E2E3=np.stack(temp_alphacoh_av30_6E_E2E3)
-                    betacoh_av30_6E_E2E3=np.stack(temp_betacoh_av30_6E_E2E3)
-                    gammacoh_av30_6E_E2E3=np.stack(temp_gammacoh_av30_6E_E2E3)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E2E3 = {
-                        'PatientID': patientID_stacked_6E_E2E3,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E2E3.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E2E3.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E2E3.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E2E3.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E2E3.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E2E3.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E2E3.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E2E3.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E2E3.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E2E3.tolist(),
+                        'PatientID': temp_patientID_6E_E2E3,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E2E3,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E2E3,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E2E3,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E2E3,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E2E3,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E2E3,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E2E3,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E2E3,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E2E3,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E2E3,
                         }
                     
                     print('Patient dictionary E2E3_6 - six electrodes, third combination')
@@ -3440,33 +3079,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E1E4.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E1E4.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E1E4.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E1E4=np.stack(temp_patientID_6E_E1E4)
-                    delta_coh_6E_E1E4=np.stack(temp_deltaband_coh_6E_E1E4)
-                    theta_coh_6E_E1E4=np.stack(temp_thetaband_coh_6E_E1E4)
-                    alpha_coh_6E_E1E4=np.stack(temp_alphaband_coh_6E_E1E4)
-                    beta_coh_6E_E1E4=np.stack(temp_betaband_coh_6E_E1E4)
-                    gamma_coh_6E_E1E4=np.stack(temp_gammaband_coh_6E_E1E4)
-                    deltacoh_av30_6E_E1E4=np.stack(temp_deltacoh_av30_6E_E1E4)
-                    thetacoh_av30_6E_E1E4=np.stack(temp_thetacoh_av30_6E_E1E4)
-                    alphacoh_av30_6E_E1E4=np.stack(temp_alphacoh_av30_6E_E1E4)
-                    betacoh_av30_6E_E1E4=np.stack(temp_betacoh_av30_6E_E1E4)
-                    gammacoh_av30_6E_E1E4=np.stack(temp_gammacoh_av30_6E_E1E4)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E1E4 = {
-                        'PatientID': patientID_stacked_6E_E1E4,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E1E4.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E1E4.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E1E4.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E1E4.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E1E4.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E1E4.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E1E4.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E1E4.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E1E4.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E1E4.tolist(),
+                        'PatientID': temp_patientID_6E_E1E4,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E1E4,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E1E4,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E1E4,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E1E4,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E1E4,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E1E4,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E1E4,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E1E4,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E1E4,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E1E4,
                         }
                     
                     print('Patient dictionary E1E4_6 - six electrodes, fourth combination')
@@ -3478,7 +3105,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[4] chosen for six electrodes fifth combination')
                     print(E_combinations[4])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E2E4.append(patientID)
                     temp_deltaband_coh_6E_E2E4.append(deltaband_coh)
                     temp_thetaband_coh_6E_E2E4.append(thetaband_coh)
@@ -3490,33 +3117,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E2E4.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E2E4.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E2E4.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E2E4=np.stack(temp_patientID_6E_E2E4)
-                    delta_coh_6E_E2E4=np.stack(temp_deltaband_coh_6E_E2E4)
-                    theta_coh_6E_E2E4=np.stack(temp_thetaband_coh_6E_E2E4)
-                    alpha_coh_6E_E2E4=np.stack(temp_alphaband_coh_6E_E2E4)
-                    beta_coh_6E_E2E4=np.stack(temp_betaband_coh_6E_E2E4)
-                    gamma_coh_6E_E2E4=np.stack(temp_gammaband_coh_6E_E2E4)
-                    deltacoh_av30_6E_E2E4=np.stack(temp_deltacoh_av30_6E_E2E4)
-                    thetacoh_av30_6E_E2E4=np.stack(temp_thetacoh_av30_6E_E2E4)
-                    alphacoh_av30_6E_E2E4=np.stack(temp_alphacoh_av30_6E_E2E4)
-                    betacoh_av30_6E_E2E4=np.stack(temp_betacoh_av30_6E_E2E4)
-                    gammacoh_av30_6E_E2E4=np.stack(temp_gammacoh_av30_6E_E2E4)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E2E4 = {
-                        'PatientID': patientID_stacked_6E_E2E4,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E2E4.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E2E4.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E2E4.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E2E4.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E2E4.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E2E4.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E2E4.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E2E4.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E2E4.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E2E4.tolist(),
+                        'PatientID': temp_patientID_6E_E2E4,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E2E4,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E2E4,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E2E4,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E2E4,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E2E4,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E2E4,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E2E4,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E2E4,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E2E4,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E2E4,
                         }
                     
                     print('Patient dictionary E2E4_6 - six electrodes, fifth combination')
@@ -3529,7 +3144,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[5] chosen for six electrodes sixth combination')
                     print(E_combinations[5])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E3E4.append(patientID)
                     temp_deltaband_coh_6E_E3E4.append(deltaband_coh)
                     temp_thetaband_coh_6E_E3E4.append(thetaband_coh)
@@ -3542,32 +3157,21 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_6E_E3E4.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E3E4.append(gamma_coh_av_30)
                             
-                    # stacking variables 
-                    patientID_stacked_6E_E3E4=np.stack(temp_patientID_6E_E3E4)
-                    delta_coh_6E_E3E4=np.stack(temp_deltaband_coh_6E_E3E4)
-                    theta_coh_6E_E3E4=np.stack(temp_thetaband_coh_6E_E3E4)
-                    alpha_coh_6E_E3E4=np.stack(temp_alphaband_coh_6E_E3E4)
-                    beta_coh_6E_E3E4=np.stack(temp_betaband_coh_6E_E3E4)
-                    gamma_coh_6E_E3E4=np.stack(temp_gammaband_coh_6E_E3E4)
-                    deltacoh_av30_6E_E3E4=np.stack(temp_deltacoh_av30_6E_E3E4)
-                    thetacoh_av30_6E_E3E4=np.stack(temp_thetacoh_av30_6E_E3E4)
-                    alphacoh_av30_6E_E3E4=np.stack(temp_alphacoh_av30_6E_E3E4)
-                    betacoh_av30_6E_E3E4=np.stack(temp_betacoh_av30_6E_E3E4)
-                    gammacoh_av30_6E_E3E4=np.stack(temp_gammacoh_av30_6E_E3E4)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E3E4 = {
-                        'PatientID': patientID_stacked_6E_E3E4,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E3E4.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E3E4.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E3E4.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E3E4.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E3E4.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E3E4.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E3E4.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E3E4.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E3E4.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E3E4.tolist(),
+                        'PatientID': temp_patientID_6E_E3E4,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E3E4,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E3E4,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E3E4,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E3E4,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E3E4,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E3E4,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E3E4,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E3E4,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E3E4,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E3E4,
                         }
                     
                     print('Patient dictionary E3E4_6 - six electrodes, sixth combination')
@@ -3579,7 +3183,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[6] chosen for six electrodes seventh combination')
                     print(E_combinations[6])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E1E5.append(patientID)
                     temp_deltaband_coh_6E_E1E5.append(deltaband_coh)
                     temp_thetaband_coh_6E_E1E5.append(thetaband_coh)
@@ -3591,33 +3195,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E1E5.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E1E5.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E1E5.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E1E5=np.stack(temp_patientID_6E_E1E5)
-                    delta_coh_6E_E1E5=np.stack(temp_deltaband_coh_6E_E1E5)
-                    theta_coh_6E_E1E5=np.stack(temp_thetaband_coh_6E_E1E5)
-                    alpha_coh_6E_E1E5=np.stack(temp_alphaband_coh_6E_E1E5)
-                    beta_coh_6E_E1E5=np.stack(temp_betaband_coh_6E_E1E5)
-                    gamma_coh_6E_E1E5=np.stack(temp_gammaband_coh_6E_E1E5)
-                    deltacoh_av30_6E_E1E5=np.stack(temp_deltacoh_av30_6E_E1E5)
-                    thetacoh_av30_6E_E1E5=np.stack(temp_thetacoh_av30_6E_E1E5)
-                    alphacoh_av30_6E_E1E5=np.stack(temp_alphacoh_av30_6E_E1E5)
-                    betacoh_av30_6E_E1E5=np.stack(temp_betacoh_av30_6E_E1E5)
-                    gammacoh_av30_6E_E1E5=np.stack(temp_gammacoh_av30_6E_E1E5)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E1E5 = {
-                        'PatientID': patientID_stacked_6E_E1E5,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E1E5.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E1E5.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E1E5.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E1E5.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E1E5.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E1E5.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E1E5.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E1E5.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E1E5.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E1E5.tolist(),
+                        'PatientID': temp_patientID_6E_E1E5,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E1E5,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E1E5,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E1E5,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E1E5,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E1E5,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E1E5,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E1E5,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E1E5,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E1E5,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E1E5,
                         }
                     
                     print('Patient dictionary E1E5_6 - six electrodes, seventh combination')
@@ -3630,7 +3222,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[7] chosen for six electrodes eight combination')
                     print(E_combinations[7])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E2E5.append(patientID)
                     temp_deltaband_coh_6E_E2E5.append(deltaband_coh)
                     temp_thetaband_coh_6E_E2E5.append(thetaband_coh)
@@ -3642,33 +3234,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E2E5.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E2E5.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E2E5.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E2E5=np.stack(temp_patientID_6E_E2E5)
-                    delta_coh_6E_E2E5=np.stack(temp_deltaband_coh_6E_E2E5)
-                    theta_coh_6E_E2E5=np.stack(temp_thetaband_coh_6E_E2E5)
-                    alpha_coh_6E_E2E5=np.stack(temp_alphaband_coh_6E_E2E5)
-                    beta_coh_6E_E2E5=np.stack(temp_betaband_coh_6E_E2E5)
-                    gamma_coh_6E_E2E5=np.stack(temp_gammaband_coh_6E_E2E5)
-                    deltacoh_av30_6E_E2E5=np.stack(temp_deltacoh_av30_6E_E2E5)
-                    thetacoh_av30_6E_E2E5=np.stack(temp_thetacoh_av30_6E_E2E5)
-                    alphacoh_av30_6E_E2E5=np.stack(temp_alphacoh_av30_6E_E2E5)
-                    betacoh_av30_6E_E2E5=np.stack(temp_betacoh_av30_6E_E2E5)
-                    gammacoh_av30_6E_E2E5=np.stack(temp_gammacoh_av30_6E_E2E5)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E2E5 = {
-                        'PatientID': patientID_stacked_6E_E2E5,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E2E5.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E2E5.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E2E5.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E2E5.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E2E5.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E2E5.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E2E5.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E2E5.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E2E5.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E2E5.tolist(),
+                        'PatientID': temp_patientID_6E_E2E5,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E2E5,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E2E5,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E2E5,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E2E5,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E2E5,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E2E5,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E2E5,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E2E5,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E2E5,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E2E5,
                         }
                     
                     print('Patient dictionary E2E5_6 - six electrodes, 8th combination')
@@ -3680,7 +3260,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[8] chosen for six electrodes 9th combination')
                     print(E_combinations[8])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E3E5.append(patientID)
                     temp_deltaband_coh_6E_E3E5.append(deltaband_coh)
                     temp_thetaband_coh_6E_E3E5.append(thetaband_coh)
@@ -3693,32 +3273,21 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_6E_E3E5.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E3E5.append(gamma_coh_av_30)
                             
-                    # stacking variables 
-                    patientID_stacked_6E_E3E5=np.stack(temp_patientID_6E_E3E5)
-                    delta_coh_6E_E3E5=np.stack(temp_deltaband_coh_6E_E3E5)
-                    theta_coh_6E_E3E5=np.stack(temp_thetaband_coh_6E_E3E5)
-                    alpha_coh_6E_E3E5=np.stack(temp_alphaband_coh_6E_E3E5)
-                    beta_coh_6E_E3E5=np.stack(temp_betaband_coh_6E_E3E5)
-                    gamma_coh_6E_E3E5=np.stack(temp_gammaband_coh_6E_E3E5)
-                    deltacoh_av30_6E_E3E5=np.stack(temp_deltacoh_av30_6E_E3E5)
-                    thetacoh_av30_6E_E3E5=np.stack(temp_thetacoh_av30_6E_E3E5)
-                    alphacoh_av30_6E_E3E5=np.stack(temp_alphacoh_av30_6E_E3E5)
-                    betacoh_av30_6E_E3E5=np.stack(temp_betacoh_av30_6E_E3E5)
-                    gammacoh_av30_6E_E3E5=np.stack(temp_gammacoh_av30_6E_E3E5)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E3E5 = {
-                        'PatientID': patientID_stacked_6E_E3E5,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E3E5.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E3E5.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E3E5.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E3E5.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E3E5.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E3E5.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E3E5.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E3E5.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E3E5.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E3E5.tolist(),
+                        'PatientID': temp_patientID_6E_E3E5,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E3E5,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E3E5,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E3E5,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E3E5,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E3E5,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E3E5,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E3E5,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E3E5,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E3E5,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E3E5,
                         }
                     
                     print('Patient dictionary E3E5_6 - six electrodes, 9th combination')
@@ -3731,7 +3300,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[9] chosen for six electrodes 10th combination')
                     print(E_combinations[9])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E4E5.append(patientID)
                     temp_deltaband_coh_6E_E4E5.append(deltaband_coh)
                     temp_thetaband_coh_6E_E4E5.append(thetaband_coh)
@@ -3743,33 +3312,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E4E5.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E4E5.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E4E5.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E4E5=np.stack(temp_patientID_6E_E4E5)
-                    delta_coh_6E_E4E5=np.stack(temp_deltaband_coh_6E_E4E5)
-                    theta_coh_6E_E4E5=np.stack(temp_thetaband_coh_6E_E4E5)
-                    alpha_coh_6E_E4E5=np.stack(temp_alphaband_coh_6E_E4E5)
-                    beta_coh_6E_E4E5=np.stack(temp_betaband_coh_6E_E4E5)
-                    gamma_coh_6E_E4E5=np.stack(temp_gammaband_coh_6E_E4E5)
-                    deltacoh_av30_6E_E4E5=np.stack(temp_deltacoh_av30_6E_E4E5)
-                    thetacoh_av30_6E_E4E5=np.stack(temp_thetacoh_av30_6E_E4E5)
-                    alphacoh_av30_6E_E4E5=np.stack(temp_alphacoh_av30_6E_E4E5)
-                    betacoh_av30_6E_E4E5=np.stack(temp_betacoh_av30_6E_E4E5)
-                    gammacoh_av30_6E_E4E5=np.stack(temp_gammacoh_av30_6E_E4E5)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E4E5 = {
-                        'PatientID': patientID_stacked_6E_E4E5,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E4E5.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E4E5.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E4E5.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E4E5.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E4E5.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E4E5.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E4E5.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E4E5.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E4E5.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E4E5.tolist(),
+                        'PatientID': temp_patientID_6E_E4E5,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E4E5,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E4E5,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E4E5,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E4E5,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E4E5,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E4E5,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E4E5,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E4E5,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E4E5,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E4E5,
                         }
                     
                     print('Patient dictionary E4E5_6 - six electrodes, 10th combination')
@@ -3782,7 +3339,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[10] chosen for six electrodes 11th combination')
                     print(E_combinations[10])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E1E6.append(patientID)
                     temp_deltaband_coh_6E_E1E6.append(deltaband_coh)
                     temp_thetaband_coh_6E_E1E6.append(thetaband_coh)
@@ -3794,33 +3351,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E1E6.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E1E6.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E1E6.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E1E6=np.stack(temp_patientID_6E_E1E6)
-                    delta_coh_6E_E1E6=np.stack(temp_deltaband_coh_6E_E1E6)
-                    theta_coh_6E_E1E6=np.stack(temp_thetaband_coh_6E_E1E6)
-                    alpha_coh_6E_E1E6=np.stack(temp_alphaband_coh_6E_E1E6)
-                    beta_coh_6E_E1E6=np.stack(temp_betaband_coh_6E_E1E6)
-                    gamma_coh_6E_E1E6=np.stack(temp_gammaband_coh_6E_E1E6)
-                    deltacoh_av30_6E_E1E6=np.stack(temp_deltacoh_av30_6E_E1E6)
-                    thetacoh_av30_6E_E1E6=np.stack(temp_thetacoh_av30_6E_E1E6)
-                    alphacoh_av30_6E_E1E6=np.stack(temp_alphacoh_av30_6E_E1E6)
-                    betacoh_av30_6E_E1E6=np.stack(temp_betacoh_av30_6E_E1E6)
-                    gammacoh_av30_6E_E1E6=np.stack(temp_gammacoh_av30_6E_E1E6)
+                    
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E1E6 = {
-                        'PatientID': patientID_stacked_6E_E1E6,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E1E6.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E1E6.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E1E6.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E1E6.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E1E6.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E1E6.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E1E6.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E1E6.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E1E6.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E1E6.tolist(),
+                        'PatientID': temp_patientID_6E_E1E6,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E1E6,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E1E6,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E1E6,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E1E6,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E1E6,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E1E6,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E1E6,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E1E6,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E1E6,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E1E6,
                         }
                     
                     print('Patient dictionary E1E6_6 - six electrodes, 11th combination')
@@ -3833,7 +3378,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[11] chosen for six electrodes 12th combination')
                     print(E_combinations[11])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E2E6.append(patientID)
                     temp_deltaband_coh_6E_E2E6.append(deltaband_coh)
                     temp_thetaband_coh_6E_E2E6.append(thetaband_coh)
@@ -3845,33 +3390,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E2E6.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E2E6.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E2E6.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E2E6=np.stack(temp_patientID_6E_E2E6)
-                    delta_coh_6E_E2E6=np.stack(temp_deltaband_coh_6E_E2E6)
-                    theta_coh_6E_E2E6=np.stack(temp_thetaband_coh_6E_E2E6)
-                    alpha_coh_6E_E2E6=np.stack(temp_alphaband_coh_6E_E2E6)
-                    beta_coh_6E_E2E6=np.stack(temp_betaband_coh_6E_E2E6)
-                    gamma_coh_6E_E2E6=np.stack(temp_gammaband_coh_6E_E2E6)
-                    deltacoh_av30_6E_E2E6=np.stack(temp_deltacoh_av30_6E_E2E6)
-                    thetacoh_av30_6E_E2E6=np.stack(temp_thetacoh_av30_6E_E2E6)
-                    alphacoh_av30_6E_E2E6=np.stack(temp_alphacoh_av30_6E_E2E6)
-                    betacoh_av30_6E_E2E6=np.stack(temp_betacoh_av30_6E_E2E6)
-                    gammacoh_av30_6E_E2E6=np.stack(temp_gammacoh_av30_6E_E2E6)
+            
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E2E6 = {
-                        'PatientID': patientID_stacked_6E_E2E6,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E2E6.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E2E6.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E2E6.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E2E6.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E2E6.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E2E6.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E2E6.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E2E6.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E2E6.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E2E6.tolist(),
+                        'PatientID': temp_patientID_6E_E2E6,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E2E6,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E2E6,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E2E6,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E2E6,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E2E6,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E2E6,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E2E6,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E2E6,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E2E6,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E2E6,
                         }
                     
                     print('Patient dictionary E2E6_6 - six electrodes, 12th combination')
@@ -3884,7 +3417,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[12] chosen for six electrodes 13th combination')
                     print(E_combinations[12])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E3E6.append(patientID)
                     temp_deltaband_coh_6E_E3E6.append(deltaband_coh)
                     temp_thetaband_coh_6E_E3E6.append(thetaband_coh)
@@ -3897,32 +3430,20 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_6E_E3E6.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E3E6.append(gamma_coh_av_30)
                             
-                    # stacking variables 
-                    patientID_stacked_6E_E3E6=np.stack(temp_patientID_6E_E3E6)
-                    delta_coh_6E_E3E6=np.stack(temp_deltaband_coh_6E_E3E6)
-                    theta_coh_6E_E3E6=np.stack(temp_thetaband_coh_6E_E3E6)
-                    alpha_coh_6E_E3E6=np.stack(temp_alphaband_coh_6E_E3E6)
-                    beta_coh_6E_E3E6=np.stack(temp_betaband_coh_6E_E3E6)
-                    gamma_coh_6E_E3E6=np.stack(temp_gammaband_coh_6E_E3E6)
-                    deltacoh_av30_6E_E3E6=np.stack(temp_deltacoh_av30_6E_E3E6)
-                    thetacoh_av30_6E_E3E6=np.stack(temp_thetacoh_av30_6E_E3E6)
-                    alphacoh_av30_6E_E3E6=np.stack(temp_alphacoh_av30_6E_E3E6)
-                    betacoh_av30_6E_E3E6=np.stack(temp_betacoh_av30_6E_E3E6)
-                    gammacoh_av30_6E_E3E6=np.stack(temp_gammacoh_av30_6E_E3E6)
-
+                    
                     # Packing data in dictonary 
                     Coherence_values_6E_E3E6 = {
-                        'PatientID': patientID_stacked_6E_E3E6,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E3E6.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E3E6.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E3E6.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E3E6.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E3E6.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E3E6.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E3E6.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E3E6.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E3E6.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E3E6.tolist(),
+                        'PatientID': temp_patientID_6E_E3E6,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E3E6,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E3E6,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E3E6,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E3E6,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E3E6,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E3E6,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E3E6,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E3E6,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E3E6,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E3E6,
                         }
                     
                     print('Patient dictionary E3E6_6 - six electrodes, 13th combination')
@@ -3936,7 +3457,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[13] chosen for six electrodes 14th combination')
                     print(E_combinations[13])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E4E6.append(patientID)
                     temp_deltaband_coh_6E_E4E6.append(deltaband_coh)
                     temp_thetaband_coh_6E_E4E6.append(thetaband_coh)
@@ -3948,33 +3469,21 @@ for edf_file in edf_files_list:
                     temp_alphacoh_av30_6E_E4E6.append(alpha_coh_av_30)
                     temp_betacoh_av30_6E_E4E6.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E4E6.append(gamma_coh_av_30)
-                            
-                    # stacking variables 
-                    patientID_stacked_6E_E4E6=np.stack(temp_patientID_6E_E4E6)
-                    delta_coh_6E_E4E6=np.stack(temp_deltaband_coh_6E_E4E6)
-                    theta_coh_6E_E4E6=np.stack(temp_thetaband_coh_6E_E4E6)
-                    alpha_coh_6E_E4E6=np.stack(temp_alphaband_coh_6E_E4E6)
-                    beta_coh_6E_E4E6=np.stack(temp_betaband_coh_6E_E4E6)
-                    gamma_coh_6E_E4E6=np.stack(temp_gammaband_coh_6E_E4E6)
-                    deltacoh_av30_6E_E4E6=np.stack(temp_deltacoh_av30_6E_E4E6)
-                    thetacoh_av30_6E_E4E6=np.stack(temp_thetacoh_av30_6E_E4E6)
-                    alphacoh_av30_6E_E4E6=np.stack(temp_alphacoh_av30_6E_E4E6)
-                    betacoh_av30_6E_E4E6=np.stack(temp_betacoh_av30_6E_E4E6)
-                    gammacoh_av30_6E_E4E6=np.stack(temp_gammacoh_av30_6E_E4E6)
+                        
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E4E6 = {
-                        'PatientID': patientID_stacked_6E_E4E6,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E4E6.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E4E6.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E4E6.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E4E6.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E4E6.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E4E6.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E4E6.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E4E6.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E4E6.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E4E6.tolist(),
+                        'PatientID': temp_patientID_6E_E4E6,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E4E6,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E4E6,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E4E6,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E4E6,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E4E6,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E4E6,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E4E6,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E4E6,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E4E6,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E4E6,
                         }
                     
                     print('Patient dictionary E4E6_6 - six electrodes, 14th combination')
@@ -3987,7 +3496,7 @@ for edf_file in edf_files_list:
                     print('E_combinations[14] chosen for six electrodes 15th combination')
                     print(E_combinations[14])
 
-                        # Filling out temporary variables: 
+                    # Filling out temporary variables: 
                     temp_patientID_6E_E5E6.append(patientID)
                     temp_deltaband_coh_6E_E5E6.append(deltaband_coh)
                     temp_thetaband_coh_6E_E5E6.append(thetaband_coh)
@@ -4000,32 +3509,20 @@ for edf_file in edf_files_list:
                     temp_betacoh_av30_6E_E5E6.append(beta_coh_av_30)
                     temp_gammacoh_av30_6E_E5E6.append(gamma_coh_av_30)
                             
-                    # stacking variables 
-                    patientID_stacked_6E_E5E6=np.stack(temp_patientID_6E_E5E6)
-                    delta_coh_6E_E5E6=np.stack(temp_deltaband_coh_6E_E5E6)
-                    theta_coh_6E_E5E6=np.stack(temp_thetaband_coh_6E_E5E6)
-                    alpha_coh_6E_E5E6=np.stack(temp_alphaband_coh_6E_E5E6)
-                    beta_coh_6E_E5E6=np.stack(temp_betaband_coh_6E_E5E6)
-                    gamma_coh_6E_E5E6=np.stack(temp_gammaband_coh_6E_E5E6)
-                    deltacoh_av30_6E_E5E6=np.stack(temp_deltacoh_av30_6E_E5E6)
-                    thetacoh_av30_6E_E5E6=np.stack(temp_thetacoh_av30_6E_E5E6)
-                    alphacoh_av30_6E_E5E6=np.stack(temp_alphacoh_av30_6E_E5E6)
-                    betacoh_av30_6E_E5E6=np.stack(temp_betacoh_av30_6E_E5E6)
-                    gammacoh_av30_6E_E5E6=np.stack(temp_gammacoh_av30_6E_E5E6)
 
                     # Packing data in dictonary 
                     Coherence_values_6E_E5E6 = {
-                        'PatientID': patientID_stacked_6E_E5E6,
-                        'Delta_coh_'+str(Electrode_combination_naming): delta_coh_6E_E5E6.tolist(),
-                        'Theta_coh_'+str(Electrode_combination_naming): theta_coh_6E_E5E6.tolist(),
-                        'Alpha_coh_'+str(Electrode_combination_naming): alpha_coh_6E_E5E6.tolist(),
-                        'Beta_coh_'+str(Electrode_combination_naming): beta_coh_6E_E5E6.tolist(),
-                        'Gamma_coh_'+str(Electrode_combination_naming): gamma_coh_6E_E5E6.tolist(),
-                        'Deltacoh_av30s'+str(Electrode_combination_naming): deltacoh_av30_6E_E5E6.tolist(),
-                        'Thetacoh_av30s'+str(Electrode_combination_naming): thetacoh_av30_6E_E5E6.tolist(),
-                        'Alphacoh_av30s'+str(Electrode_combination_naming): alphacoh_av30_6E_E5E6.tolist(),
-                        'Betacoh_av30s'+str(Electrode_combination_naming): betacoh_av30_6E_E5E6.tolist(),
-                        'Gammacoh_av30s'+str(Electrode_combination_naming): gammacoh_av30_6E_E5E6.tolist(),
+                        'PatientID': temp_patientID_6E_E5E6,
+                        'Delta_coh_'+str(Electrode_combination_naming): temp_deltaband_coh_6E_E5E6,
+                        'Theta_coh_'+str(Electrode_combination_naming): temp_thetaband_coh_6E_E5E6,
+                        'Alpha_coh_'+str(Electrode_combination_naming): temp_alphaband_coh_6E_E5E6,
+                        'Beta_coh_'+str(Electrode_combination_naming): temp_betaband_coh_6E_E5E6,
+                        'Gamma_coh_'+str(Electrode_combination_naming): temp_gammaband_coh_6E_E5E6,
+                        'Deltacoh_av30s'+str(Electrode_combination_naming): temp_deltacoh_av30_6E_E5E6,
+                        'Thetacoh_av30s'+str(Electrode_combination_naming): temp_thetacoh_av30_6E_E5E6,
+                        'Alphacoh_av30s'+str(Electrode_combination_naming): temp_alphacoh_av30_6E_E5E6,
+                        'Betacoh_av30s'+str(Electrode_combination_naming): temp_betacoh_av30_6E_E5E6,
+                        'Gammacoh_av30s'+str(Electrode_combination_naming): temp_gammacoh_av30_6E_E5E6,
                         }
                     
                     print('Patient dictionary E5E6_6 - six electrodes, 15th combination')
@@ -4130,7 +3627,7 @@ def Merge2(dict1, dict2):
 if 'Bandpower_values_6E_E1' in locals():
     Bandpower_6E_full_dict=Merge6(Bandpower_values_6E_E1, Bandpower_values_6E_E2, Bandpower_values_6E_E3, Bandpower_values_6E_E4, Bandpower_values_6E_E5, Bandpower_values_6E_E6)
     BP_6E=pd.DataFrame(Bandpower_6E_full_dict)
-    BP_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_1_10_6electrodes.csv", index=False)
+    BP_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_trial_6electrodes.csv", index=False)
     print('Bandpower 6e were generated')   
     del Bandpower_values_6E_E1
 
@@ -4141,7 +3638,7 @@ if 'Coherence_values_6E_E1E2' in locals():
 
     # Generating full data frame for the 6 electrode data 
     full_dataframe_6E=pd.DataFrame(full_dict_6E)
-    full_dataframe_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_patient_1_10_6electrodes.csv", index=False) # change filename using os
+    full_dataframe_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_trial_6electrodes.csv", index=False) # change filename using os
     print('cvs file was generated - 6E')
     del Coherence_values_6E_E1E2
 ############################################################################
@@ -4152,7 +3649,7 @@ if 'Coherence_values_6E_E1E2' in locals():
 if 'Bandpower_values_5E_E1' in locals():
     Bandpower_5E_full_dict=Merge5(Bandpower_values_5E_E1, Bandpower_values_5E_E2, Bandpower_values_5E_E3, Bandpower_values_5E_E4, Bandpower_values_5E_E5)
     BP_5E=pd.DataFrame(Bandpower_5E_full_dict)
-    BP_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_1_10_5electrodes.csv", index=False)
+    BP_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_trial_5electrodes.csv", index=False)
     print('Bandpower 5e were generated')    
     del Bandpower_values_5E_E1
 
@@ -4164,7 +3661,7 @@ if 'Coherence_values_5E_E1E2' in locals():
     # Generating full data frame for the 5 electrode data 
     full_dataframe_5E=pd.DataFrame(full_dict_5E)
 
-    full_dataframe_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_patient_1_10_5electrodes.csv", index=False) # change filename using os
+    full_dataframe_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_trial_5electrodes.csv", index=False) # change filename using os
     print('csv with 5e where generated')
     del Coherence_values_5E_E1E2
 ############################################################################
@@ -4176,7 +3673,7 @@ if 'Coherence_values_5E_E1E2' in locals():
 if 'Bandpower_values_4E_E1' in locals():
     Bandpower_4E_full_dict=Merge4(Bandpower_values_4E_E1, Bandpower_values_4E_E2, Bandpower_values_4E_E3, Bandpower_values_4E_E4)
     BP_4E=pd.DataFrame(Bandpower_4E_full_dict)
-    BP_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_1_10_4electrodes.csv", index=False)
+    BP_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_trial_4electrodes.csv", index=False)
     print('Bandpower 4e were generated')
     del Bandpower_values_4E_E1
 
@@ -4188,7 +3685,7 @@ if 'Coherence_values_4E_E1E2' in locals():
     # Generating full data frame for the 4 electrode data 
     full_dataframe_4E=pd.DataFrame(full_dict_4E)
 
-    full_dataframe_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_patient_1_10_4electrodes.csv", index=False) # change filename using os
+    full_dataframe_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_trial_4electrodes.csv", index=False) # change filename using os
     print('csv file with 4 electrodes where generated')
     
     del Coherence_values_4E_E1E2
@@ -4201,7 +3698,7 @@ if 'Coherence_values_4E_E1E2' in locals():
 if 'Bandpower_values_3E_E1' in locals():
     Bandpower_3E_full_dict=Merge3(Bandpower_values_3E_E1, Bandpower_values_3E_E2, Bandpower_values_3E_E3)
     BP_3E=pd.DataFrame(Bandpower_3E_full_dict)
-    BP_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_1_10_3electrodes.csv", index=False)
+    BP_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_trial_3electrodes.csv", index=False)
     print('Bandpower 3e generated csv file')
     del Bandpower_values_3E_E1
 
@@ -4212,7 +3709,7 @@ if 'Coherence_values_3E_E1E2' in locals():
 
     # Generating full data frame for the 3 electrode data 
     full_dataframe_3E=pd.DataFrame(full_dict_3E)
-    full_dataframe_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_patient_1_10_3electrodes.csv", index=False) # change filename using os
+    full_dataframe_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_trial_3electrodes.csv", index=False) # change filename using os
     print('csv file 3e were generated')
     del Coherence_values_3E_E1E2
 ############################################################################
@@ -4223,7 +3720,7 @@ if 'Coherence_values_3E_E1E2' in locals():
 if 'Bandpower_values_2E_E1' in locals():
     Bandpower_2E_full_dict=Merge2(Bandpower_values_2E_E1, Bandpower_values_2E_E2)
     BP_2E=pd.Dataframe(Bandpower_2E_full_dict)
-    BP_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_1_10_2electrodes.csv", index=False)
+    BP_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_trial_2electrodes.csv", index=False)
     print('BP 2E csv generated')
     del Bandpower_values_2E_E1
 
@@ -4232,7 +3729,7 @@ if 'Coherence_values_2E_E1E2' in locals():
     # Generating full data frame for the 2 electrode data 
     print('Generating dataframe and CSV file for 2-electrode data')
     full_dataframe_2E=pd.DataFrame(Coherence_values_2E_E1E2) 
-    full_dataframe_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_patient_1_10_2electrodes.csv", index=False) # change filename using os
+    full_dataframe_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_trial_2electrodes.csv", index=False) # change filename using os
     print('csv file 2E generated')
     del Coherence_values_2E_E1E2
 ############################################################################

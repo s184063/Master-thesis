@@ -26,11 +26,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("api_example")
 import itertools 
 from itertools import combinations
-import fractions
-from fractions import Fraction
 
 
-def preprocessing(input_signal,input_signal_header): #,input_signal_header
+def preprocessing(input_signal):
     # Made by Natasja Bonde Andersen 28-02-2024
     # This function pre-processes the data by resampling and filtering 
     # the data using a notch filter and highpass filter. 
@@ -40,38 +38,26 @@ def preprocessing(input_signal,input_signal_header): #,input_signal_header
     ########### Resampling ##################
     # final sampling rate = (up/down)*original sampling rate
     # The function upsamples by adding zeros, then it low pass FIR filters and then downsamples again
-    signal_header_selected = copy.deepcopy(input_signal_header)
-    signal_selected = copy.deepcopy(input_signal)
-
-    #print('Information about selected signal')
-    #print(type(signal_selected))
-    #print(len(signal_selected))
-
-    #sample_rate=signal_header_selected['sample_rate']
-    sample_frequency=signal_header_selected['sample_frequency'] # 256 Hz for RBD dataset 
-    fs_old=int(sample_frequency)
-    print('Sampling frequency')
-    print(type(fs_old))
-    print(fs_old)
-
     
-    fs_new=128
-
-    resample_frac = Fraction(fs_new/fs_old).limit_denominator(100)
-    signal_new = scipy.signal.resample_poly(signal_selected, resample_frac.numerator, resample_frac.denominator)
-
+    signal_selected = copy.deepcopy(input_signal)
+    
+    up = 128
+    down=100
+    signal_new = scipy.signal.resample_poly(signal_selected,up, down)
     signal_old=signal_selected
 
+
+    # Defining sampling frequency fs 
+    fs_new = up  # sampling frequency
+    fs_old=100
     
-   
-    '''
     # Time axis for 128 Hz and 100 Hz signals 
     t_128 = np.arange(0, len(signal_new)/fs_new, 1/fs_new)
     t_100 = np.arange(0,len(signal_old)/fs_old,1/fs_old)
     
     print('Length of signals after resampling')
     print(signal_new.shape)
-    '''
+
     '''
     # Visualising the resampling
     fig, axs = matplotlib.pyplot.subplots(2) # Creating subplot 
@@ -90,7 +76,7 @@ def preprocessing(input_signal,input_signal_header): #,input_signal_header
 
 
     ###### Looking into spectra before and after resampling #######
-    '''
+
     # Fast fourier transform 
     y_old=fft(signal_old)
     y_new=fft(signal_new)
@@ -101,7 +87,7 @@ def preprocessing(input_signal,input_signal_header): #,input_signal_header
     #Creating frequency axis 
     f_old=np.linspace(-fs_old/2,fs_old/2,len(signal_old))
     f_new=np.linspace(-fs_new/2,fs_new/2,len(signal_new))
-    '''
+
     '''
     # Plot magnitude spectra dB 
     fig, axs = matplotlib.pyplot.subplots(2)
@@ -208,7 +194,7 @@ def preprocessing(input_signal,input_signal_header): #,input_signal_header
     
 
     print('Success')
-    return signal_new, fs_new, time_filtered_HP
+    return t_128, signal_new, f_new, fs_new, time_filtered_HP
    
 
 
@@ -335,72 +321,36 @@ def coherence_features(Coherence_xy_input,f_input):
     
     # Finding the indexes 
     #Finding the last value in an np.array [-1]
-    idx_1=np.where(f<0.5)
-    idx_1=idx_1[-1][-1]
-    #print(idx_1)
-    #print(f[idx_1])
-
+    idx_1=np.where(f==1)
     idx_3=np.where(f<4)
     idx_3=idx_3[-1][-1]
-    #print(idx_3)
-    #print(f[idx_3])
-
-
-    #idx_4=np.where(f==4)
-    #idx_4=idx_4[0][0]
-
+    idx_4=np.where(f==4)
     idx_7=np.where(f<8)
     idx_7=idx_7[-1][-1]
-    #print(idx_7)
-    #print(f[idx_7])
-
-
-    #idx_8=np.where(f==8)
-    #idx_8=idx_8[0][0]
-
+    idx_8=np.where(f==8)
     idx_12=np.where(f<13)
     idx_12=idx_12[-1][-1]
-    #print(idx_12)
-    #print(f[idx_12])
-
-
-    #idx_13=np.where(f==13)
-    #idx_13=idx_13[0][0]
-
-
+    idx_13=np.where(f==13)
     idx_30=np.where(f<31)
     idx_30=idx_30[-1][-1]
-    #print(idx_30)
-    #print(f[idx_30])
-
-
-    #idx_31=np.where(f==31)
-    #idx_31=idx_31[0][0]
-
+    idx_31=np.where(f==31)
     idx_100=np.where(f<100)
     idx_100=idx_100[-1][-1]
-    #print(idx_100)
-    #print(f[idx_100])
 
-    
 
-    
     # Converting into integers 
-    idx_1=int(idx_1)
+    idx_1=int(idx_1[0])
     idx_3=int(idx_3)
-    #idx_4=int(idx_4)
+    idx_4=int(idx_4[0])
     idx_7=int(idx_7)
-    #idx_8=int(idx_8)
+    idx_8=int(idx_8[0])
     idx_12=int(idx_12)
-    #idx_13=int(idx_13)
+    idx_13=int(idx_13[0])
     idx_30=int(idx_30)
-    #idx_31=int(idx_31)
+    idx_31=int(idx_31[0])
     idx_100=int(idx_100)
 
 
-    
-
-   
     # Indexing and averaging the frequency bands 
     #Delta
     delta=Cxy[idx_1:idx_3]
@@ -408,22 +358,22 @@ def coherence_features(Coherence_xy_input,f_input):
 
 
     #Theta 
-    theta=Cxy[idx_3:idx_7]
+    theta=Cxy[idx_4:idx_7]
     thetaband_coh_2E=np.average(theta)
 
 
     #Alpha 
-    alpha=Cxy[idx_7:idx_12]
+    alpha=Cxy[idx_8:idx_12]
     alphaband_coh_2E=np.average(alpha)
 
 
     #Beta
-    beta=Cxy[idx_12:idx_30]
+    beta=Cxy[idx_13:idx_30]
     betaband_coh_2E=np.average(beta)
 
 
     #gamma 
-    gamma=Cxy[idx_30:idx_100]
+    gamma=Cxy[idx_31:idx_100]
     gammaband_coh_2E=np.average(gamma)
 
     return deltaband_coh_2E, thetaband_coh_2E, alphaband_coh_2E,betaband_coh_2E,gammaband_coh_2E
@@ -672,7 +622,7 @@ def Usleep_2channels(edf_file_uploaded,make_folder_path_uploaded,epoch_size_in_s
     print(numbers_found)
 
     # Saving token - this should be changed every 12 hours 
-    os.environ ['USLEEP_API_TOKEN']='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3MTQ5NzM3ODksImlhdCI6MTcxNDkzMDU4OSwibmJmIjoxNzE0OTMwNTg5LCJpZGVudGl0eSI6ImZmYzUxYTJiYzc2MiJ9.tqKheV1gn14v3X-oQmXkXtESAzb_GLiCEf0xXBmmyyI'
+    os.environ ['USLEEP_API_TOKEN']='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3MTUzMTI0MzgsImlhdCI6MTcxNTI2OTIzOCwibmJmIjoxNzE1MjY5MjM4LCJpZGVudGl0eSI6ImZmYzUxYTJiYzc2MiJ9.fKb5HO9R9vXyLr1yxT0t_hlM-en6wMkYl8PiJc_333Y'
 
     # Create an API object with API token stored in environment variable 
     api = usleep_api.USleepAPI(api_token=os.environ['USLEEP_API_TOKEN'])
@@ -1043,15 +993,9 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
         folder_path = os.path.join(output_path, main_folder)  # Update with your actual parent folder path
             
         # Extracting patient ID
-        #patientID=str(main_folder) 
-        file_name=str(main_folder) 
-        print('Folder') # Check which folder we are inside 
-        print(file_name )
+        patientID=str(main_folder) 
 
-        print('PatientID')
-        # Skipping the first part of the filename to extract the real patientID 
-        patientID_temp=file_name[21:] #restructuredfile_RBD_82001_(1)
-        patientID=patientID_temp[:-4] 
+        print('Folder') # Check which folder we are inside 
         print(patientID)
         
         ############## Loading electrode names ###################
@@ -1115,8 +1059,8 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
             print(d)
             
             # Selecting the consistent part of the filename
-            consistent_part_1 = E_combinations[d][0] # e.g "C3M2"  # Replace with the consistent part of the first array's name
-            consistent_part_2 = E_combinations[d][1] # e.g "O1M2"  # Replace with the consistent part of the second array's name
+            consistent_part_1 = E_combinations[d][0] #"C3M2"  # Replace with the consistent part of the first array's name
+            consistent_part_2 = E_combinations[d][1] #"O1M2"  # Replace with the consistent part of the second array's name
 
             # Defining electrode combination for naming the CSV files in the end 
             Electrode_combination_naming = [consistent_part_1, consistent_part_2]
@@ -1141,7 +1085,7 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     # Load array for the first consistent part
                     print('Loading file 1')
                     Electrode1 = np.load(os.path.join(folder_path, filename))
-                    #Electrode1 = copy.deepcopy(Electrode1)
+                    Electrode1 = copy.deepcopy(Electrode1)
                     print(filename)
                     print(epoch_size_in_seconds)
                         
@@ -1149,7 +1093,7 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     # Load array for the second consistent part
                     print('Loading file 2')
                     Electrode2 = np.load(os.path.join(folder_path, filename))
-                    #Electrode2 = copy.deepcopy(Electrode2)
+                    Electrode2 = copy.deepcopy(Electrode2)
                     print(filename)
                     print(epoch_size_in_seconds)
 
@@ -1176,9 +1120,7 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
 
                 # This code will generate 5 (2,2) matrices and select the relevant value from the matrix 
                 # This is done using Pearson correlation coefficient 
-                print('Lengt of electrode1 and electrode2 in correlation loop')
-                print(len(Electrode1[:,j]))
-                print(len(Electrode2[:,j]))
+                
                 # Using Pearson correlation coefficient 
                 correlation_matrix=np.corrcoef(Electrode1[:,j],Electrode2[:,j])
                 print('Correlation matrix inside loop')
@@ -1189,20 +1131,15 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                 # Saving the value in a temporary list 
                 temporary_list.append(correlation_matrix[0,1])
                 
-            # Creating a 3D structure with correlation matrices 
-            correlation_structure= np.stack(temporary_list,axis=0)
+                # Creating a 3D structure with correlation matrices 
+                correlation_structure= np.stack(temporary_list,axis=0)
 
             # Generating the correlation structure 
             print('Correlation structure!!!')
             print(correlation_structure)
             print(correlation_structure.shape)
 
-            # Making sure not to save wrong electrodes 
-            del Electrode1, Electrode2
             
-
-
-
             ######### Storing the correlation structures according to number of electrodes in the data ############
             
             # Using if-statements to determine how many electrodes present in the data for the single patient
@@ -1218,7 +1155,6 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
             # Applying same name rules as for the two electrodes 
 
                 
-            
             # Only two electrodes with one combination of electrodes 
             if len(E_combinations) ==1:
                 
@@ -1232,18 +1168,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                 temp_correlation_N3_E1E2_2.append(correlation_structure[3])
                 temp_correlation_REM_E1E2_2.append(correlation_structure[4])
 
+                
+                # Stacking the variables 
+                patient_id_stacked_E1E2_2=np.stack(temp_patient_id_E1E2_2)
+                N1_E1E2_2=np.stack(temp_correlation_N1_E1E2_2)
+                N2_E1E2_2=np.stack(temp_correlation_N2_E1E2_2)
+                N3_E1E2_2=np.stack(temp_correlation_N3_E1E2_2)
+                Wake_E1E2_2=np.stack(temp_correlation_Wake_E1E2_2)
+                REM_E1E2_2=np.stack(temp_correlation_REM_E1E2_2)
+
+                ##### Saving values in a dictonary #####
+                patient_ids_E1E2_2=patient_id_stacked_E1E2_2
 
                 print('Electrode combination')
                 print(Electrode_combination_naming)
 
                 # Create a dictionary to store patient ID and corresponding information
                 patient_data_dict_E1E2_2 = {
-                    'PatientID': temp_patient_id_E1E2_2,
-                    'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E2_2,
-                    'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E2_2,
-                    'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_2,
-                    'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_2,
-                    'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_2,
+                    'PatientID_2E': patient_ids_E1E2_2,
+                    'Wake_2E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E2_2.tolist(),
+                    'N1_2E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E2_2.tolist(),
+                    'N2_2E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E2_2.tolist(),
+                    'N3_2E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E2_2.tolist(),
+                    'REM_2E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E2_2.tolist(),
                 }
 
                 print('Patient dictionary E1E2_2 - two electrodes, one combination')
@@ -1270,18 +1217,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E2_3.append(correlation_structure[3])
                     temp_correlation_REM_E1E2_3.append(correlation_structure[4])
 
+                    
+                    # Stacking the variables 
+                    patient_id_stacked_E1E2_3=np.stack(temp_patient_id_E1E2_3)
+                    N1_E1E2_3=np.stack(temp_correlation_N1_E1E2_3)
+                    N2_E1E2_3=np.stack(temp_correlation_N2_E1E2_3)
+                    N3_E1E2_3=np.stack(temp_correlation_N3_E1E2_3)
+                    Wake_E1E2_3=np.stack(temp_correlation_Wake_E1E2_3)
+                    REM_E1E2_3=np.stack(temp_correlation_REM_E1E2_3)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E2_3=patient_id_stacked_E1E2_3
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E2_3 = {
-                        'PatientID': temp_patient_id_E1E2_3,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E2_3,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E2_3,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_3,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_3,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_3,
+                        'PatientID_3E': patient_ids_E1E2_3,
+                        'Wake_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E2_3.tolist(),
+                        'N1_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E2_3.tolist(),
+                        'N2_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E2_3.tolist(),
+                        'N3_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E2_3.tolist(),
+                        'REM_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E2_3.tolist(),
                     }
 
                     print('Patient dictionary E1E2_3 - three electrodes, first combination')
@@ -1301,18 +1259,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E3_3.append(correlation_structure[3])
                     temp_correlation_REM_E1E3_3.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E3_3=np.stack(temp_patient_id_E1E3_3)
+                    N1_E1E3_3=np.stack(temp_correlation_N1_E1E3_3)
+                    N2_E1E3_3=np.stack(temp_correlation_N2_E1E3_3)
+                    N3_E1E3_3=np.stack(temp_correlation_N3_E1E3_3)
+                    Wake_E1E3_3=np.stack(temp_correlation_Wake_E1E3_3)
+                    REM_E1E3_3=np.stack(temp_correlation_REM_E1E3_3)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E3_3=patient_id_stacked_E1E3_3
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E3_3 = {
-                        'PatientID': temp_patient_id_E1E3_3,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E3_3,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E3_3,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E3_3,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E3_3,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E3_3,
+                        'PatientID_3E': patient_ids_E1E3_3,
+                        'Wake_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E3_3.tolist(),
+                        'N1_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E3_3.tolist(),
+                        'N2_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E3_3.tolist(),
+                        'N3_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E3_3.tolist(),
+                        'REM_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E3_3.tolist(),
                     }
                     
                     print('Patient dictionary E1E3_3 - three electrodes, second combination')
@@ -1332,18 +1301,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E3_3.append(correlation_structure[3])
                     temp_correlation_REM_E2E3_3.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E3_3=np.stack(temp_patient_id_E2E3_3)
+                    N1_E2E3_3=np.stack(temp_correlation_N1_E2E3_3)
+                    N2_E2E3_3=np.stack(temp_correlation_N2_E2E3_3)
+                    N3_E2E3_3=np.stack(temp_correlation_N3_E2E3_3)
+                    Wake_E2E3_3=np.stack(temp_correlation_Wake_E2E3_3)
+                    REM_E2E3_3=np.stack(temp_correlation_REM_E2E3_3)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E3_3=patient_id_stacked_E2E3_3
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E3_3 = {
-                        'PatientID': temp_patient_id_E2E3_3,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E3_3,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E3_3,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E3_3,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E3_3,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E3_3,
+                        'PatientID_3E': patient_ids_E2E3_3,
+                        'Wake_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E3_3.tolist(),
+                        'N1_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E3_3.tolist(),
+                        'N2_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E3_3.tolist(),
+                        'N3_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E3_3.tolist(),
+                        'REM_3E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E3_3.tolist(),
                     }
 
                     print('Patient dictionary E2E3_3 - three electrodes, third combination')
@@ -1370,18 +1350,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E2_4.append(correlation_structure[3])
                     temp_correlation_REM_E1E2_4.append(correlation_structure[4])
 
+                    
+                    # Stacking the variables 
+                    patient_id_stacked_E1E2_4=np.stack(temp_patient_id_E1E2_4)
+                    N1_E1E2_4=np.stack(temp_correlation_N1_E1E2_4)
+                    N2_E1E2_4=np.stack(temp_correlation_N2_E1E2_4)
+                    N3_E1E2_4=np.stack(temp_correlation_N3_E1E2_4)
+                    Wake_E1E2_4=np.stack(temp_correlation_Wake_E1E2_4)
+                    REM_E1E2_4=np.stack(temp_correlation_REM_E1E2_4)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E2_4=patient_id_stacked_E1E2_4
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E2_4 = {
-                        'PatientID': temp_patient_id_E1E2_4,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E2_4,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E2_4,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_4,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_4,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_4,
+                        'PatientID_4E': patient_ids_E1E2_4,
+                        'Wake_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E2_4.tolist(),
+                        'N1_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E2_4.tolist(),
+                        'N2_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E2_4.tolist(),
+                        'N3_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E2_4.tolist(),
+                        'REM_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E2_4.tolist(),
                     }
 
                     print('Patient dictionary E1E2_4 - three electrodes, first combination')
@@ -1401,18 +1392,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E3_4.append(correlation_structure[3])
                     temp_correlation_REM_E1E3_4.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E3_4=np.stack(temp_patient_id_E1E3_4)
+                    N1_E1E3_4=np.stack(temp_correlation_N1_E1E3_4)
+                    N2_E1E3_4=np.stack(temp_correlation_N2_E1E3_4)
+                    N3_E1E3_4=np.stack(temp_correlation_N3_E1E3_4)
+                    Wake_E1E3_4=np.stack(temp_correlation_Wake_E1E3_4)
+                    REM_E1E3_4=np.stack(temp_correlation_REM_E1E3_4)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E3_4=patient_id_stacked_E1E3_4
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E3_4 = {
-                        'PatientID': temp_patient_id_E1E3_4,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E3_4,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E3_4,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E3_4,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E3_4,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E3_4,
+                        'PatientID_4E': patient_ids_E1E3_4,
+                        'Wake_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E3_4.tolist(),
+                        'N1_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E3_4.tolist(),
+                        'N2_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E3_4.tolist(),
+                        'N3_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E3_4.tolist(),
+                        'REM_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E3_4.tolist(),
                     }
                     
                     print('Patient dictionary E1E3_4 - four electrodes, second combination')
@@ -1432,18 +1434,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E3_4.append(correlation_structure[3])
                     temp_correlation_REM_E2E3_4.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E3_4=np.stack(temp_patient_id_E2E3_4)
+                    N1_E2E3_4=np.stack(temp_correlation_N1_E2E3_4)
+                    N2_E2E3_4=np.stack(temp_correlation_N2_E2E3_4)
+                    N3_E2E3_4=np.stack(temp_correlation_N3_E2E3_4)
+                    Wake_E2E3_4=np.stack(temp_correlation_Wake_E2E3_4)
+                    REM_E2E3_4=np.stack(temp_correlation_REM_E2E3_4)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E3_4=patient_id_stacked_E2E3_4
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E3_4 = {
-                        'PatientID': temp_patient_id_E2E3_4,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E3_4,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E3_4,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E3_4,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E3_4,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E3_4,
+                        'PatientID_4E': patient_ids_E2E3_4,
+                        'Wake_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E3_4.tolist(),
+                        'N1_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E3_4.tolist(),
+                        'N2_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E3_4.tolist(),
+                        'N3_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E3_4.tolist(),
+                        'REM_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E3_4.tolist(),
                     }
 
                     print('Patient dictionary E2E3_4 - four electrodes, third combination')
@@ -1464,18 +1477,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E4_4.append(correlation_structure[3])
                     temp_correlation_REM_E1E4_4.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E4_4=np.stack(temp_patient_id_E1E4_4)
+                    N1_E1E4_4=np.stack(temp_correlation_N1_E1E4_4)
+                    N2_E1E4_4=np.stack(temp_correlation_N2_E1E4_4)
+                    N3_E1E4_4=np.stack(temp_correlation_N3_E1E4_4)
+                    Wake_E1E4_4=np.stack(temp_correlation_Wake_E1E4_4)
+                    REM_E1E4_4=np.stack(temp_correlation_REM_E1E4_4)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E4_4=patient_id_stacked_E1E4_4
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E4_4 = {
-                        'PatientID': temp_patient_id_E1E4_4,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E4_4,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E4_4,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E4_4,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E4_4,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E4_4,
+                        'PatientID_4E': patient_ids_E1E4_4,
+                        'Wake_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E4_4.tolist(),
+                        'N1_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E4_4.tolist(),
+                        'N2_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E4_4.tolist(),
+                        'N3_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E4_4.tolist(),
+                        'REM_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E4_4.tolist(),
                     }
 
                     print('Patient dictionary E1E4_4 - four electrodes, fourth combination')
@@ -1495,17 +1519,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E4_4.append(correlation_structure[3])
                     temp_correlation_REM_E2E4_4.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E4_4=np.stack(temp_patient_id_E2E4_4)
+                    N1_E2E4_4=np.stack(temp_correlation_N1_E2E4_4)
+                    N2_E2E4_4=np.stack(temp_correlation_N2_E2E4_4)
+                    N3_E2E4_4=np.stack(temp_correlation_N3_E2E4_4)
+                    Wake_E2E4_4=np.stack(temp_correlation_Wake_E2E4_4)
+                    REM_E2E4_4=np.stack(temp_correlation_REM_E2E4_4)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E4_4=patient_id_stacked_E2E4_4
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E4_4 = {
-                        'PatientID': temp_patient_id_E2E4_4,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E4_4,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E4_4,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E4_4,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E4_4,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E4_4,
+                        'PatientID_4E': patient_ids_E2E4_4,
+                        'Wake_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E4_4.tolist(),
+                        'N1_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E4_4.tolist(),
+                        'N2_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E4_4.tolist(),
+                        'N3_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E4_4.tolist(),
+                        'REM_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E4_4.tolist(),
                     }
 
                     print('Patient dictionary E2E4_4 - four electrodes, fifth combination')
@@ -1526,25 +1562,36 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E4_4.append(correlation_structure[3])
                     temp_correlation_REM_E3E4_4.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E3E4_4=np.stack(temp_patient_id_E3E4_4)
+                    N1_E3E4_4=np.stack(temp_correlation_N1_E3E4_4)
+                    N2_E3E4_4=np.stack(temp_correlation_N2_E3E4_4)
+                    N3_E3E4_4=np.stack(temp_correlation_N3_E3E4_4)
+                    Wake_E3E4_4=np.stack(temp_correlation_Wake_E3E4_4)
+                    REM_E3E4_4=np.stack(temp_correlation_REM_E3E4_4)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E3E4_4=patient_id_stacked_E3E4_4
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E3E4_4 = {
-                        'PatientID': temp_patient_id_E3E4_4,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E3E4_4,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E3E4_4,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E4_4,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E4_4,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E4_4,
+                        'PatientID_4E': patient_ids_E3E4_4,
+                        'Wake_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E3E4_4.tolist(),
+                        'N1_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E3E4_4.tolist(),
+                        'N2_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E3E4_4.tolist(),
+                        'N3_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E3E4_4.tolist(),
+                        'REM_4E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E3E4_4.tolist(),
                     }
 
                     print('Patient dictionary E3E4_4 - four electrodes, sixth combination')
                     print(patient_data_dict_E3E4_4)
 
                 
-            # 5 electrodes will give 10 combinations 
+            # 4 electrodes will give 6 combinations 
 
             elif len(E_combinations) ==10:
             
@@ -1565,18 +1612,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E2_5.append(correlation_structure[3])
                     temp_correlation_REM_E1E2_5.append(correlation_structure[4])
 
+                    
+                    # Stacking the variables 
+                    patient_id_stacked_E1E2_5=np.stack(temp_patient_id_E1E2_5)
+                    N1_E1E2_5=np.stack(temp_correlation_N1_E1E2_5)
+                    N2_E1E2_5=np.stack(temp_correlation_N2_E1E2_5)
+                    N3_E1E2_5=np.stack(temp_correlation_N3_E1E2_5)
+                    Wake_E1E2_5=np.stack(temp_correlation_Wake_E1E2_5)
+                    REM_E1E2_5=np.stack(temp_correlation_REM_E1E2_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E2_5=patient_id_stacked_E1E2_5
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E2_5 = {
-                        'PatientID': temp_patient_id_E1E2_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E2_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E2_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_5,
+                        'PatientID_5E': patient_ids_E1E2_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E2_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E2_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E2_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E2_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E2_5.tolist(),
                     }
 
                     print('Patient dictionary E1E2_5 - five electrodes, first combination')
@@ -1596,18 +1654,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E3_5.append(correlation_structure[3])
                     temp_correlation_REM_E1E3_5.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E3_5=np.stack(temp_patient_id_E1E3_5)
+                    N1_E1E3_5=np.stack(temp_correlation_N1_E1E3_5)
+                    N2_E1E3_5=np.stack(temp_correlation_N2_E1E3_5)
+                    N3_E1E3_5=np.stack(temp_correlation_N3_E1E3_5)
+                    Wake_E1E3_5=np.stack(temp_correlation_Wake_E1E3_5)
+                    REM_E1E3_5=np.stack(temp_correlation_REM_E1E3_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E3_5=patient_id_stacked_E1E3_5
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E3_5 = {
-                        'PatientID': temp_patient_id_E1E3_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E3_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E3_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E3_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E3_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E3_5,
+                        'PatientID_5E': patient_ids_E1E3_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E3_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E3_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E3_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E3_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E3_5.tolist(),
                     }
                     
                     print('Patient dictionary E1E3_5 - five electrodes, second combination')
@@ -1627,17 +1696,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E3_5.append(correlation_structure[3])
                     temp_correlation_REM_E2E3_5.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E3_5=np.stack(temp_patient_id_E2E3_5)
+                    N1_E2E3_5=np.stack(temp_correlation_N1_E2E3_5)
+                    N2_E2E3_5=np.stack(temp_correlation_N2_E2E3_5)
+                    N3_E2E3_5=np.stack(temp_correlation_N3_E2E3_5)
+                    Wake_E2E3_5=np.stack(temp_correlation_Wake_E2E3_5)
+                    REM_E2E3_5=np.stack(temp_correlation_REM_E2E3_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E3_5=patient_id_stacked_E2E3_5
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E3_5 = {
-                        'PatientID': temp_patient_id_E2E3_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E3_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E3_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E3_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E3_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E3_5,
+                        'PatientID_5E': patient_ids_E2E3_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E3_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E3_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E3_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E3_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E3_5.tolist(),
                     }
 
                     print('Patient dictionary E2E3_5 - five electrodes, third combination')
@@ -1658,17 +1739,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E4_5.append(correlation_structure[3])
                     temp_correlation_REM_E1E4_5.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E4_5=np.stack(temp_patient_id_E1E4_5)
+                    N1_E1E4_5=np.stack(temp_correlation_N1_E1E4_5)
+                    N2_E1E4_5=np.stack(temp_correlation_N2_E1E4_5)
+                    N3_E1E4_5=np.stack(temp_correlation_N3_E1E4_5)
+                    Wake_E1E4_5=np.stack(temp_correlation_Wake_E1E4_5)
+                    REM_E1E4_5=np.stack(temp_correlation_REM_E1E4_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E4_5=patient_id_stacked_E1E4_5
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E4_5 = {
-                        'PatientID': temp_patient_id_E1E4_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E4_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E4_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E4_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E4_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E4_5,
+                        'PatientID_5E': patient_ids_E1E4_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E4_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E4_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E4_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E4_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E4_5.tolist(),
                     }
 
                     print('Patient dictionary E1E4_5 - five electrodes, fourth combination')
@@ -1688,18 +1781,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E4_5.append(correlation_structure[3])
                     temp_correlation_REM_E2E4_5.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E4_5=np.stack(temp_patient_id_E2E4_5)
+                    N1_E2E4_5=np.stack(temp_correlation_N1_E2E4_5)
+                    N2_E2E4_5=np.stack(temp_correlation_N2_E2E4_5)
+                    N3_E2E4_5=np.stack(temp_correlation_N3_E2E4_5)
+                    Wake_E2E4_5=np.stack(temp_correlation_Wake_E2E4_5)
+                    REM_E2E4_5=np.stack(temp_correlation_REM_E2E4_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E4_5=patient_id_stacked_E2E4_5
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E4_5 = {
-                        'PatientID': temp_patient_id_E2E4_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E4_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E4_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E4_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E4_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E4_5,
+                        'PatientID_5E': patient_ids_E2E4_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E4_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E4_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E4_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E4_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E4_5.tolist(),
                     }
 
                     print('Patient dictionary E2E4_5 - five electrodes, fifth combination')
@@ -1720,17 +1824,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E4_5.append(correlation_structure[3])
                     temp_correlation_REM_E3E4_5.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E3E4_5=np.stack(temp_patient_id_E3E4_5)
+                    N1_E3E4_5=np.stack(temp_correlation_N1_E3E4_5)
+                    N2_E3E4_5=np.stack(temp_correlation_N2_E3E4_5)
+                    N3_E3E4_5=np.stack(temp_correlation_N3_E3E4_5)
+                    Wake_E3E4_5=np.stack(temp_correlation_Wake_E3E4_5)
+                    REM_E3E4_5=np.stack(temp_correlation_REM_E3E4_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E3E4_5=patient_id_stacked_E3E4_5
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E3E4_5 = {
-                        'PatientID': temp_patient_id_E3E4_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E3E4_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E3E4_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E4_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E4_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E4_5,
+                        'PatientID_5E': patient_ids_E3E4_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E3E4_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E3E4_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E3E4_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E3E4_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E3E4_5.tolist(),
                     }
 
                     print('Patient dictionary E3E4_5 - five electrodes, sixth combination')
@@ -1750,17 +1866,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E5_5.append(correlation_structure[3])
                     temp_correlation_REM_E1E5_5.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E5_5=np.stack(temp_patient_id_E1E5_5)
+                    N1_E1E5_5=np.stack(temp_correlation_N1_E1E5_5)
+                    N2_E1E5_5=np.stack(temp_correlation_N2_E1E5_5)
+                    N3_E1E5_5=np.stack(temp_correlation_N3_E1E5_5)
+                    Wake_E1E5_5=np.stack(temp_correlation_Wake_E1E5_5)
+                    REM_E1E5_5=np.stack(temp_correlation_REM_E1E5_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E5_5=patient_id_stacked_E1E5_5
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E5_5 = {
-                        'PatientID': temp_patient_id_E1E5_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E5_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E5_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E5_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E5_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E5_5,
+                        'PatientID_5E': patient_ids_E1E5_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E5_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E5_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E5_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E5_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E5_5.tolist(),
                     }
 
                     print('Patient dictionary E1E5_5 - five electrodes, seventh combination')
@@ -1781,18 +1909,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E5_5.append(correlation_structure[3])
                     temp_correlation_REM_E2E5_5.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E5_5=np.stack(temp_patient_id_E2E5_5)
+                    N1_E2E5_5=np.stack(temp_correlation_N1_E2E5_5)
+                    N2_E2E5_5=np.stack(temp_correlation_N2_E2E5_5)
+                    N3_E2E5_5=np.stack(temp_correlation_N3_E2E5_5)
+                    Wake_E2E5_5=np.stack(temp_correlation_Wake_E2E5_5)
+                    REM_E2E5_5=np.stack(temp_correlation_REM_E2E5_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E5_5=patient_id_stacked_E2E5_5
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E5_5 = {
-                        'PatientID': temp_patient_id_E2E5_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E5_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E5_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E5_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E5_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E5_5,
+                        'PatientID_5E': patient_ids_E2E5_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E5_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E5_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E5_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E5_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E5_5.tolist(),
                     }
 
                     print('Patient dictionary E2E5_5 - five electrodes, 8th combination')
@@ -1812,18 +1951,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E5_5.append(correlation_structure[3])
                     temp_correlation_REM_E3E5_5.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E3E5_5=np.stack(temp_patient_id_E3E5_5)
+                    N1_E3E5_5=np.stack(temp_correlation_N1_E3E5_5)
+                    N2_E3E5_5=np.stack(temp_correlation_N2_E3E5_5)
+                    N3_E3E5_5=np.stack(temp_correlation_N3_E3E5_5)
+                    Wake_E3E5_5=np.stack(temp_correlation_Wake_E3E5_5)
+                    REM_E3E5_5=np.stack(temp_correlation_REM_E3E5_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E3E5_5=patient_id_stacked_E3E5_5
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E3E5_5 = {
-                        'PatientID': temp_patient_id_E3E5_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E3E5_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E3E5_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E5_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E5_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E5_5,
+                        'PatientID_5E': patient_ids_E3E5_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E3E5_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E3E5_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E3E5_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E3E5_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E3E5_5.tolist(),
                     }
 
                     print('Patient dictionary E3E5_5 - five electrodes, 9th combination')
@@ -1844,17 +1994,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E4E5_5.append(correlation_structure[3])
                     temp_correlation_REM_E4E5_5.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E4E5_5=np.stack(temp_patient_id_E4E5_5)
+                    N1_E4E5_5=np.stack(temp_correlation_N1_E4E5_5)
+                    N2_E4E5_5=np.stack(temp_correlation_N2_E4E5_5)
+                    N3_E4E5_5=np.stack(temp_correlation_N3_E4E5_5)
+                    Wake_E4E5_5=np.stack(temp_correlation_Wake_E4E5_5)
+                    REM_E4E5_5=np.stack(temp_correlation_REM_E4E5_5)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E4E5_5=patient_id_stacked_E4E5_5
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E4E5_5 = {
-                        'PatientID': temp_patient_id_E4E5_5,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E4E5_5,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E4E5_5,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E4E5_5,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E4E5_5,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E4E5_5,
+                        'PatientID_5E': patient_ids_E4E5_5,
+                        'Wake_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E4E5_5.tolist(),
+                        'N1_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E4E5_5.tolist(),
+                        'N2_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E4E5_5.tolist(),
+                        'N3_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E4E5_5.tolist(),
+                        'REM_5E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E4E5_5.tolist(),
                     }
 
                     print('Patient dictionary E4E5_5 - five electrodes, 10th combination')
@@ -1880,17 +2042,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E2_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E2_6.append(correlation_structure[4])
 
+                    
+                    # Stacking the variables 
+                    patient_id_stacked_E1E2_6=np.stack(temp_patient_id_E1E2_6)
+                    N1_E1E2_6=np.stack(temp_correlation_N1_E1E2_6)
+                    N2_E1E2_6=np.stack(temp_correlation_N2_E1E2_6)
+                    N3_E1E2_6=np.stack(temp_correlation_N3_E1E2_6)
+                    Wake_E1E2_6=np.stack(temp_correlation_Wake_E1E2_6)
+                    REM_E1E2_6=np.stack(temp_correlation_REM_E1E2_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E2_6=patient_id_stacked_E1E2_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E2_6 = {
-                        'PatientID': temp_patient_id_E1E2_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E2_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E2_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_6,
+                        'PatientID_6E': patient_ids_E1E2_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E2_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E2_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E2_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E2_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E2_6.tolist(),
                     }
 
                     print('Patient dictionary E1E2_6 - six electrodes, first combination')
@@ -1910,17 +2084,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E3_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E3_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E3_6=np.stack(temp_patient_id_E1E3_6)
+                    N1_E1E3_6=np.stack(temp_correlation_N1_E1E3_6)
+                    N2_E1E3_6=np.stack(temp_correlation_N2_E1E3_6)
+                    N3_E1E3_6=np.stack(temp_correlation_N3_E1E3_6)
+                    Wake_E1E3_6=np.stack(temp_correlation_Wake_E1E3_6)
+                    REM_E1E3_6=np.stack(temp_correlation_REM_E1E3_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E3_6=patient_id_stacked_E1E3_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E3_6 = {
-                        'PatientID': temp_patient_id_E1E3_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E3_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E3_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E3_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E3_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E3_6,
+                        'PatientID_6E': patient_ids_E1E3_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E3_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E3_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E3_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E3_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E3_6.tolist(),
                     }
                     
                     print('Patient dictionary E1E3_6 - six electrodes, second combination')
@@ -1940,17 +2126,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E3_6.append(correlation_structure[3])
                     temp_correlation_REM_E2E3_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E3_6=np.stack(temp_patient_id_E2E3_6)
+                    N1_E2E3_6=np.stack(temp_correlation_N1_E2E3_6)
+                    N2_E2E3_6=np.stack(temp_correlation_N2_E2E3_6)
+                    N3_E2E3_6=np.stack(temp_correlation_N3_E2E3_6)
+                    Wake_E2E3_6=np.stack(temp_correlation_Wake_E2E3_6)
+                    REM_E2E3_6=np.stack(temp_correlation_REM_E2E3_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E3_6=patient_id_stacked_E2E3_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E3_6 = {
-                        'PatientID': temp_patient_id_E2E3_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E3_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E3_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E3_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E3_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E3_6,
+                        'PatientID_6E': patient_ids_E2E3_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E3_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E3_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E3_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E3_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E3_6.tolist(),
                     }
 
                     print('Patient dictionary E2E3_6 - six electrodes, third combination')
@@ -1971,17 +2169,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E4_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E4_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E4_6=np.stack(temp_patient_id_E1E4_6)
+                    N1_E1E4_6=np.stack(temp_correlation_N1_E1E4_6)
+                    N2_E1E4_6=np.stack(temp_correlation_N2_E1E4_6)
+                    N3_E1E4_6=np.stack(temp_correlation_N3_E1E4_6)
+                    Wake_E1E4_6=np.stack(temp_correlation_Wake_E1E4_6)
+                    REM_E1E4_6=np.stack(temp_correlation_REM_E1E4_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E4_6=patient_id_stacked_E1E4_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E4_6 = {
-                        'PatientID': temp_patient_id_E1E4_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E4_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E4_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E4_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E4_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E4_6,
+                        'PatientID_6E': patient_ids_E1E4_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E4_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E4_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E4_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E4_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E4_6.tolist(),
                     }
 
                     print('Patient dictionary E1E4_6 - six electrodes, fourth combination')
@@ -2001,17 +2211,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E4_6.append(correlation_structure[3])
                     temp_correlation_REM_E2E4_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E4_6=np.stack(temp_patient_id_E2E4_6)
+                    N1_E2E4_6=np.stack(temp_correlation_N1_E2E4_6)
+                    N2_E2E4_6=np.stack(temp_correlation_N2_E2E4_6)
+                    N3_E2E4_6=np.stack(temp_correlation_N3_E2E4_6)
+                    Wake_E2E4_6=np.stack(temp_correlation_Wake_E2E4_6)
+                    REM_E2E4_6=np.stack(temp_correlation_REM_E2E4_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E4_6=patient_id_stacked_E2E4_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E4_6 = {
-                        'PatientID': temp_patient_id_E2E4_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E4_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E4_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E4_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E4_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E4_6,
+                        'PatientID_6E': patient_ids_E2E4_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E4_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E4_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E4_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E4_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E4_6.tolist(),
                     }
 
                     print('Patient dictionary E2E4_6 - six electrodes, fifth combination')
@@ -2032,17 +2254,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E4_6.append(correlation_structure[3])
                     temp_correlation_REM_E3E4_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E3E4_6=np.stack(temp_patient_id_E3E4_6)
+                    N1_E3E4_6=np.stack(temp_correlation_N1_E3E4_6)
+                    N2_E3E4_6=np.stack(temp_correlation_N2_E3E4_6)
+                    N3_E3E4_6=np.stack(temp_correlation_N3_E3E4_6)
+                    Wake_E3E4_6=np.stack(temp_correlation_Wake_E3E4_6)
+                    REM_E3E4_6=np.stack(temp_correlation_REM_E3E4_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E3E4_6=patient_id_stacked_E3E4_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E3E4_6 = {
-                        'PatientID': temp_patient_id_E3E4_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E3E4_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E3E4_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E4_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E4_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E4_6,
+                        'PatientID_6E': patient_ids_E3E4_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E3E4_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E3E4_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E3E4_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E3E4_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E3E4_6.tolist(),
                     }
 
                     print('Patient dictionary E3E4_6 - six electrodes, sixth combination')
@@ -2062,17 +2296,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E5_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E5_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E5_6=np.stack(temp_patient_id_E1E5_6)
+                    N1_E1E5_6=np.stack(temp_correlation_N1_E1E5_6)
+                    N2_E1E5_6=np.stack(temp_correlation_N2_E1E5_6)
+                    N3_E1E5_6=np.stack(temp_correlation_N3_E1E5_6)
+                    Wake_E1E5_6=np.stack(temp_correlation_Wake_E1E5_6)
+                    REM_E1E5_6=np.stack(temp_correlation_REM_E1E5_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E5_6=patient_id_stacked_E1E5_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E5_6 = {
-                        'PatientID': temp_patient_id_E1E5_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E5_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E5_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E5_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E5_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E5_6,
+                        'PatientID_6E': patient_ids_E1E5_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E5_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E5_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E5_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E5_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E5_6.tolist(),
                     }
 
                     print('Patient dictionary E1E5_6 - six electrodes, seventh combination')
@@ -2093,17 +2339,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E5_6.append(correlation_structure[3])
                     temp_correlation_REM_E2E5_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E5_6=np.stack(temp_patient_id_E2E5_6)
+                    N1_E2E5_6=np.stack(temp_correlation_N1_E2E5_6)
+                    N2_E2E5_6=np.stack(temp_correlation_N2_E2E5_6)
+                    N3_E2E5_6=np.stack(temp_correlation_N3_E2E5_6)
+                    Wake_E2E5_6=np.stack(temp_correlation_Wake_E2E5_6)
+                    REM_E2E5_6=np.stack(temp_correlation_REM_E2E5_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E5_6=patient_id_stacked_E2E5_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E5_6 = {
-                        'PatientID': temp_patient_id_E2E5_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E5_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E5_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E5_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E5_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E5_6,
+                        'PatientID_6E': patient_ids_E2E5_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E5_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E5_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E5_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E5_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E5_6.tolist(),
                     }
 
                     print('Patient dictionary E2E5_6 - six electrodes, 8th combination')
@@ -2123,17 +2381,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E5_6.append(correlation_structure[3])
                     temp_correlation_REM_E3E5_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E3E5_6=np.stack(temp_patient_id_E3E5_6)
+                    N1_E3E5_6=np.stack(temp_correlation_N1_E3E5_6)
+                    N2_E3E5_6=np.stack(temp_correlation_N2_E3E5_6)
+                    N3_E3E5_6=np.stack(temp_correlation_N3_E3E5_6)
+                    Wake_E3E5_6=np.stack(temp_correlation_Wake_E3E5_6)
+                    REM_E3E5_6=np.stack(temp_correlation_REM_E3E5_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E3E5_6=patient_id_stacked_E3E5_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E3E5_6 = {
-                        'PatientID': temp_patient_id_E3E5_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E3E5_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E3E5_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E5_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E5_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E5_6,
+                        'PatientID_6E': patient_ids_E3E5_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E3E5_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E3E5_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E3E5_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E3E5_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E3E5_6.tolist(),
                     }
 
                     print('Patient dictionary E3E5_6 - six electrodes, 9th combination')
@@ -2154,17 +2424,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E4E5_6.append(correlation_structure[3])
                     temp_correlation_REM_E4E5_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E4E5_6=np.stack(temp_patient_id_E4E5_6)
+                    N1_E4E5_6=np.stack(temp_correlation_N1_E4E5_6)
+                    N2_E4E5_6=np.stack(temp_correlation_N2_E4E5_6)
+                    N3_E4E5_6=np.stack(temp_correlation_N3_E4E5_6)
+                    Wake_E4E5_6=np.stack(temp_correlation_Wake_E4E5_6)
+                    REM_E4E5_6=np.stack(temp_correlation_REM_E4E5_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E4E5_6=patient_id_stacked_E4E5_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E4E5_6 = {
-                        'PatientID': temp_patient_id_E4E5_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E4E5_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E4E5_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E4E5_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E4E5_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E4E5_6,
+                        'PatientID_6E': patient_ids_E4E5_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E4E5_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E4E5_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E4E5_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E4E5_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E4E5_6.tolist(),
                     }
 
                     print('Patient dictionary E4E5_6 - six electrodes, 10th combination')
@@ -2185,17 +2467,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E6_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E1E6_6=np.stack(temp_patient_id_E1E6_6)
+                    N1_E1E6_6=np.stack(temp_correlation_N1_E1E6_6)
+                    N2_E1E6_6=np.stack(temp_correlation_N2_E1E6_6)
+                    N3_E1E6_6=np.stack(temp_correlation_N3_E1E6_6)
+                    Wake_E1E6_6=np.stack(temp_correlation_Wake_E1E6_6)
+                    REM_E1E6_6=np.stack(temp_correlation_REM_E1E6_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E1E6_6=patient_id_stacked_E1E6_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E6_6 = {
-                        'PatientID': temp_patient_id_E1E6_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E6_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E6_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E6_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E6_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E6_6,
+                        'PatientID_6E': patient_ids_E1E6_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E1E6_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E1E6_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E1E6_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E1E6_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E1E6_6.tolist(),
                     }
 
                     print('Patient dictionary E1E6_6 - six electrodes, 11th combination')
@@ -2216,17 +2510,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E2E6_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E2E6_6=np.stack(temp_patient_id_E2E6_6)
+                    N1_E2E6_6=np.stack(temp_correlation_N1_E2E6_6)
+                    N2_E2E6_6=np.stack(temp_correlation_N2_E2E6_6)
+                    N3_E2E6_6=np.stack(temp_correlation_N3_E2E6_6)
+                    Wake_E2E6_6=np.stack(temp_correlation_Wake_E2E6_6)
+                    REM_E2E6_6=np.stack(temp_correlation_REM_E2E6_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E2E6_6=patient_id_stacked_E2E6_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E2E6_6 = {
-                        'PatientID': temp_patient_id_E2E6_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E2E6_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E2E6_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E6_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E6_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E6_6,
+                        'PatientID_6E': patient_ids_E2E6_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E2E6_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E2E6_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E2E6_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E2E6_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E2E6_6.tolist(),
                     }
 
                     print('Patient dictionary E2E6_6 - six electrodes, 12th combination')
@@ -2247,17 +2553,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E3E6_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E3E6_6=np.stack(temp_patient_id_E3E6_6)
+                    N1_E3E6_6=np.stack(temp_correlation_N1_E3E6_6)
+                    N2_E3E6_6=np.stack(temp_correlation_N2_E3E6_6)
+                    N3_E3E6_6=np.stack(temp_correlation_N3_E3E6_6)
+                    Wake_E3E6_6=np.stack(temp_correlation_Wake_E3E6_6)
+                    REM_E3E6_6=np.stack(temp_correlation_REM_E3E6_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E3E6_6=patient_id_stacked_E3E6_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E3E6_6 = {
-                        'PatientID': temp_patient_id_E3E6_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E3E6_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E3E6_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E6_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E6_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E6_6,
+                        'PatientID_6E': patient_ids_E3E6_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E3E6_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E3E6_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E3E6_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E3E6_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E3E6_6.tolist(),
                     }
 
                     print('Patient dictionary E3E6_6 - six electrodes, 13th combination')
@@ -2279,17 +2597,29 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E4E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E4E6_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E4E6_6=np.stack(temp_patient_id_E4E6_6)
+                    N1_E4E6_6=np.stack(temp_correlation_N1_E4E6_6)
+                    N2_E4E6_6=np.stack(temp_correlation_N2_E4E6_6)
+                    N3_E4E6_6=np.stack(temp_correlation_N3_E4E6_6)
+                    Wake_E4E6_6=np.stack(temp_correlation_Wake_E4E6_6)
+                    REM_E4E6_6=np.stack(temp_correlation_REM_E4E6_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E4E6_6=patient_id_stacked_E4E6_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E4E6_6 = {
-                        'PatientID': temp_patient_id_E4E6_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E4E6_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E4E6_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E4E6_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E4E6_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E4E6_6,
+                        'PatientID_6E': patient_ids_E4E6_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E4E6_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E4E6_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E4E6_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E4E6_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E4E6_6.tolist(),
                     }
 
                     print('Patient dictionary E4E6_6 - six electrodes, 14th combination')
@@ -2310,24 +2640,39 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E5E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E5E6_6.append(correlation_structure[4])
 
+                
+                    # Stacking the variables 
+                    patient_id_stacked_E5E6_6=np.stack(temp_patient_id_E5E6_6)
+                    N1_E5E6_6=np.stack(temp_correlation_N1_E5E6_6)
+                    N2_E5E6_6=np.stack(temp_correlation_N2_E5E6_6)
+                    N3_E5E6_6=np.stack(temp_correlation_N3_E5E6_6)
+                    Wake_E5E6_6=np.stack(temp_correlation_Wake_E5E6_6)
+                    REM_E5E6_6=np.stack(temp_correlation_REM_E5E6_6)
+
+                    ##### Saving values in a dataframe #####
+                    patient_ids_E5E6_6=patient_id_stacked_E5E6_6
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E5E6_6 = {
-                        'PatientID': temp_patient_id_E5E6_6,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E5E6_6,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E5E6_6,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E5E6_6,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E5E6_6,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E5E6_6,
+                        'PatientID_6E': patient_ids_E5E6_6,
+                        'Wake_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): Wake_E5E6_6.tolist(),
+                        'N1_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N1_E5E6_6.tolist(),
+                        'N2_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N2_E5E6_6.tolist(),
+                        'N3_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): N3_E5E6_6.tolist(),
+                        'REM_6E_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): REM_E5E6_6.tolist(),
                     }
 
                     print('Patient dictionary E5E6_6 - six electrodes, 15th combination')
                     print(patient_data_dict_E5E6_6)
 
+
     ################ Generating dataframes and CSV files #####################
 
+
+    ######################## 3 electrodes ####################################
     # Merging the dataframes containing the three combinations of electrodes 
     def Merge3(dict1, dict2, dict3):
         res = {**dict1, **dict2, **dict3}
@@ -2347,110 +2692,62 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
         return res
     
 
-    
-    
-
     ############ 6 electrodes ##################################################
     # Merge15 is used because 15 combinations of electrodes are present, when there are 6 electrodes 
-    if 'patient_data_dict_E1E2_6' in locals():
-        print(patient_data_dict_E1E2_6)
-        full_dict_6E = Merge15(patient_data_dict_E1E2_6,patient_data_dict_E1E3_6,patient_data_dict_E2E3_6,patient_data_dict_E1E4_6,patient_data_dict_E2E4_6,patient_data_dict_E3E4_6,patient_data_dict_E1E5_6,patient_data_dict_E2E5_6,patient_data_dict_E3E5_6,patient_data_dict_E4E5_6,patient_data_dict_E1E6_6,patient_data_dict_E2E6_6,patient_data_dict_E3E6_6,patient_data_dict_E4E6_6,patient_data_dict_E5E6_6)
-        
-        # Generating full data frame for the 3 electrode data 
-        full_dataframe_6E=pd.DataFrame(full_dict_6E)
-
-        filename_6E=f"Correlation_6E_"+str(epoch_size_in_seconds)+"_RBD.csv"
-        RBD_output_path_6E=os.path.join('/scratch/users/s184063/RBD_Features/', filename_6E)
-
-        full_dataframe_6E.to_csv(RBD_output_path_6E, index=False) # change filename using os
-        print(RBD_output_path_6E)
-        #full_dataframe_6E.to_csv(f"Correlation_6E_"+str(epoch_size_in_seconds)+"_RBD.csv", index=False) # change filename using os
-        del patient_data_dict_E1E2_6,patient_data_dict_E1E3_6,patient_data_dict_E2E3_6,patient_data_dict_E1E4_6,patient_data_dict_E2E4_6,patient_data_dict_E3E4_6,patient_data_dict_E1E5_6,patient_data_dict_E2E5_6,patient_data_dict_E3E5_6,patient_data_dict_E4E5_6,patient_data_dict_E1E6_6,patient_data_dict_E2E6_6,patient_data_dict_E3E6_6,patient_data_dict_E4E6_6,patient_data_dict_E5E6_6
+    print(patient_data_dict_E1E2_6)
+    full_dict_6E = Merge15(patient_data_dict_E1E2_6,patient_data_dict_E1E3_6,patient_data_dict_E2E3_6,patient_data_dict_E1E4_6,patient_data_dict_E2E4_6,patient_data_dict_E3E4_6,patient_data_dict_E1E5_6,patient_data_dict_E2E5_6,patient_data_dict_E3E5_6,patient_data_dict_E4E5_6,patient_data_dict_E1E6_6,patient_data_dict_E2E6_6,patient_data_dict_E3E6_6,patient_data_dict_E4E6_6,patient_data_dict_E5E6_6)
     
-        print('6 electrode documents where packed')
+    # Generating full data frame for the 3 electrode data 
+    full_dataframe_6E=pd.DataFrame(full_dict_6E)
+    full_dataframe_6E.to_csv(f"Correlation_6E_"+str(epoch_size_in_seconds)+"_CHINA_allpatients_data.csv", index=False) # change filename using os
+    #full_dataframe_6E.to_csv(f"Correlation_6E_"+str(epoch_size_in_seconds)+"_CHINA_allcontrols_data.csv", index=False) # change filename using os
 
+    
     ############ 5 electrodes ##################################################
     # Merge10 is used because 10 combinations of electrodes are present, when there are 5 electrodes 
-    if 'patient_data_dict_E1E2_5' in locals():
-        print(patient_data_dict_E1E2_5)
-        full_dict_5E = Merge10(patient_data_dict_E1E2_5,patient_data_dict_E1E3_5,patient_data_dict_E2E3_5,patient_data_dict_E1E4_5,patient_data_dict_E2E4_5,patient_data_dict_E3E4_5,patient_data_dict_E1E5_5,patient_data_dict_E2E5_5,patient_data_dict_E3E5_5,patient_data_dict_E4E5_5)
-        
-        # Generating full data frame for the 3 electrode data 
-        full_dataframe_5E=pd.DataFrame(full_dict_5E)
-        
-        filename_5E=f"Correlation_5E_"+str(epoch_size_in_seconds)+"_RBD.csv"
-        RBD_output_path_5E=os.path.join('/scratch/users/s184063/RBD_Features/', filename_5E)
-        print(RBD_output_path_5E)
-        full_dataframe_5E.to_csv(RBD_output_path_5E, index=False) # change filename using os
-        
-        #full_dataframe_5E.to_csv(f"Correlation_5E_"+str(epoch_size_in_seconds)+"_RBD.csv", index=False) # change filename using os
-        del patient_data_dict_E1E2_5,patient_data_dict_E1E3_5,patient_data_dict_E2E3_5,patient_data_dict_E1E4_5,patient_data_dict_E2E4_5,patient_data_dict_E3E4_5,patient_data_dict_E1E5_5,patient_data_dict_E2E5_5,patient_data_dict_E3E5_5,patient_data_dict_E4E5_5
-        print('5 electrode documents where packed')
+    print(patient_data_dict_E1E2_5)
+    full_dict_5E = Merge10(patient_data_dict_E1E2_5,patient_data_dict_E1E3_5,patient_data_dict_E2E3_5,patient_data_dict_E1E4_5,patient_data_dict_E2E4_5,patient_data_dict_E3E4_5,patient_data_dict_E1E5_5,patient_data_dict_E2E5_5,patient_data_dict_E3E5_5,patient_data_dict_E4E5_5)
+    
+    # Generating full data frame for the 3 electrode data 
+    full_dataframe_5E=pd.DataFrame(full_dict_5E)
+    full_dataframe_5E.to_csv(f"Correlation_5E_"+str(epoch_size_in_seconds)+"_CHINA_allpatients_data.csv", index=False) # change filename using os
+    #full_dataframe_5E.to_csv(f"Correlation_5E_"+str(epoch_size_in_seconds)+"_CHINA_allcontrols_data.csv", index=False) # change filename using os
+
+
     
     ############ 4 electrodes ##################################################
     # Merge6 is used because 6 combinations of electrodes are present, when there are 4 electrodes 
-    if 'patient_data_dict_E1E2_4' in locals():
-        print(patient_data_dict_E1E2_4)
-        full_dict_4E = Merge6(patient_data_dict_E1E2_4,patient_data_dict_E1E3_4,patient_data_dict_E2E3_4,patient_data_dict_E1E4_4,patient_data_dict_E2E4_4,patient_data_dict_E3E4_4)
-        
-        # Generating full data frame for the 3 electrode data 
-        full_dataframe_4E=pd.DataFrame(full_dict_4E)
-        
-        filename_4E=f"Correlation_4E_"+str(epoch_size_in_seconds)+"_RBD.csv"
-        RBD_output_path_4E=os.path.join('/scratch/users/s184063/RBD_Features/', filename_4E)
-
-        print(RBD_output_path_4E)
-        full_dataframe_4E.to_csv(RBD_output_path_4E, index=False) # change filename using os
+    print(patient_data_dict_E1E2_4)
+    full_dict_4E = Merge6(patient_data_dict_E1E2_4,patient_data_dict_E1E3_4,patient_data_dict_E2E3_4,patient_data_dict_E1E4_4,patient_data_dict_E2E4_4,patient_data_dict_E3E4_4)
     
-        
-        #full_dataframe_4E.to_csv(f"Correlation_4E_"+str(epoch_size_in_seconds)+"_RBD.csv", index=False) # change filename using os
-        
-        del patient_data_dict_E1E2_4,patient_data_dict_E1E3_4,patient_data_dict_E2E3_4,patient_data_dict_E1E4_4,patient_data_dict_E2E4_4,patient_data_dict_E3E4_4
-        print('4 electrode documents where packed')
+    # Generating full data frame for the 3 electrode data 
+    full_dataframe_4E=pd.DataFrame(full_dict_4E)
+    full_dataframe_4E.to_csv(f"Correlation_4E_"+str(epoch_size_in_seconds)+"_CHINA_allpatients_data.csv", index=False) # change filename using os
+    #full_dataframe_4E.to_csv(f"Correlation_4E_"+str(epoch_size_in_seconds)+"_CHINA_allcontrols_data.csv", index=False) # change filename using os
+
 
     ############ 3 electrodes ###################################################
     # Generating dictonary for the merged dictornary 
-    if 'patient_data_dict_E1E2_3' in locals():
+    print(patient_data_dict_E1E2_3)
+    full_dict_3E = Merge3(patient_data_dict_E1E2_3,patient_data_dict_E1E3_3,patient_data_dict_E2E3_3)
+    print('Full dictornary 3 electrodes')
+    # One row per patient 
 
-        print(patient_data_dict_E1E2_3)
-        full_dict_3E = Merge3(patient_data_dict_E1E2_3,patient_data_dict_E1E3_3,patient_data_dict_E2E3_3)
-        print('Full dictornary 3 electrodes')
-        # One row per patient 
-
-        # Generating full data frame for the 3 electrode data 
-        full_dataframe_3E=pd.DataFrame(full_dict_3E)
-        
-        filename_3E=f"Correlation_3E_"+str(epoch_size_in_seconds)+"_RBD.csv"
-        RBD_output_path_3E=os.path.join('/scratch/users/s184063/RBD_Features/', filename_3E)
-
-        print(RBD_output_path_3E)
-        full_dataframe_3E.to_csv(RBD_output_path_3E, index=False) # change filename using os
-        
-        
-        #full_dataframe_3E.to_csv(f"Correlation_3E_"+str(epoch_size_in_seconds)+"_RBD.csv", index=False) # change filename using os
-        del patient_data_dict_E1E2_3,patient_data_dict_E1E3_3,patient_data_dict_E2E3_3
-        print('3 electrode documents where packed')
+    # Generating full data frame for the 3 electrode data 
+    full_dataframe_3E=pd.DataFrame(full_dict_3E)
+    full_dataframe_3E.to_csv(f"Correlation_3E_"+str(epoch_size_in_seconds)+"_CHINA_allpatients_data.csv", index=False) # change filename using os
+    #full_dataframe_3E.to_csv(f"Correlation_3E_"+str(epoch_size_in_seconds)+"_CHINA_allcontrols_data.csv", index=False) # change filename using os
     ############################################################################
     
 
     
     ##################### 2 electrodes #########################################
     # Generating full data frame for the 2 electrode data 
-    if 'patient_data_dict_E1E2_2' in locals():
-        print('Generating dataframe and CSV file for 2-electrode data')
-        print(patient_data_dict_E1E2_2)
-        full_dataframe_2E=pd.DataFrame(patient_data_dict_E1E2_2)
-        
-        filename_2E=f"Correlation_2E_"+str(epoch_size_in_seconds)+"_RBD.csv"
-        RBD_output_path_2E=os.path.join('/scratch/users/s184063/RBD_Features/', filename_2E)
-
-        print(RBD_output_path_2E)
-        full_dataframe_2E.to_csv(RBD_output_path_2E, index=False) # change filename using os
-        
-        
-        #full_dataframe_2E.to_csv(f"Correlation_2E_"+str(epoch_size_in_seconds)+"_RBD.csv", index=False) # change filename using os
-        ############################################################################
-        del patient_data_dict_E1E2_2
-        print('2 electrode documents where packed')
+    print('Generating dataframe and CSV file for 2-electrode data')
+    print(patient_data_dict_E1E2_2)
+    full_dataframe_2E=pd.DataFrame(patient_data_dict_E1E2_2)
+    #full_dataframe_2E.to_csv(f"Correlation_2E_"+str(epoch_size_in_seconds)+"_CHINA_allpatients_data.csv", index=False) # change filename using os
+    full_dataframe_2E.to_csv(f"Correlation_2E_"+str(epoch_size_in_seconds)+"_CHINA_allcontrols_data.csv", index=False) # change filename using os
+    ############################################################################
 
     return print('Correlation_multiple_electrodes() are done') 
