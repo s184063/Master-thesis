@@ -63,6 +63,8 @@ def preprocessing(input_signal,input_signal_header): #,input_signal_header
     signal_old=signal_selected
 
     
+
+    
    
     '''
     # Time axis for 128 Hz and 100 Hz signals 
@@ -2454,3 +2456,323 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
         print('2 electrode documents where packed')
 
     return print('Correlation_multiple_electrodes() are done') 
+
+
+
+
+
+
+def hypnogram_average(input_path,Electrodes_input,folder_name):
+
+    Electrodes=copy.deepcopy(Electrodes_input)
+    output_path=copy.deepcopy(input_path)
+
+    main_folder=folder_name
+
+
+    folder_path = os.path.join(output_path, main_folder)  # Update with your actual parent folder path
+    print('Folder path')
+    print(folder_path)
+    # Extracting patient ID
+    #patientID=str(main_folder) 
+    file_name=str(main_folder) 
+    print('Folder') # Check which folder we are inside 
+    print(file_name )
+
+    print('PatientID')
+    # Skipping the first part of the filename to extract the real patientID 
+    patientID=file_name[21:] #restructuredfile_RBD_82001_(1)
+    print(patientID)
+        
+    # Loop through files in the folder 
+    for filename in os.listdir(folder_path): 
+            
+        if len(Electrodes)==2:
+            # Finding the consistent parts of the filename to select the correct files 
+            if Electrodes[0] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 1')
+                Electrode1 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+            elif Electrodes[1] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 2')
+                Electrode2 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+                
+
+        if len(Electrodes)==3:
+            # Finding the consistent parts of the filename to select the correct files 
+            if Electrodes[0] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 1')
+                Electrode1 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+            elif Electrodes[1] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 2')
+                Electrode2 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+                
+            elif Electrodes[2] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 3')
+                Electrode3 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+                
+            
+        if len(Electrodes)==4:
+            # Finding the consistent parts of the filename to select the correct files 
+            if Electrodes[0] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 1')
+                Electrode1 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+            elif Electrodes[1] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 2')
+                Electrode2 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+                
+            elif Electrodes[2] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 3')
+                Electrode3 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+                
+            elif Electrodes[3] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 4')
+                Electrode4 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+
+
+
+        if len(Electrodes)==5:
+            # Finding the consistent parts of the filename to select the correct files 
+            if Electrodes[0] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 1')
+                Electrode1 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+            elif Electrodes[1] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 2')
+                Electrode2 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+                
+            elif Electrodes[2] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 3')
+                Electrode3 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+                
+            elif Electrodes[3] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 4')
+                Electrode4 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+            elif Electrodes[4] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 5')
+                Electrode5 = np.load(os.path.join(folder_path, filename))
+                    
+                print(filename)
+
+
+        if len(Electrodes)==6:
+            # Finding the consistent parts of the filename to select the correct files 
+            if Electrodes[0] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 1')
+                Electrode1 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+            elif Electrodes[1] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 2')
+                Electrode2 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+                
+            elif Electrodes[2] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 3')
+                Electrode3 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+                
+            elif Electrodes[3] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 4')
+                Electrode4 = np.load(os.path.join(folder_path, filename))
+                #Electrode1 = copy.deepcopy(Electrode1)
+                print(filename)
+            elif Electrodes[4] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 5')
+                Electrode5 = np.load(os.path.join(folder_path, filename))
+                print(filename)
+
+            elif Electrodes[5] in filename and f'30.npy' in filename:
+                # Load array for the first consistent part
+                print('Loading file 6')
+                Electrode6 = np.load(os.path.join(folder_path, filename))
+                print(filename)
+
+
+
+
+    if len(Electrodes)==2:
+            
+        # Dividing the sleep stages from all signals into separate structures
+        wake_structure=np.stack((Electrode1[:,0],Electrode2[:,0]),axis=1)
+        N1_structure=np.stack((Electrode1[:,1],Electrode2[:,1]),axis=1)
+        N2_structure=np.stack((Electrode1[:,2],Electrode2[:,2]),axis=1)
+        N3_structure=np.stack((Electrode1[:,3],Electrode2[:,3]),axis=1)
+        REM_structure=np.stack((Electrode1[:,4],Electrode2[:,4]),axis=1)
+
+        # Calculating the mean for each sleep-strucure 
+        # --> output = one column with mean values for each 30 sec epoch in each sleep stage structure
+        wake=np.mean(wake_structure,axis=1)
+        N1=np.mean(N1_structure,axis=1)
+        N2=np.mean(N2_structure,axis=1)
+        N3=np.mean(N3_structure,axis=1)
+        REM=np.mean(REM_structure,axis=1)
+
+        # Creating one sleep-stage average structure dimensions =(number of 30 sec epochs, 5)
+        sleep_stage_mean=np.stack((wake,N1,N2,N3,REM),axis=1)
+
+        # Using np.argmax to find the average sleep stage for the sleep_stage_mean structure
+        hypnogram_av=np.argmax(sleep_stage_mean,axis=1)
+
+        del Electrode1, Electrode2, wake_structure, N1_structure, N2_structure, N3_structure, REM_structure, wake, N1, N2, N3, REM, sleep_stage_mean
+
+
+
+    if len(Electrodes)==3:
+            
+        # Dividing the sleep stages from all signals into separate structures
+        wake_structure=np.stack((Electrode1[:,0],Electrode2[:,0],Electrode3[:,0]),axis=1)
+        N1_structure=np.stack((Electrode1[:,1],Electrode2[:,1],Electrode3[:,1]),axis=1)
+        N2_structure=np.stack((Electrode1[:,2],Electrode2[:,2],Electrode3[:,2]),axis=1)
+        N3_structure=np.stack((Electrode1[:,3],Electrode2[:,3],Electrode3[:,3]),axis=1)
+        REM_structure=np.stack((Electrode1[:,4],Electrode2[:,4],Electrode3[:,4]),axis=1)
+
+        # Calculating the mean for each sleep-strucure 
+        # --> output = one column with mean values for each 30 sec epoch in each sleep stage structure
+        wake=np.mean(wake_structure,axis=1)
+        N1=np.mean(N1_structure,axis=1)
+        N2=np.mean(N2_structure,axis=1)
+        N3=np.mean(N3_structure,axis=1)
+        REM=np.mean(REM_structure,axis=1)
+
+        # Creating one sleep-stage average structure dimensions =(number of 30 sec epochs, 5)
+        sleep_stage_mean=np.stack((wake,N1,N2,N3,REM),axis=1)
+
+        # Using np.argmax to find the average sleep stage for the sleep_stage_mean structure
+        hypnogram_av=np.argmax(sleep_stage_mean,axis=1)
+            
+        del Electrode1, Electrode2, Electrode3, wake_structure, N1_structure, N2_structure, N3_structure, REM_structure, wake, N1, N2, N3, REM, sleep_stage_mean
+
+
+
+        
+    if len(Electrodes)==4:
+            
+        # Dividing the sleep stages from all signals into separate structures
+        wake_structure=np.stack((Electrode1[:,0],Electrode2[:,0],Electrode3[:,0],Electrode4[:,0]),axis=1)
+        N1_structure=np.stack((Electrode1[:,1],Electrode2[:,1],Electrode3[:,1],Electrode4[:,1]),axis=1)
+        N2_structure=np.stack((Electrode1[:,2],Electrode2[:,2],Electrode3[:,2],Electrode4[:,2]),axis=1)
+        N3_structure=np.stack((Electrode1[:,3],Electrode2[:,3],Electrode3[:,3],Electrode4[:,3]),axis=1)
+        REM_structure=np.stack((Electrode1[:,4],Electrode2[:,4],Electrode3[:,4],Electrode4[:,4]),axis=1)
+
+        # Calculating the mean for each sleep-strucure 
+        # --> output = one column with mean values for each 30 sec epoch in each sleep stage structure
+        wake=np.mean(wake_structure,axis=1)
+        N1=np.mean(N1_structure,axis=1)
+        N2=np.mean(N2_structure,axis=1)
+        N3=np.mean(N3_structure,axis=1)
+        REM=np.mean(REM_structure,axis=1)
+
+        # Creating one sleep-stage average structure dimensions =(number of 30 sec epochs, 5)
+        sleep_stage_mean=np.stack((wake,N1,N2,N3,REM),axis=1)
+
+        # Using np.argmax to find the average sleep stage for the sleep_stage_mean structure
+        hypnogram_av=np.argmax(sleep_stage_mean,axis=1)
+        del Electrode1, Electrode2, Electrode3, Electrode4, wake_structure, N1_structure, N2_structure, N3_structure, REM_structure, wake, N1, N2, N3, REM, sleep_stage_mean
+
+
+
+
+        
+    if len(Electrodes)==5:
+            
+        # Dividing the sleep stages from all signals into separate structures
+        wake_structure=np.stack((Electrode1[:,0],Electrode2[:,0],Electrode3[:,0],Electrode4[:,0],Electrode5[:,0]),axis=1)
+        N1_structure=np.stack((Electrode1[:,1],Electrode2[:,1],Electrode3[:,1],Electrode4[:,1],Electrode5[:,1]),axis=1)
+        N2_structure=np.stack((Electrode1[:,2],Electrode2[:,2],Electrode3[:,2],Electrode4[:,2],Electrode5[:,2]),axis=1)
+        N3_structure=np.stack((Electrode1[:,3],Electrode2[:,3],Electrode3[:,3],Electrode4[:,3],Electrode5[:,3]),axis=1)
+        REM_structure=np.stack((Electrode1[:,4],Electrode2[:,4],Electrode3[:,4],Electrode4[:,4],Electrode5[:,4]),axis=1)
+
+        # Calculating the mean for each sleep-strucure 
+        # --> output = one column with mean values for each 30 sec epoch in each sleep stage structure
+        wake=np.mean(wake_structure,axis=1)
+        N1=np.mean(N1_structure,axis=1)
+        N2=np.mean(N2_structure,axis=1)
+        N3=np.mean(N3_structure,axis=1)
+        REM=np.mean(REM_structure,axis=1)
+
+        # Creating one sleep-stage average structure dimensions =(number of 30 sec epochs, 5)
+        sleep_stage_mean=np.stack((wake,N1,N2,N3,REM),axis=1)
+
+        # Using np.argmax to find the average sleep stage for the sleep_stage_mean structure
+        hypnogram_av=np.argmax(sleep_stage_mean,axis=1)
+        del Electrode1, Electrode2, Electrode3, Electrode4, Electrode5, wake_structure, N1_structure, N2_structure, N3_structure, REM_structure, wake, N1, N2, N3, REM, sleep_stage_mean
+
+
+
+
+
+    if len(Electrodes)==6:
+            
+        # Dividing the sleep stages from all signals into separate structures
+        wake_structure=np.stack((Electrode1[:,0],Electrode2[:,0],Electrode3[:,0],Electrode4[:,0],Electrode5[:,0],Electrode6[:,0]),axis=1)
+        N1_structure=np.stack((Electrode1[:,1],Electrode2[:,1],Electrode3[:,1],Electrode4[:,1],Electrode5[:,1],Electrode6[:,1]),axis=1)
+        N2_structure=np.stack((Electrode1[:,2],Electrode2[:,2],Electrode3[:,2],Electrode4[:,2],Electrode5[:,2],Electrode6[:,2]),axis=1)
+        N3_structure=np.stack((Electrode1[:,3],Electrode2[:,3],Electrode3[:,3],Electrode4[:,3],Electrode5[:,3],Electrode6[:,3]),axis=1)
+        REM_structure=np.stack((Electrode1[:,4],Electrode2[:,4],Electrode3[:,4],Electrode4[:,4],Electrode5[:,4],Electrode6[:,4]),axis=1)
+
+        # Calculating the mean for each sleep-strucure 
+        # --> output = one column with mean values for each 30 sec epoch in each sleep stage structure
+        wake=np.mean(wake_structure,axis=1)
+        N1=np.mean(N1_structure,axis=1)
+        N2=np.mean(N2_structure,axis=1)
+        N3=np.mean(N3_structure,axis=1)
+        REM=np.mean(REM_structure,axis=1)
+
+        # Creating one sleep-stage average structure dimensions =(number of 30 sec epochs, 5)
+        sleep_stage_mean=np.stack((wake,N1,N2,N3,REM),axis=1)
+
+        # Using np.argmax to find the average sleep stage for the sleep_stage_mean structure
+        hypnogram_av=np.argmax(sleep_stage_mean,axis=1)
+        del Electrode1, Electrode2, Electrode3, Electrode4, Electrode5, Electrode6, wake_structure, N1_structure, N2_structure, N3_structure, REM_structure, wake, N1, N2, N3, REM, sleep_stage_mean
+
+
+    del Electrodes, output_path, main_folder
+    
+    return hypnogram_av
+
