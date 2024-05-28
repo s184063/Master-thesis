@@ -2128,8 +2128,6 @@ for edf_file in edf_files_list:
             del F3M2_index,F4M1_index,C3M2_index,C4M1_index,O1M2_index,O2M1_index
 
         
-        
-
 
         # Packing electrode combinations based on the correct index 
         elif 'F3M2_index' in locals() and 'C3M2_index' in locals() and 'C4M1_index' in locals() and 'O1M2_index' in locals() and 'O2M1_index' in locals(): 
@@ -2295,6 +2293,29 @@ for edf_file in edf_files_list:
 
 
             signal_new_single, fs_new_single, time_filtered_HP_single = preprocessing(Electrode_single, Signal_headers_single)
+
+            quarter_length=len(time_filtered_HP_single)/4
+            print('Signal length')
+            print(len(time_filtered_HP_single))
+            print('Length of one quarter')
+            print(quarter_length)
+            quarter_length=int(quarter_length)
+
+            quarter_4=time_filtered_HP_single[3*quarter_length:4*quarter_length]
+            time_filtered_HP_single=quarter_4
+            #quarter_2=time_filtered_HP_single[quarter_length:2*quarter_length]
+            #quarter_3=time_filtered_HP_single[2*quarter_length:3*quarter_length]
+            #quarter_4=time_filtered_HP_single[3*quarter_length:4*quarter_length]
+
+            #print('All four quarters')
+            #print(quarter_1)
+            #print(len(quarter_1))
+            #print(quarter_2)
+            #print(len(quarter_2))
+            #print(quarter_3)
+            #print(len(quarter_3))
+            #print(quarter_4)
+            #print(len(quarter_4))
 
 
 
@@ -2912,6 +2933,15 @@ for edf_file in edf_files_list:
         print('Length of hypnogram x30')
         print(len(hypnogram)*30*128)
 
+
+        print('Hypnogram length before and after quartering the signal')
+        print(len(hypnogram))
+        quarter_length_hypnogram=len(hypnogram)/4
+        quarter_length_hypnogram=int(quarter_length_hypnogram)
+        shortening_hypnogram=hypnogram[3*quarter_length_hypnogram:4*quarter_length_hypnogram]
+        hypnogram=shortening_hypnogram
+        print(len(hypnogram))
+
         # Making array to loop over for all electrode combinations 
         iterable=Electrodes
         r=2 # Length of subsequence 
@@ -3187,6 +3217,7 @@ for edf_file in edf_files_list:
             # Calling pre-processing function for channel 2
             signal_new_chan2, fs_new_chan2, time_filtered_HP_chan2 = preprocessing(Electrode2,Signalheader2)
 
+
             # Deleting to release memory
             del Electrode1, Electrode2
 
@@ -3194,6 +3225,29 @@ for edf_file in edf_files_list:
             print(len(signal_new_chan1))
             print('Filtered signal length')
             print(len(time_filtered_HP_chan1))
+
+
+            # Splitting the signal into 1st quarter
+            quarter_length=len(time_filtered_HP_chan1)/4
+            print('Signal length')
+            print(len(time_filtered_HP_chan1))
+            print('Length of one quarter')
+            print(quarter_length)
+            quarter_length=int(quarter_length)
+
+            quarter_4=time_filtered_HP_chan1[3*quarter_length:4*quarter_length]
+            time_filtered_HP_chan1=quarter_4
+
+            quarter_44=time_filtered_HP_chan2[3*quarter_length:4*quarter_length]
+            time_filtered_HP_chan2=quarter_44
+
+            print('Length of a quarter signal (1 and 2) - comparing to hypnogram length')
+            print(len(time_filtered_HP_chan1))
+            print(len(time_filtered_HP_chan2))
+
+            
+
+            print(len(hypnogram))
 
             ####### Normal coherence analysis #########
 
@@ -3238,6 +3292,7 @@ for edf_file in edf_files_list:
             idx_30=time_30s_calculate
             print('Signal length')
             print(len(time_filtered_HP_chan1))
+            
 
             
             if len(hypnogram)*128*30 < len(time_filtered_HP_chan1): 
@@ -3440,6 +3495,8 @@ for edf_file in edf_files_list:
                 del temp_wake_delta30, temp_wake_theta30, temp_wake_alpha30, temp_wake_beta30, temp_wake_gamma30
 
             else: 
+
+
                 fake_list_wake=[np.nan,np.nan,np.nan,np.nan]
 
                 wake_coh_delta30=np.stack(fake_list_wake)
@@ -7092,7 +7149,7 @@ def Merge2(dict1, dict2):
 if 'Bandpower_values_6E_E1' in locals():
     Bandpower_6E_full_dict=Merge6(Bandpower_values_6E_E1, Bandpower_values_6E_E2, Bandpower_values_6E_E3, Bandpower_values_6E_E4, Bandpower_values_6E_E5, Bandpower_values_6E_E6)
     BP_6E=pd.DataFrame(Bandpower_6E_full_dict)
-    BP_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_6electrodes.csv", index=False)
+    BP_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_4partnight_6electrodes.csv", index=False)
     print('Bandpower 6e were generated')   
     del Bandpower_values_6E_E1
 
@@ -7103,7 +7160,7 @@ if 'Coherence_values_6E_E1E2' in locals():
 
     # Generating full data frame for the 6 electrode data 
     full_dataframe_6E=pd.DataFrame(full_dict_6E)
-    full_dataframe_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_6electrodes.csv", index=False) # change filename using os
+    full_dataframe_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_4partnight_6electrodes.csv", index=False) # change filename using os
     print('cvs file was generated - 6E')
     del Coherence_values_6E_E1E2
 ############################################################################
@@ -7114,7 +7171,7 @@ if 'Coherence_values_6E_E1E2' in locals():
 if 'Bandpower_values_5E_E1' in locals():
     Bandpower_5E_full_dict=Merge5(Bandpower_values_5E_E1, Bandpower_values_5E_E2, Bandpower_values_5E_E3, Bandpower_values_5E_E4, Bandpower_values_5E_E5)
     BP_5E=pd.DataFrame(Bandpower_5E_full_dict)
-    BP_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_5electrodes.csv", index=False)
+    BP_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_4partnight_5electrodes.csv", index=False)
     print('Bandpower 5e were generated')    
     del Bandpower_values_5E_E1
 
@@ -7126,7 +7183,7 @@ if 'Coherence_values_5E_E1E2' in locals():
     # Generating full data frame for the 5 electrode data 
     full_dataframe_5E=pd.DataFrame(full_dict_5E)
 
-    full_dataframe_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_5electrodes.csv", index=False) # change filename using os
+    full_dataframe_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_4partnight_5electrodes.csv", index=False) # change filename using os
     print('csv with 5e where generated')
     del Coherence_values_5E_E1E2
 ############################################################################
@@ -7138,7 +7195,7 @@ if 'Coherence_values_5E_E1E2' in locals():
 if 'Bandpower_values_4E_E1' in locals():
     Bandpower_4E_full_dict=Merge4(Bandpower_values_4E_E1, Bandpower_values_4E_E2, Bandpower_values_4E_E3, Bandpower_values_4E_E4)
     BP_4E=pd.DataFrame(Bandpower_4E_full_dict)
-    BP_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_4electrodes.csv", index=False)
+    BP_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_4partnight_4electrodes.csv", index=False)
     print('Bandpower 4e were generated')
     del Bandpower_values_4E_E1
 
@@ -7150,7 +7207,7 @@ if 'Coherence_values_4E_E1E2' in locals():
     # Generating full data frame for the 4 electrode data 
     full_dataframe_4E=pd.DataFrame(full_dict_4E)
 
-    full_dataframe_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_4electrodes.csv", index=False) # change filename using os
+    full_dataframe_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_4partnight_4electrodes.csv", index=False) # change filename using os
     print('csv file with 4 electrodes where generated')
     
     del Coherence_values_4E_E1E2
@@ -7163,7 +7220,7 @@ if 'Coherence_values_4E_E1E2' in locals():
 if 'Bandpower_values_3E_E1' in locals():
     Bandpower_3E_full_dict=Merge3(Bandpower_values_3E_E1, Bandpower_values_3E_E2, Bandpower_values_3E_E3)
     BP_3E=pd.DataFrame(Bandpower_3E_full_dict)
-    BP_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_3electrodes.csv", index=False)
+    BP_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_4partnight_3electrodes.csv", index=False)
     print('Bandpower 3e generated csv file')
     del Bandpower_values_3E_E1
 
@@ -7174,7 +7231,7 @@ if 'Coherence_values_3E_E1E2' in locals():
 
     # Generating full data frame for the 3 electrode data 
     full_dataframe_3E=pd.DataFrame(full_dict_3E)
-    full_dataframe_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_3electrodes.csv", index=False) # change filename using os
+    full_dataframe_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_4partnight_3electrodes.csv", index=False) # change filename using os
     print('csv file 3e were generated')
     del Coherence_values_3E_E1E2
 ############################################################################
@@ -7185,7 +7242,7 @@ if 'Coherence_values_3E_E1E2' in locals():
 if 'Bandpower_values_2E_E1' in locals():
     Bandpower_2E_full_dict=Merge2(Bandpower_values_2E_E1, Bandpower_values_2E_E2)
     BP_2E=pd.DataFrame(Bandpower_2E_full_dict)
-    BP_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_2electrodes.csv", index=False)
+    BP_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_4partnight_2electrodes.csv", index=False)
     print('BP 2E csv generated')
     del Bandpower_values_2E_E1
 
@@ -7194,7 +7251,7 @@ if 'Coherence_values_2E_E1E2' in locals():
     # Generating full data frame for the 2 electrode data 
     print('Generating dataframe and CSV file for 2-electrode data')
     full_dataframe_2E=pd.DataFrame(Coherence_values_2E_E1E2) 
-    full_dataframe_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_2electrodes.csv", index=False) # change filename using os
+    full_dataframe_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_4partnight_2electrodes.csv", index=False) # change filename using os
     print('csv file 2E generated')
     del Coherence_values_2E_E1E2
 ############################################################################

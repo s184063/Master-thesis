@@ -40,7 +40,7 @@ from My_functions_script_RBD import preprocessing, extract_numbers_from_filename
 ##########################################
 
 # Input path 
-path_edf=r'/scratch/users/s184063/France restructure EDF all correct final/'
+path_edf= r'/scratch/users/s184063/France subsample/'#r'/scratch/users/s184063/France restructure EDF all correct final/'
 
 # Looping over all EDF files in folder 
 edf_files_list = list_files_in_folder(path_edf)
@@ -130,15 +130,15 @@ temp_bad_signal=[]
 # Step 2 
 # Loop over 30 sec epochs and check if the signals deviates with a 
 # chosen factor from the overall median and std of the time signal and spectrum
-'''
+
 # Input path 
-path_edf=r'/scratch/users/s184063/RBD_onepatient/'
+path_edf=r'/scratch/users/s184063/France subsample/'
 
 # Looping over all EDF files in folder 
 edf_files_list = list_files_in_folder(path_edf)
 
 edf_files_list=sorted(edf_files_list)
-'''
+
 
 
 print("EDF files in the folder:")
@@ -275,7 +275,7 @@ for edf_file in edf_files_list:
         signal_index=indices[0]*30
         print(signal_index)
 
-        '''
+        
         for loop_factor in signal_index:
             fig = matplotlib.pyplot.figure()
             fig.suptitle(f'Outlier detection {loop_factor}')
@@ -287,7 +287,7 @@ for edf_file in edf_files_list:
         
             # Clearing plot
             matplotlib.pyplot.clf()
-        '''
+        
     
         print('New signal and the outlier variable is deleted')
 
@@ -343,7 +343,7 @@ for edf_file in edf_files_list:
 
 if 'bad_channels_for_csv' in locals():
     full_dataframe=pd.DataFrame(bad_channels_for_csv) 
-    full_dataframe.to_csv('/scratch/users/s184063/France_Features/Outliers_France.csv',index=False)
+    full_dataframe.to_csv('/scratch/users/s184063/France_Features/Outliers_trial_France.csv',index=False)
 else: 
     print('No bad channels where found in this dataset')
 

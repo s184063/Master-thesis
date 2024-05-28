@@ -59,7 +59,7 @@ for edf_file in edf_files_list:
 
     # PatientID
     file_temp=str(edf_file) 
-    filename=file_temp[48:] # /scratch/users/s184063/RBD_Restructure_firsttry/restructuredfile_RBD_controls_STNF00006.EDF
+    filename=file_temp[46:] # /scratch/users/s184063/RBD_Restructure_firsttry/restructuredfile_RBD_controls_STNF00006.EDF
     print('Filename')
     print(filename)
   

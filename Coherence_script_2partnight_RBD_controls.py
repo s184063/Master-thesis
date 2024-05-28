@@ -25,7 +25,7 @@ import mne
 sys.path.insert(0, '/home/users/s184063/')
 
 # Import My_functions_script
-from My_functions_script_RBD import list_files_in_folder, preprocessing, bandpass_frequency_band, relative_power_for_frequencyband, coherence_features, extract_numbers_from_filename, extract_letters_and_numbers, hypnogram_average
+from My_functions_script_RBD_controls import list_files_in_folder, preprocessing, bandpass_frequency_band, relative_power_for_frequencyband, coherence_features, extract_numbers_from_filename, extract_letters_and_numbers, hypnogram_average
 
 
 # Get indices for the EEG files - the names of electrodes has to be known 
@@ -37,11 +37,9 @@ def get_indices(data, labels):
             
     return indices
 
-
 # File paths 
-input_path =r'/scratch/users/s184063/RBD_Restructure_firsttry/' # RBD_Restructure_firsttry # select correct path and folder
-input_path_hypnodensities =r'/scratch/users/s184063/hypnograms_RBD_firsttry/'
-
+input_path =r'/scratch/users/s184063/RBD_controls_Restructure_firsttry' # RBD_Restructure_firsttry # select correct path and folder
+input_path_hypnodensities =r'/scratch/users/s184063/hypnograms_RBD_controls_firsttry/'
 
 temp_patientID_2E_E1E2=[]
 temp_visit=[]
@@ -1793,10 +1791,11 @@ temp_REM_coh_gamma_6E_E5E6=[]
 
 
 # Loading list with outliers 
-Outliers=pd.read_csv('/scratch/users/s184063/RBD_Features/Outliers_RBD.csv')
+Outliers=pd.read_csv('/scratch/users/s184063/RBD_controls_Features/Outliers_RBD_controls.csv')
 Bad_channels=Outliers['Bad signals']
 print('Outlier dataframe')
 print(Bad_channels)
+
 
 
 # Looping over all EDF files in folder 
@@ -1831,8 +1830,7 @@ for edf_file in edf_files_list:
 
         print('PatientID')
         # Skipping the first part of the filename to extract the real patientID 
-        patientID_temp=filename[21:] #restructuredfile_RBD_82001_(1)
-        patientID=patientID_temp[:-4] 
+        patientID=filename[30:] #restructuredfile_RBD_controls_STNF00006
         print(patientID)
 
         
@@ -1845,6 +1843,7 @@ for edf_file in edf_files_list:
         
         
     
+        
         #Looping over the possible labels 
         for label in labels_to_find:
             print(f"The label '{label}' is at index {indices[label]}")
@@ -1870,7 +1869,7 @@ for edf_file in edf_files_list:
                     print(len(F3M2_signal))
 
                     # file:restructuredfile_RBD_82010_(1).EDF_Electrode:F3M2
-                    check_outlier=f'file:restructuredfile_RBD_{patientID}_(1).EDF_Electrode:F3M2'
+                    check_outlier=f'file:restructuredfile_RBD_controls_{patientID}.EDF_Electrode:F3M2'
                     print(check_outlier)
                     print(type(check_outlier))
 
@@ -1879,8 +1878,8 @@ for edf_file in edf_files_list:
                             print('Bad channel - from outlier document ')
                             print(Bad_channels[g])
 
-                            print('Channel generated')
-                            print(f"file:restructuredfile_RBD_'{patientID}'_(1).EDF_Electrode:F3M2")
+                            print('Channel generated') # restructuredfile_RBD_controls_STNF00020.EDF
+                            print(f"file:restructuredfile_RBD_controls_'{patientID}'.EDF_Electrode:F3M2")
                             print('Bad channel - F3M2 was deleted')
 
                             del F3M2_signal, F3M2_index, F3M2_index_trial
@@ -1911,8 +1910,8 @@ for edf_file in edf_files_list:
                     print(type(F4M1_signal))
                     print(len(F4M1_signal))
 
-                    # file:restructuredfile_RBD_82010_(1).EDF_Electrode:F4M1
-                    check_outlier=f'file:restructuredfile_RBD_{patientID}_(1).EDF_Electrode:F4M1'
+                    #               file:restructuredfile_RBD_controls_STNF00020.EDF_Electrode:F4M1
+                    check_outlier=f'file:restructuredfile_RBD_controls_{patientID}.EDF_Electrode:F4M1'
                     print(check_outlier)
                     print(type(check_outlier))
 
@@ -1922,7 +1921,7 @@ for edf_file in edf_files_list:
                             print(Bad_channels[g])
 
                             print('Channel generated')
-                            print(f"file:restructuredfile_RBD_'{patientID}'_(1).EDF_Electrode:F4M1")
+                            print(f"file:restructuredfile_RBD_controls_'{patientID}'.EDF_Electrode:F4M1")
                             print('Bad channel - F4M1 was deleted')
 
                             del F4M1_signal, F4M1_index, F4M1_index_trial
@@ -1955,7 +1954,7 @@ for edf_file in edf_files_list:
 
                     
                     # file:restructuredfile_RBD_82010_(1).EDF_Electrode:C3M2
-                    check_outlier=f'file:restructuredfile_RBD_{patientID}_(1).EDF_Electrode:C3M2'
+                    check_outlier=f'file:restructuredfile_RBD_controls_{patientID}.EDF_Electrode:C3M2'
                     print(check_outlier)
                     print(type(check_outlier))
 
@@ -1965,7 +1964,7 @@ for edf_file in edf_files_list:
                             print(Bad_channels[g])
 
                             print('Channel generated')
-                            print(f"file:restructuredfile_RBD_'{patientID}'_(1).EDF_Electrode:C3M2")
+                            print(f"file:restructuredfile_RBD_controls_'{patientID}'.EDF_Electrode:C3M2")
                             print('Bad channel - C3M2 was deleted')
 
                             del C3M2_signal, C3M2_index, C3M2_index_trial
@@ -1994,7 +1993,7 @@ for edf_file in edf_files_list:
                     print(len(C4M1_signal))
 
                     # file:restructuredfile_RBD_82010_(1).EDF_Electrode:C4M1
-                    check_outlier=f'file:restructuredfile_RBD_{patientID}_(1).EDF_Electrode:C4M1'
+                    check_outlier=f'file:restructuredfile_RBD_controls_{patientID}.EDF_Electrode:C4M1'
                     print(check_outlier)
                     print(type(check_outlier))
 
@@ -2005,7 +2004,7 @@ for edf_file in edf_files_list:
                             print(Bad_channels[g])
 
                             print('Channel generated')
-                            print(f"file:restructuredfile_RBD_'{patientID}'_(1).EDF_Electrode:C4M1")
+                            print(f"file:restructuredfile_RBD_controls_'{patientID}'.EDF_Electrode:C4M1")
                             print('Bad channel - C4M1 was deleted')
 
                             del C4M1_signal, C4M1_index, C4M1_index_trial
@@ -2034,7 +2033,7 @@ for edf_file in edf_files_list:
                     print(len(O2M1_signal))
 
                     # file:restructuredfile_RBD_82010_(1).EDF_Electrode:O2M1
-                    check_outlier=f'file:restructuredfile_RBD_{patientID}_(1).EDF_Electrode:O2M1'
+                    check_outlier=f'file:restructuredfile_RBD_controls_{patientID}.EDF_Electrode:O2M1'
                     print(check_outlier)
                     print(type(check_outlier))
 
@@ -2045,7 +2044,7 @@ for edf_file in edf_files_list:
                             print(Bad_channels[g])
 
                             print('Channel generated')
-                            print(f"file:restructuredfile_RBD_'{patientID}'_(1).EDF_Electrode:O2M1")
+                            print(f"file:restructuredfile_RBD_controls_'{patientID}'.EDF_Electrode:O2M1")
                             print('Bad channel - O2M1 was deleted')
 
                             del O2M1_signal, O2M1_index, O2M1_index_trial
@@ -2073,8 +2072,8 @@ for edf_file in edf_files_list:
                     print(type(O1M2_signal))
                     print(len(O1M2_signal))
 
-                    # file:restructuredfile_RBD_82010_(1).EDF_Electrode:O1M2
-                    check_outlier=f'file:restructuredfile_RBD_{patientID}_(1).EDF_Electrode:O1M2'
+                    
+                    check_outlier=f'file:restructuredfile_RBD_controls_{patientID}.EDF_Electrode:O1M2'
                     print(check_outlier)
                     print(type(check_outlier))
 
@@ -2085,7 +2084,7 @@ for edf_file in edf_files_list:
                             print(Bad_channels[g])
 
                             print('Channel generated')
-                            print(f"file:restructuredfile_RBD_'{patientID}'_(1).EDF_Electrode:O1M2")
+                            print(f"file:restructuredfile_RBD_controls_'{patientID}'.EDF_Electrode:O1M2")
                             print('Bad channel - O1M2 was deleted')
 
                             del O1M2_signal, O1M2_index, O1M2_index_trial
@@ -2113,6 +2112,7 @@ for edf_file in edf_files_list:
         
         if 'O2M1_index_trial' in locals():
             del O2M1_index_trial
+
 
 
         # Packing electrode combinations based on the correct index 
@@ -2253,7 +2253,7 @@ for edf_file in edf_files_list:
             Signal_headers = [C3M2_signalheader,C4M1_signalheader]
 
             del C3M2_index,C4M1_index
-
+        
         
         
 
@@ -2295,6 +2295,29 @@ for edf_file in edf_files_list:
 
 
             signal_new_single, fs_new_single, time_filtered_HP_single = preprocessing(Electrode_single, Signal_headers_single)
+
+            quarter_length=len(time_filtered_HP_single)/4
+            print('Signal length')
+            print(len(time_filtered_HP_single))
+            print('Length of one quarter')
+            print(quarter_length)
+            quarter_length=int(quarter_length)
+
+            quarter_2=time_filtered_HP_single[quarter_length:2*quarter_length]
+            time_filtered_HP_single=quarter_2
+            #quarter_2=time_filtered_HP_single[quarter_length:2*quarter_length]
+            #quarter_3=time_filtered_HP_single[2*quarter_length:3*quarter_length]
+            #quarter_4=time_filtered_HP_single[3*quarter_length:4*quarter_length]
+
+            #print('All four quarters')
+            #print(quarter_1)
+            #print(len(quarter_1))
+            #print(quarter_2)
+            #print(len(quarter_2))
+            #print(quarter_3)
+            #print(len(quarter_3))
+            #print(quarter_4)
+            #print(len(quarter_4))
 
 
 
@@ -2372,7 +2395,7 @@ for edf_file in edf_files_list:
 
                 
 
-                    # Packing data in dictonary 
+                   # Packing data in dictonary 
                     Bandpower_values_2E_E1 = {
                         'PatientID': temp_P1_patientID_2E_E1,
                         'P1_delta_'+str(Electrode_for_naming): temp_P1_delta_2E_E1,
@@ -2912,6 +2935,15 @@ for edf_file in edf_files_list:
         print('Length of hypnogram x30')
         print(len(hypnogram)*30*128)
 
+
+        print('Hypnogram length before and after quartering the signal')
+        print(len(hypnogram))
+        quarter_length_hypnogram=len(hypnogram)/4
+        quarter_length_hypnogram=int(quarter_length_hypnogram)
+        shortening_hypnogram=hypnogram[quarter_length_hypnogram:2*quarter_length_hypnogram]
+        hypnogram=shortening_hypnogram
+        print(len(hypnogram))
+
         # Making array to loop over for all electrode combinations 
         iterable=Electrodes
         r=2 # Length of subsequence 
@@ -3187,6 +3219,7 @@ for edf_file in edf_files_list:
             # Calling pre-processing function for channel 2
             signal_new_chan2, fs_new_chan2, time_filtered_HP_chan2 = preprocessing(Electrode2,Signalheader2)
 
+
             # Deleting to release memory
             del Electrode1, Electrode2
 
@@ -3194,6 +3227,29 @@ for edf_file in edf_files_list:
             print(len(signal_new_chan1))
             print('Filtered signal length')
             print(len(time_filtered_HP_chan1))
+
+
+            # Splitting the signal into 1st quarter
+            quarter_length=len(time_filtered_HP_chan1)/4
+            print('Signal length')
+            print(len(time_filtered_HP_chan1))
+            print('Length of one quarter')
+            print(quarter_length)
+            quarter_length=int(quarter_length)
+
+            quarter_2=time_filtered_HP_chan1[quarter_length:2*quarter_length]
+            time_filtered_HP_chan1=quarter_2
+
+            quarter_22=time_filtered_HP_chan2[quarter_length:2*quarter_length]
+            time_filtered_HP_chan2=quarter_22
+
+            print('Length of a quarter signal (1 and 2) - comparing to hypnogram length')
+            print(len(time_filtered_HP_chan1))
+            print(len(time_filtered_HP_chan2))
+
+            
+
+            print(len(hypnogram))
 
             ####### Normal coherence analysis #########
 
@@ -3238,6 +3294,7 @@ for edf_file in edf_files_list:
             idx_30=time_30s_calculate
             print('Signal length')
             print(len(time_filtered_HP_chan1))
+            
 
             
             if len(hypnogram)*128*30 < len(time_filtered_HP_chan1): 
@@ -7092,7 +7149,7 @@ def Merge2(dict1, dict2):
 if 'Bandpower_values_6E_E1' in locals():
     Bandpower_6E_full_dict=Merge6(Bandpower_values_6E_E1, Bandpower_values_6E_E2, Bandpower_values_6E_E3, Bandpower_values_6E_E4, Bandpower_values_6E_E5, Bandpower_values_6E_E6)
     BP_6E=pd.DataFrame(Bandpower_6E_full_dict)
-    BP_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_6electrodes.csv", index=False)
+    BP_6E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Bandpower_RBD_controls_2partnight_6electrodes.csv", index=False)
     print('Bandpower 6e were generated')   
     del Bandpower_values_6E_E1
 
@@ -7103,7 +7160,7 @@ if 'Coherence_values_6E_E1E2' in locals():
 
     # Generating full data frame for the 6 electrode data 
     full_dataframe_6E=pd.DataFrame(full_dict_6E)
-    full_dataframe_6E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_6electrodes.csv", index=False) # change filename using os
+    full_dataframe_6E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Coherence_RBD_controls_2partnight_6electrodes.csv", index=False) # change filename using os
     print('cvs file was generated - 6E')
     del Coherence_values_6E_E1E2
 ############################################################################
@@ -7114,7 +7171,7 @@ if 'Coherence_values_6E_E1E2' in locals():
 if 'Bandpower_values_5E_E1' in locals():
     Bandpower_5E_full_dict=Merge5(Bandpower_values_5E_E1, Bandpower_values_5E_E2, Bandpower_values_5E_E3, Bandpower_values_5E_E4, Bandpower_values_5E_E5)
     BP_5E=pd.DataFrame(Bandpower_5E_full_dict)
-    BP_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_5electrodes.csv", index=False)
+    BP_5E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Bandpower_RBD_controls_2partnight_5electrodes.csv", index=False)
     print('Bandpower 5e were generated')    
     del Bandpower_values_5E_E1
 
@@ -7126,7 +7183,7 @@ if 'Coherence_values_5E_E1E2' in locals():
     # Generating full data frame for the 5 electrode data 
     full_dataframe_5E=pd.DataFrame(full_dict_5E)
 
-    full_dataframe_5E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_5electrodes.csv", index=False) # change filename using os
+    full_dataframe_5E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Coherence_RBD_controls_2partnight_5electrodes.csv", index=False) # change filename using os
     print('csv with 5e where generated')
     del Coherence_values_5E_E1E2
 ############################################################################
@@ -7138,7 +7195,7 @@ if 'Coherence_values_5E_E1E2' in locals():
 if 'Bandpower_values_4E_E1' in locals():
     Bandpower_4E_full_dict=Merge4(Bandpower_values_4E_E1, Bandpower_values_4E_E2, Bandpower_values_4E_E3, Bandpower_values_4E_E4)
     BP_4E=pd.DataFrame(Bandpower_4E_full_dict)
-    BP_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_4electrodes.csv", index=False)
+    BP_4E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Bandpower_RBD_controls_2partnight_4electrodes.csv", index=False)
     print('Bandpower 4e were generated')
     del Bandpower_values_4E_E1
 
@@ -7150,7 +7207,7 @@ if 'Coherence_values_4E_E1E2' in locals():
     # Generating full data frame for the 4 electrode data 
     full_dataframe_4E=pd.DataFrame(full_dict_4E)
 
-    full_dataframe_4E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_4electrodes.csv", index=False) # change filename using os
+    full_dataframe_4E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Coherence_RBD_controls_2partnight_4electrodes.csv", index=False) # change filename using os
     print('csv file with 4 electrodes where generated')
     
     del Coherence_values_4E_E1E2
@@ -7163,7 +7220,7 @@ if 'Coherence_values_4E_E1E2' in locals():
 if 'Bandpower_values_3E_E1' in locals():
     Bandpower_3E_full_dict=Merge3(Bandpower_values_3E_E1, Bandpower_values_3E_E2, Bandpower_values_3E_E3)
     BP_3E=pd.DataFrame(Bandpower_3E_full_dict)
-    BP_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_3electrodes.csv", index=False)
+    BP_3E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Bandpower_RBD_controls_2partnight_3electrodes.csv", index=False)
     print('Bandpower 3e generated csv file')
     del Bandpower_values_3E_E1
 
@@ -7174,7 +7231,7 @@ if 'Coherence_values_3E_E1E2' in locals():
 
     # Generating full data frame for the 3 electrode data 
     full_dataframe_3E=pd.DataFrame(full_dict_3E)
-    full_dataframe_3E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_3electrodes.csv", index=False) # change filename using os
+    full_dataframe_3E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Coherence_RBD_controls_2partnight_3electrodes.csv", index=False) # change filename using os
     print('csv file 3e were generated')
     del Coherence_values_3E_E1E2
 ############################################################################
@@ -7185,7 +7242,7 @@ if 'Coherence_values_3E_E1E2' in locals():
 if 'Bandpower_values_2E_E1' in locals():
     Bandpower_2E_full_dict=Merge2(Bandpower_values_2E_E1, Bandpower_values_2E_E2)
     BP_2E=pd.DataFrame(Bandpower_2E_full_dict)
-    BP_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Bandpower_RBD_2electrodes.csv", index=False)
+    BP_2E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Bandpower_RBD_controls_2partnight_2electrodes.csv", index=False)
     print('BP 2E csv generated')
     del Bandpower_values_2E_E1
 
@@ -7194,7 +7251,7 @@ if 'Coherence_values_2E_E1E2' in locals():
     # Generating full data frame for the 2 electrode data 
     print('Generating dataframe and CSV file for 2-electrode data')
     full_dataframe_2E=pd.DataFrame(Coherence_values_2E_E1E2) 
-    full_dataframe_2E.to_csv(f"/scratch/users/s184063/RBD_Features/Coherence_RBD_2electrodes.csv", index=False) # change filename using os
+    full_dataframe_2E.to_csv(f"/scratch/users/s184063/RBD_controls_Features/Coherence_RBD_controls_2partnight_2electrodes.csv", index=False) # change filename using os
     print('csv file 2E generated')
     del Coherence_values_2E_E1E2
 ############################################################################

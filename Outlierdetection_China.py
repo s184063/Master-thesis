@@ -19,7 +19,7 @@ sys.path.insert(0, '/home/users/s184063')
 #import mne
 
 # Import My_functions_script
-from My_functions_script_RBD import preprocessing, extract_numbers_from_filename, extract_letters_and_numbers, list_files_in_folder, split_string_by_length, Usleep_2channels, correlation_multiple_electrodes
+from My_functions_script_China import preprocessing, extract_numbers_from_filename, extract_letters_and_numbers, list_files_in_folder, split_string_by_length, Usleep_2channels, correlation_multiple_electrodes
 
 # Made by Natasja Bonde Andersen 25.04.2024 
 
@@ -40,7 +40,7 @@ from My_functions_script_RBD import preprocessing, extract_numbers_from_filename
 ##########################################
 
 # Input path 
-path_edf=r'/scratch/users/s184063/RBD_Restructure_firsttry/'
+path_edf=r'/scratch/users/s184063/China patients subsample/'
 
 # Looping over all EDF files in folder 
 edf_files_list = list_files_in_folder(path_edf)
@@ -59,7 +59,8 @@ for edf_file in edf_files_list:
 
     # PatientID
     file_temp=str(edf_file) 
-    filename=file_temp[48:] # /scratch/users/s184063/RBD_Restructure_firsttry/restructuredfile_RBD_82001_(1).EDF
+    filename=file_temp[63:] # /scratch/users/s184063/China restructured EDF patients correct/restructuredfile_China_1001-psg.EDF
+    #filename=file_temp[48:]
     print('Filename')
     print(filename)
   
@@ -91,6 +92,8 @@ for edf_file in edf_files_list:
 
         temp_spectrum_std.append(spectrum_std)
         spectrum_structure_std=np.stack(temp_spectrum_std,axis=0)
+    
+    del signals, signal_headers, header
 
 # All channels are mixed to calculate this measure (which is ok)
 print('Median structure')
@@ -125,19 +128,21 @@ print(overall_spectrum_std)
 temp_bad_signal=[]
 
 
-'''
+
 
 # Step 2 
 # Loop over 30 sec epochs and check if the signals deviates with a 
 # chosen factor from the overall median and std of the time signal and spectrum
-'''
 # Input path 
-path_edf=r'/scratch/users/s184063/RBD subsample/'
 
+path_edf2= r'/scratch/users/s184063/China restructured EDF patients correct/'
+
+#path_edf2=r'/scratch/users/s184063/China subsample2/'
 # Looping over all EDF files in folder 
-edf_files_list = list_files_in_folder(path_edf)
+edf_files_list = list_files_in_folder(path_edf2)
 
 edf_files_list=sorted(edf_files_list)
+
 
 print("EDF files in the folder:")
 for edf_file in edf_files_list:
@@ -145,7 +150,8 @@ for edf_file in edf_files_list:
 
     # PatientID
     file_temp=str(edf_file) 
-    filename=file_temp[48:] # /scratch/users/s184063/RBD_Restructure_firsttry/restructuredfile_RBD_82001_(1).EDF
+    filename=file_temp[63:] # /scratch/users/s184063/China restructured EDF patients correct/restructuredfile_China_1001-psg.EDF
+    #filename=file_temp[48:]
     print('Filename')
     print(filename)
 
@@ -204,7 +210,7 @@ for edf_file in edf_files_list:
             spectrum_std_30sec=np.std(spectrum_30sec)
 
             # Checking if the signal are out of range 
-            if 50*overall_median <= median_30sec and 4*overall_std <= std_30sec:
+            if 17*overall_median <= median_30sec and 6*overall_std <= std_30sec:
                 # The factors multiplied on the median and std are found by trial and error 
                 # This part checks for large positive amplitudes in the signal 
                 out_of_range='True'
@@ -231,6 +237,7 @@ for edf_file in edf_files_list:
 
         print('Electrodes in data')
         print(Electrodes_in_data)
+
         print(type(Electrodes_in_data))
 
         #### Check how much of the signal are outliers ######
@@ -265,16 +272,16 @@ for edf_file in edf_files_list:
         print(signal_index)
 
         
-        for loop_factor in signal_index:
-            fig = matplotlib.pyplot.figure()
-            fig.suptitle(f'Outlier detection {loop_factor}')
-            matplotlib.pyplot.plot(timefs, time_signal[loop_factor:loop_factor+len(timefs)], 'k')
-            #matplotlib.pyplot.title("After resampling")
-            matplotlib.pyplot.xlabel('Time [s]') 
-            matplotlib.pyplot.ylabel('Amplitude [muV]') 
-            matplotlib.pyplot.savefig(f'/scratch/users/s184063/RBD subsample/Outlier_number_{loop_factor}.png')
-            # Clearing plot
-            matplotlib.pyplot.clf()
+        #for loop_factor in signal_index:
+        #    fig = matplotlib.pyplot.figure()
+        #    fig.suptitle(f'Outlier detection {loop_factor}')
+        #    matplotlib.pyplot.plot(timefs, time_signal[loop_factor:loop_factor+len(timefs)], 'k')
+        #    #matplotlib.pyplot.title("After resampling")
+        #    matplotlib.pyplot.xlabel('Time [s]') 
+        #    matplotlib.pyplot.ylabel('Amplitude [muV]') 
+        #    matplotlib.pyplot.savefig(f'/scratch/users/s184063/China patients Features/Outlier_number_{loop_factor}.png')
+        #    # Clearing plot
+        #    matplotlib.pyplot.clf()
         
     
         print('New signal and the outlier variable is deleted')
@@ -283,7 +290,7 @@ for edf_file in edf_files_list:
         del Outlier, temp_out_of_range, 
         
     # Clearing the variables, so they only collect data for one patient at a time 
-    del temp_electrodes, temp_percentage
+    del temp_electrodes, temp_percentage, signals, signal_headers, header
 
     # Looking into the variables collected for one patient 
     print('Percentage for patient - full structure and minimum value')
@@ -331,7 +338,7 @@ for edf_file in edf_files_list:
 
 if 'bad_channels_for_csv' in locals():
     full_dataframe=pd.DataFrame(bad_channels_for_csv)
-    full_dataframe.to_csv('/scratch/users/s184063/RBD_Features/Outliers_trial_RBD.csv',index=False)
+    full_dataframe.to_csv('/scratch/users/s184063/China patients Features/Outliers_China.csv',index=False)
 else: 
     print('No bad channels where found in this dataset')
 

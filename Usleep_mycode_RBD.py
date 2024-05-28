@@ -40,10 +40,19 @@ import itertools
 from itertools import combinations
 import statsmodels.api as sm
 import seaborn as sns
+
+# For processing EDF files 
+import pyedflib 
+from pyedflib import highlevel # Extra packages for EDF
+import pyedflib as plib
+
+# Dynamic time warping
+import dtw
+from dtw import *
 # Using sys function to import 'My_functions_script'
 sys.path.insert(0, '/home/users/s184063')
 # Import My_functions_script
-from My_functions_script_RBD import extract_numbers_from_filename, extract_letters_and_numbers, list_files_in_folder, split_string_by_length, Usleep_2channels, correlation_multiple_electrodes
+from My_functions_script_RBD import extract_numbers_from_filename, extract_letters_and_numbers, list_files_in_folder, split_string_by_length, Usleep_2channels, correlation_multiple_electrodes, dynamic_time_warping
 
 ################################################################################################
 
@@ -54,6 +63,7 @@ input_path =r'/scratch/users/s184063/RBD_Restructure_firsttry/'
 #input_file=f'A0001_4 165907.EDF' # Easier later for namechange according to the patient ID 
 #input_file_path = os.path.join(input_path,input_file)
 output_path = r'/scratch/users/s184063/hypnograms_RBD_firsttry/' 
+#output_path = r'/scratch/users/s184063/RBD subsample hypnograms/' 
 #######################################################
 
 
@@ -290,19 +300,21 @@ Errors.to_csv('Errors_happened.csv')
 ##### Part 2 ###########################
 #### Load the hypnograms and do correlation between combination of pairs of electrodes ####
 
-epoch_size_in_seconds = [1, 3, 5, 15, 30]
+#epoch_size_in_seconds = [1, 3, 5, 15, 30]
+epoch_size_in_seconds = [30]
+time_signal_folder=r'/scratch/users/s184063/RBD_Restructure_firsttry/'
 
 for epoch in epoch_size_in_seconds:
     # The path loaded in should be the one, where the hypnograms are stored 
 
-    correlation_multiple_electrodes(output_path,epoch)
+    correlation_multiple_electrodes(output_path,epoch,time_signal_folder)
 
 
 # The Pearson (product-moment) correlation coefficient is a measure of the linear relationship between two features.
 # Pearson correlation coefficient can take on any real value in the range −1 ≤ r ≤ 1.
 #########################################
 
-
+'''
 ########### Part 3 #################
 # In this part of the code all CSV files with correlation features will be merged to one large CSV file and dataframe
 # Age, sex, BMI, label for disease and cohort will be extracted from a major CSV file from a previous study. 
@@ -430,7 +442,7 @@ plt.tight_layout()
 plt.savefig('/scratch/users/s184063/RBD_Features/Correlation_matrix_RBD.png')
 
 '''
-
+'''
 #####Multiple linear regression ##########
 
 # Define the dependent variable and the independent variables.
@@ -506,7 +518,7 @@ max_val.to_csv('/scratch/users/s184063/RBD_Features/Max values.csv')
 
 print(temp)
 '''
-
+'''
 ########## Scatter plots ##############
 ######## RBD #################
 
@@ -653,6 +665,7 @@ for d in range(len(E_combinations)):
 
 # for all features 
 #matplotlib.pyplot.figure(figsize=(8,6)) # Adjust these numbers as per your requirement.
+'''
 '''
 matplotlib.pyplot.subplot(2,3,1)
 sns.histplot(data=df_combined_C3M2O1M2.iloc[:,20])

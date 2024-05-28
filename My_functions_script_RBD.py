@@ -28,6 +28,8 @@ import itertools
 from itertools import combinations
 import fractions
 from fractions import Fraction
+import dtw
+from dtw import *
 
 
 def preprocessing(input_signal,input_signal_header): #,input_signal_header
@@ -761,7 +763,193 @@ def Usleep_2channels(edf_file_uploaded,make_folder_path_uploaded,epoch_size_in_s
 
 
 
-def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_uploaded):
+
+
+def dynamic_time_warping(Electrode1_input,Electrode2_input,epoch_size_in_seconds_input,time_signal_input,fs_input):
+    ########### Dynamic time warping ####################
+    # The dynamic time warping between two hypnodensities will be calculated hour for hour, because of memory problems 
+
+    # Inner loop: 
+    # Calculating dynamic time warping for each hour between two hypnodensites. They are stacked and the average value is calculated
+
+
+    # Outer loop: 
+    # Looping over sleep stages in the hypnodensities 
+    # output = 5 values of dynamic time warping, one value for each sleep stage (wake, N1, N2, N3, REM) 
+    # These values are saved and packed in the dictionaries 
+
+
+    # Inputs to the function 
+    Electrode1=copy.deepcopy(Electrode1_input)
+    Electrode2=copy.deepcopy(Electrode2_input)
+    epoch_size_in_seconds=copy.deepcopy(epoch_size_in_seconds_input)
+    time_signal=copy.deepcopy(time_signal_input)
+    fs=copy.deepcopy(fs_input)
+
+    # Calculating samples per hour 
+    time = np.arange(0, len(time_signal)/fs, 1/fs)
+    seconds=np.max(time)
+    hours=(seconds/60)/60 
+
+    #print('epoch_size_in_seconds')
+    #print(epoch_size_in_seconds)
+    '''
+    print('round hours')
+    print(np.round(hours))
+    print('hours')
+    print(hours)
+    print('Length of signal')
+    print(len(time_signal))
+    '''
+
+    round_hours=int(np.round(hours))
+    print('round hours')
+    print(round_hours)
+    print('A part of the signal')
+    part=len(time_signal)/round_hours
+    part=part/(fs*epoch_size_in_seconds)
+    idx_hour=int(part)
+    print(idx_hour)
+
+
+
+    print('Hypnodensity 1')
+    print(Electrode1.shape)
+    print('Hypnodensity 2')
+    print(Electrode2.shape)
+
+
+    # Initializing values 
+
+
+    temp_dtw_outerloop=[]
+    temp_diff_dtw_outerloop=[]
+
+    k=5
+
+    for j in range(k):
+        print('J factor')
+        print(j)
+        
+        temp_dtw_innerloop=[]
+        temp_diff_dtw_innerloop=[]
+
+
+        # Differentiates the hypnodensities 
+        diff_hyp1=np.diff(Electrode1[:,j])
+        print(diff_hyp1.shape)
+        diff_hyp2=np.diff(Electrode2[:,j])
+        print(diff_hyp2.shape)
+
+        #Indexing for every hour in the hypnodensities
+        for i in range(0,len(Electrode1),idx_hour):
+
+            print('Loop i factor')
+            print(i)
+
+            # indexing in the two signals for 30 second intervals 
+            intervals_1hour_signal1=Electrode1[i:i+idx_hour] # hypnodensity 1
+            intervals_1hour_signal2=Electrode2[i:i+idx_hour] # hypnodensity 2 
+            
+            print('Idx hypnodensities - normal')
+            print(intervals_1hour_signal1.shape)
+            #print(intervals_1hour_signal1)
+            print(intervals_1hour_signal2.shape)
+            #print(intervals_1hour_signal2)
+            
+
+            print('Dynamic time warping')
+            alignment = dtw(intervals_1hour_signal1[:,j], intervals_1hour_signal2[:,j], keep_internals=True)
+            print(alignment.normalizedDistance)
+            print(type(alignment))
+
+            temp_dtw_innerloop.append(alignment.normalizedDistance)
+
+
+
+            #### For the differentiated hypnodensities 
+            # indexing in the two signals for 30 second intervals 
+            print('Dynamic time warping - differentiated signals idx shape')
+            intervals_1hour_diff1=diff_hyp1[i:i+idx_hour] # hypnodensity 1
+            intervals_1hour_diff2=diff_hyp2[i:i+idx_hour] # hypnodensity 2 
+                
+            print(intervals_1hour_diff1.shape)
+            #print(intervals_1hour_diff1)
+            print(intervals_1hour_diff2.shape)
+            #print(intervals_1hour_diff2)
+            
+
+            if intervals_1hour_diff1.shape== (0,) and intervals_1hour_diff2.shape ==(0,):
+                print('Diff interval 1 hour is empty because the last element has been reached')
+                continue 
+            else: 
+                print('Dynamic time warping - differentiated hypnodensities ')
+                alignment_diff = dtw(intervals_1hour_diff1, intervals_1hour_diff2, keep_internals=True)
+                print(alignment_diff.normalizedDistance)
+           
+
+            temp_diff_dtw_innerloop.append(alignment_diff.normalizedDistance)
+
+
+
+
+        ############# Hypndensities signals #########################
+        # Stacking variables calculated for one sleep stage at a time, dynamic time warping between two hypnodensities
+        #print('stacked temp variable')
+        dtw_stack=np.stack(temp_dtw_innerloop,axis=0)
+        #print(dtw_stack)
+
+        del temp_dtw_innerloop
+
+        #print('Average dtw')
+        av_dtw=np.mean(dtw_stack)
+        #print(av_dtw)
+
+        # Collecting values for five hypnodensites (wake, N1, N2, N3, REM)
+        temp_dtw_outerloop.append(av_dtw)
+
+
+        ########### Differentiated hypnodensities #########################
+        # Stacking variables calculated for one sleep stage at a time, differentiated dynamic time warping between two hypnodensities
+        #print('stacked temp variable')
+        dtw_diff_stack=np.stack(temp_diff_dtw_innerloop,axis=0)
+        #print(dtw_diff_stack)
+
+        del temp_diff_dtw_innerloop
+
+        #print('Average diff dtw')
+        av_diff_dtw=np.mean(dtw_diff_stack)
+        #print(av_diff_dtw)
+        
+        # Collecting values for five hypnodensites (wake, N1, N2, N3, REM)
+        temp_diff_dtw_outerloop.append(av_diff_dtw)
+
+
+    #### collecting five values for normal hypnodensities #########
+    dtw_values=np.stack(temp_dtw_outerloop,axis=0)
+    del temp_dtw_outerloop
+    #print('Final result - dtw for all sleep stages')
+    #print(dtw_values)
+
+    ### collecting five values for differentiated hypnodensities ########
+    dtw_diff_values=np.stack(temp_diff_dtw_outerloop,axis=0)
+    del temp_diff_dtw_outerloop
+    #print('Final result - dtw diff for all sleep stages')
+    #print(dtw_diff_values)
+
+
+    print('Done with function')
+
+    return dtw_values, dtw_diff_values
+
+
+
+
+
+
+
+
+def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_uploaded,time_signal_folder_uploaded):
     
     # The input path uploaded should be where the hypnograms are saved 
 
@@ -770,8 +958,9 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
     # Copying input variables 
     output_path = copy.deepcopy(input_path_uploaded)
     epoch_size_in_seconds = copy.deepcopy(epoch_size_in_seconds_uploaded)
+    epoch_size_in_seconds_numbers=epoch_size_in_seconds
     epoch_size_in_seconds = f"epocssize_"+str(epoch_size_in_seconds) # This part makes sure that the function selects the exact name and number
-
+    path_folder=copy.deepcopy(time_signal_folder_uploaded)
 
     # Defining temporary variables: 
     # Defining variables to collect information for dataframe
@@ -1030,6 +1219,722 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
 
     templist_visit=[]
 
+
+    # Extra features 
+
+    temp_cor_diff_Wake_E1E2_2=[]
+    temp_cor_diff_N1_E1E2_2=[]
+    temp_cor_diff_N2_E1E2_2=[]
+    temp_cor_diff_N3_E1E2_2=[]
+    temp_cor_diff_REM_E1E2_2=[]
+
+    temp_dtw_Wake_E1E2_2=[]
+    temp_dtw_N1_E1E2_2=[]
+    temp_dtw_N2_E1E2_2=[]
+    temp_dtw_N3_E1E2_2=[]
+    temp_dtw_REM_E1E2_2=[]
+
+    temp_dtw_diff_Wake_E1E2_2=[]
+    temp_dtw_diff_N1_E1E2_2=[]
+    temp_dtw_diff_N2_E1E2_2=[]
+    temp_dtw_diff_N3_E1E2_2=[]
+    temp_dtw_diff_REM_E1E2_2=[]
+
+
+
+    # 3E
+    temp_cor_diff_Wake_E1E2_3=[]
+    temp_cor_diff_N1_E1E2_3=[]
+    temp_cor_diff_N2_E1E2_3=[]
+    temp_cor_diff_N3_E1E2_3=[]
+    temp_cor_diff_REM_E1E2_3=[]
+
+    temp_dtw_Wake_E1E2_3=[]
+    temp_dtw_N1_E1E2_3=[]
+    temp_dtw_N2_E1E2_3=[]
+    temp_dtw_N3_E1E2_3=[]
+    temp_dtw_REM_E1E2_3=[]
+
+    temp_dtw_diff_Wake_E1E2_3=[]
+    temp_dtw_diff_N1_E1E2_3=[]
+    temp_dtw_diff_N2_E1E2_3=[]
+    temp_dtw_diff_N3_E1E2_3=[]
+    temp_dtw_diff_REM_E1E2_3=[]
+
+
+    #3E E1E3
+    
+    temp_cor_diff_Wake_E1E3_3=[]
+    temp_cor_diff_N1_E1E3_3=[]
+    temp_cor_diff_N2_E1E3_3=[]
+    temp_cor_diff_N3_E1E3_3=[]
+    temp_cor_diff_REM_E1E3_3=[]
+
+    temp_dtw_Wake_E1E3_3=[]
+    temp_dtw_N1_E1E3_3=[]
+    temp_dtw_N2_E1E3_3=[]
+    temp_dtw_N3_E1E3_3=[]
+    temp_dtw_REM_E1E3_3=[]
+
+    temp_dtw_diff_Wake_E1E3_3=[]
+    temp_dtw_diff_N1_E1E3_3=[]
+    temp_dtw_diff_N2_E1E3_3=[]
+    temp_dtw_diff_N3_E1E3_3=[]
+    temp_dtw_diff_REM_E1E3_3=[]
+
+    # 3E E2E3
+    
+    temp_cor_diff_Wake_E2E3_3=[]
+    temp_cor_diff_N1_E2E3_3=[]
+    temp_cor_diff_N2_E2E3_3=[]
+    temp_cor_diff_N3_E2E3_3=[]
+    temp_cor_diff_REM_E2E3_3=[]
+
+    temp_dtw_Wake_E2E3_3=[]
+    temp_dtw_N1_E2E3_3=[]
+    temp_dtw_N2_E2E3_3=[]
+    temp_dtw_N3_E2E3_3=[]
+    temp_dtw_REM_E2E3_3=[]
+
+    temp_dtw_diff_Wake_E2E3_3=[]
+    temp_dtw_diff_N1_E2E3_3=[]
+    temp_dtw_diff_N2_E2E3_3=[]
+    temp_dtw_diff_N3_E2E3_3=[]
+    temp_dtw_diff_REM_E2E3_3=[]
+
+
+    # 4E E1E2
+    
+    temp_cor_diff_Wake_E1E2_4=[]
+    temp_cor_diff_N1_E1E2_4=[]
+    temp_cor_diff_N2_E1E2_4=[]
+    temp_cor_diff_N3_E1E2_4=[]
+    temp_cor_diff_REM_E1E2_4=[]
+
+    temp_dtw_Wake_E1E2_4=[]
+    temp_dtw_N1_E1E2_4=[]
+    temp_dtw_N2_E1E2_4=[]
+    temp_dtw_N3_E1E2_4=[]
+    temp_dtw_REM_E1E2_4=[]
+
+    temp_dtw_diff_Wake_E1E2_4=[]
+    temp_dtw_diff_N1_E1E2_4=[]
+    temp_dtw_diff_N2_E1E2_4=[]
+    temp_dtw_diff_N3_E1E2_4=[]
+    temp_dtw_diff_REM_E1E2_4=[]
+
+    # 4E E1E3
+    
+    temp_cor_diff_Wake_E1E3_4=[]
+    temp_cor_diff_N1_E1E3_4=[]
+    temp_cor_diff_N2_E1E3_4=[]
+    temp_cor_diff_N3_E1E3_4=[]
+    temp_cor_diff_REM_E1E3_4=[]
+
+    temp_dtw_Wake_E1E3_4=[]
+    temp_dtw_N1_E1E3_4=[]
+    temp_dtw_N2_E1E3_4=[]
+    temp_dtw_N3_E1E3_4=[]
+    temp_dtw_REM_E1E3_4=[]
+
+    temp_dtw_diff_Wake_E1E3_4=[]
+    temp_dtw_diff_N1_E1E3_4=[]
+    temp_dtw_diff_N2_E1E3_4=[]
+    temp_dtw_diff_N3_E1E3_4=[]
+    temp_dtw_diff_REM_E1E3_4=[]
+
+
+    # 4E E2E3
+
+    
+    temp_cor_diff_Wake_E2E3_4=[]
+    temp_cor_diff_N1_E2E3_4=[]
+    temp_cor_diff_N2_E2E3_4=[]
+    temp_cor_diff_N3_E2E3_4=[]
+    temp_cor_diff_REM_E2E3_4=[]
+
+    temp_dtw_Wake_E2E3_4=[]
+    temp_dtw_N1_E2E3_4=[]
+    temp_dtw_N2_E2E3_4=[]
+    temp_dtw_N3_E2E3_4=[]
+    temp_dtw_REM_E2E3_4=[]
+
+    temp_dtw_diff_Wake_E2E3_4=[]
+    temp_dtw_diff_N1_E2E3_4=[]
+    temp_dtw_diff_N2_E2E3_4=[]
+    temp_dtw_diff_N3_E2E3_4=[]
+    temp_dtw_diff_REM_E2E3_4=[]
+
+    # 4E E1E4
+    
+    temp_cor_diff_Wake_E1E4_4=[]
+    temp_cor_diff_N1_E1E4_4=[]
+    temp_cor_diff_N2_E1E4_4=[]
+    temp_cor_diff_N3_E1E4_4=[]
+    temp_cor_diff_REM_E1E4_4=[]
+
+    temp_dtw_Wake_E1E4_4=[]
+    temp_dtw_N1_E1E4_4=[]
+    temp_dtw_N2_E1E4_4=[]
+    temp_dtw_N3_E1E4_4=[]
+    temp_dtw_REM_E1E4_4=[]
+
+    temp_dtw_diff_Wake_E1E4_4=[]
+    temp_dtw_diff_N1_E1E4_4=[]
+    temp_dtw_diff_N2_E1E4_4=[]
+    temp_dtw_diff_N3_E1E4_4=[]
+    temp_dtw_diff_REM_E1E4_4=[]
+
+
+    # 4E E2E4
+    temp_cor_diff_Wake_E2E4_4=[]
+    temp_cor_diff_N1_E2E4_4=[]
+    temp_cor_diff_N2_E2E4_4=[]
+    temp_cor_diff_N3_E2E4_4=[]
+    temp_cor_diff_REM_E2E4_4=[]
+
+    temp_dtw_Wake_E2E4_4=[]
+    temp_dtw_N1_E2E4_4=[]
+    temp_dtw_N2_E2E4_4=[]
+    temp_dtw_N3_E2E4_4=[]
+    temp_dtw_REM_E2E4_4=[]
+
+    temp_dtw_diff_Wake_E2E4_4=[]
+    temp_dtw_diff_N1_E2E4_4=[]
+    temp_dtw_diff_N2_E2E4_4=[]
+    temp_dtw_diff_N3_E2E4_4=[]
+    temp_dtw_diff_REM_E2E4_4=[]
+
+    # 4E E3E4
+    
+    temp_cor_diff_Wake_E3E4_4=[]
+    temp_cor_diff_N1_E3E4_4=[]
+    temp_cor_diff_N2_E3E4_4=[]
+    temp_cor_diff_N3_E3E4_4=[]
+    temp_cor_diff_REM_E3E4_4=[]
+
+    temp_dtw_Wake_E3E4_4=[]
+    temp_dtw_N1_E3E4_4=[]
+    temp_dtw_N2_E3E4_4=[]
+    temp_dtw_N3_E3E4_4=[]
+    temp_dtw_REM_E3E4_4=[]
+
+    temp_dtw_diff_Wake_E3E4_4=[]
+    temp_dtw_diff_N1_E3E4_4=[]
+    temp_dtw_diff_N2_E3E4_4=[]
+    temp_dtw_diff_N3_E3E4_4=[]
+    temp_dtw_diff_REM_E3E4_4=[]
+
+
+    # 5E E1E2
+    temp_cor_diff_Wake_E1E2_5=[]
+    temp_cor_diff_N1_E1E2_5=[]
+    temp_cor_diff_N2_E1E2_5=[]
+    temp_cor_diff_N3_E1E2_5=[]
+    temp_cor_diff_REM_E1E2_5=[]
+
+    temp_dtw_Wake_E1E2_5=[]
+    temp_dtw_N1_E1E2_5=[]
+    temp_dtw_N2_E1E2_5=[]
+    temp_dtw_N3_E1E2_5=[]
+    temp_dtw_REM_E1E2_5=[]
+
+    temp_dtw_diff_Wake_E1E2_5=[]
+    temp_dtw_diff_N1_E1E2_5=[]
+    temp_dtw_diff_N2_E1E2_5=[]
+    temp_dtw_diff_N3_E1E2_5=[]
+    temp_dtw_diff_REM_E1E2_5=[]
+
+
+    # 5E E1E3
+    
+    temp_cor_diff_Wake_E1E3_5=[]
+    temp_cor_diff_N1_E1E3_5=[]
+    temp_cor_diff_N2_E1E3_5=[]
+    temp_cor_diff_N3_E1E3_5=[]
+    temp_cor_diff_REM_E1E3_5=[]
+
+    temp_dtw_Wake_E1E3_5=[]
+    temp_dtw_N1_E1E3_5=[]
+    temp_dtw_N2_E1E3_5=[]
+    temp_dtw_N3_E1E3_5=[]
+    temp_dtw_REM_E1E3_5=[]
+
+    temp_dtw_diff_Wake_E1E3_5=[]
+    temp_dtw_diff_N1_E1E3_5=[]
+    temp_dtw_diff_N2_E1E3_5=[]
+    temp_dtw_diff_N3_E1E3_5=[]
+    temp_dtw_diff_REM_E1E3_5=[]
+
+    # 5E E2E3
+    
+    temp_cor_diff_Wake_E2E3_5=[]
+    temp_cor_diff_N1_E2E3_5=[]
+    temp_cor_diff_N2_E2E3_5=[]
+    temp_cor_diff_N3_E2E3_5=[]
+    temp_cor_diff_REM_E2E3_5=[]
+
+    temp_dtw_Wake_E2E3_5=[]
+    temp_dtw_N1_E2E3_5=[]
+    temp_dtw_N2_E2E3_5=[]
+    temp_dtw_N3_E2E3_5=[]
+    temp_dtw_REM_E2E3_5=[]
+
+    temp_dtw_diff_Wake_E2E3_5=[]
+    temp_dtw_diff_N1_E2E3_5=[]
+    temp_dtw_diff_N2_E2E3_5=[]
+    temp_dtw_diff_N3_E2E3_5=[]
+    temp_dtw_diff_REM_E2E3_5=[]
+
+    # 5E E1E4
+    
+    temp_cor_diff_Wake_E1E4_5=[]
+    temp_cor_diff_N1_E1E4_5=[]
+    temp_cor_diff_N2_E1E4_5=[]
+    temp_cor_diff_N3_E1E4_5=[]
+    temp_cor_diff_REM_E1E4_5=[]
+
+    temp_dtw_Wake_E1E4_5=[]
+    temp_dtw_N1_E1E4_5=[]
+    temp_dtw_N2_E1E4_5=[]
+    temp_dtw_N3_E1E4_5=[]
+    temp_dtw_REM_E1E4_5=[]
+
+    temp_dtw_diff_Wake_E1E4_5=[]
+    temp_dtw_diff_N1_E1E4_5=[]
+    temp_dtw_diff_N2_E1E4_5=[]
+    temp_dtw_diff_N3_E1E4_5=[]
+    temp_dtw_diff_REM_E1E4_5=[]
+
+
+    # 5E E2E4
+    
+    temp_cor_diff_Wake_E2E4_5=[]
+    temp_cor_diff_N1_E2E4_5=[]
+    temp_cor_diff_N2_E2E4_5=[]
+    temp_cor_diff_N3_E2E4_5=[]
+    temp_cor_diff_REM_E2E4_5=[]
+
+    temp_dtw_Wake_E2E4_5=[]
+    temp_dtw_N1_E2E4_5=[]
+    temp_dtw_N2_E2E4_5=[]
+    temp_dtw_N3_E2E4_5=[]
+    temp_dtw_REM_E2E4_5=[]
+
+    temp_dtw_diff_Wake_E2E4_5=[]
+    temp_dtw_diff_N1_E2E4_5=[]
+    temp_dtw_diff_N2_E2E4_5=[]
+    temp_dtw_diff_N3_E2E4_5=[]
+    temp_dtw_diff_REM_E2E4_5=[]
+
+
+    # 5E E3E4
+    
+    temp_cor_diff_Wake_E3E4_5=[]
+    temp_cor_diff_N1_E3E4_5=[]
+    temp_cor_diff_N2_E3E4_5=[]
+    temp_cor_diff_N3_E3E4_5=[]
+    temp_cor_diff_REM_E3E4_5=[]
+
+    temp_dtw_Wake_E3E4_5=[]
+    temp_dtw_N1_E3E4_5=[]
+    temp_dtw_N2_E3E4_5=[]
+    temp_dtw_N3_E3E4_5=[]
+    temp_dtw_REM_E3E4_5=[]
+
+    temp_dtw_diff_Wake_E3E4_5=[]
+    temp_dtw_diff_N1_E3E4_5=[]
+    temp_dtw_diff_N2_E3E4_5=[]
+    temp_dtw_diff_N3_E3E4_5=[]
+    temp_dtw_diff_REM_E3E4_5=[]
+
+    # 5E E1E5
+    
+    temp_cor_diff_Wake_E1E5_5=[]
+    temp_cor_diff_N1_E1E5_5=[]
+    temp_cor_diff_N2_E1E5_5=[]
+    temp_cor_diff_N3_E1E5_5=[]
+    temp_cor_diff_REM_E1E5_5=[]
+
+    temp_dtw_Wake_E1E5_5=[]
+    temp_dtw_N1_E1E5_5=[]
+    temp_dtw_N2_E1E5_5=[]
+    temp_dtw_N3_E1E5_5=[]
+    temp_dtw_REM_E1E5_5=[]
+
+    temp_dtw_diff_Wake_E1E5_5=[]
+    temp_dtw_diff_N1_E1E5_5=[]
+    temp_dtw_diff_N2_E1E5_5=[]
+    temp_dtw_diff_N3_E1E5_5=[]
+    temp_dtw_diff_REM_E1E5_5=[]
+
+    # 5E E2E5
+
+    temp_cor_diff_Wake_E2E5_5=[]
+    temp_cor_diff_N1_E2E5_5=[]
+    temp_cor_diff_N2_E2E5_5=[]
+    temp_cor_diff_N3_E2E5_5=[]
+    temp_cor_diff_REM_E2E5_5=[]
+
+    temp_dtw_Wake_E2E5_5=[]
+    temp_dtw_N1_E2E5_5=[]
+    temp_dtw_N2_E2E5_5=[]
+    temp_dtw_N3_E2E5_5=[]
+    temp_dtw_REM_E2E5_5=[]
+
+    temp_dtw_diff_Wake_E2E5_5=[]
+    temp_dtw_diff_N1_E2E5_5=[]
+    temp_dtw_diff_N2_E2E5_5=[]
+    temp_dtw_diff_N3_E2E5_5=[]
+    temp_dtw_diff_REM_E2E5_5=[]
+
+    # 5E E3E5
+    
+    temp_cor_diff_Wake_E3E5_5=[]
+    temp_cor_diff_N1_E3E5_5=[]
+    temp_cor_diff_N2_E3E5_5=[]
+    temp_cor_diff_N3_E3E5_5=[]
+    temp_cor_diff_REM_E3E5_5=[]
+
+    temp_dtw_Wake_E3E5_5=[]
+    temp_dtw_N1_E3E5_5=[]
+    temp_dtw_N2_E3E5_5=[]
+    temp_dtw_N3_E3E5_5=[]
+    temp_dtw_REM_E3E5_5=[]
+
+    temp_dtw_diff_Wake_E3E5_5=[]
+    temp_dtw_diff_N1_E3E5_5=[]
+    temp_dtw_diff_N2_E3E5_5=[]
+    temp_dtw_diff_N3_E3E5_5=[]
+    temp_dtw_diff_REM_E3E5_5=[]
+
+    # 5E E4E5
+    
+    temp_cor_diff_Wake_E4E5_5=[]
+    temp_cor_diff_N1_E4E5_5=[]
+    temp_cor_diff_N2_E4E5_5=[]
+    temp_cor_diff_N3_E4E5_5=[]
+    temp_cor_diff_REM_E4E5_5=[]
+
+    temp_dtw_Wake_E4E5_5=[]
+    temp_dtw_N1_E4E5_5=[]
+    temp_dtw_N2_E4E5_5=[]
+    temp_dtw_N3_E4E5_5=[]
+    temp_dtw_REM_E4E5_5=[]
+
+    temp_dtw_diff_Wake_E4E5_5=[]
+    temp_dtw_diff_N1_E4E5_5=[]
+    temp_dtw_diff_N2_E4E5_5=[]
+    temp_dtw_diff_N3_E4E5_5=[]
+    temp_dtw_diff_REM_E4E5_5=[]
+
+    # 6E E1E2
+    
+    temp_cor_diff_Wake_E1E2_6=[]
+    temp_cor_diff_N1_E1E2_6=[]
+    temp_cor_diff_N2_E1E2_6=[]
+    temp_cor_diff_N3_E1E2_6=[]
+    temp_cor_diff_REM_E1E2_6=[]
+
+    temp_dtw_Wake_E1E2_6=[]
+    temp_dtw_N1_E1E2_6=[]
+    temp_dtw_N2_E1E2_6=[]
+    temp_dtw_N3_E1E2_6=[]
+    temp_dtw_REM_E1E2_6=[]
+
+    temp_dtw_diff_Wake_E1E2_6=[]
+    temp_dtw_diff_N1_E1E2_6=[]
+    temp_dtw_diff_N2_E1E2_6=[]
+    temp_dtw_diff_N3_E1E2_6=[]
+    temp_dtw_diff_REM_E1E2_6=[]
+
+    # 6E E1E3
+    
+    temp_cor_diff_Wake_E1E3_6=[]
+    temp_cor_diff_N1_E1E3_6=[]
+    temp_cor_diff_N2_E1E3_6=[]
+    temp_cor_diff_N3_E1E3_6=[]
+    temp_cor_diff_REM_E1E3_6=[]
+
+    temp_dtw_Wake_E1E3_6=[]
+    temp_dtw_N1_E1E3_6=[]
+    temp_dtw_N2_E1E3_6=[]
+    temp_dtw_N3_E1E3_6=[]
+    temp_dtw_REM_E1E3_6=[]
+
+    temp_dtw_diff_Wake_E1E3_6=[]
+    temp_dtw_diff_N1_E1E3_6=[]
+    temp_dtw_diff_N2_E1E3_6=[]
+    temp_dtw_diff_N3_E1E3_6=[]
+    temp_dtw_diff_REM_E1E3_6=[]
+
+
+    # 6E E2E3
+    
+    temp_cor_diff_Wake_E2E3_6=[]
+    temp_cor_diff_N1_E2E3_6=[]
+    temp_cor_diff_N2_E2E3_6=[]
+    temp_cor_diff_N3_E2E3_6=[]
+    temp_cor_diff_REM_E2E3_6=[]
+
+    temp_dtw_Wake_E2E3_6=[]
+    temp_dtw_N1_E2E3_6=[]
+    temp_dtw_N2_E2E3_6=[]
+    temp_dtw_N3_E2E3_6=[]
+    temp_dtw_REM_E2E3_6=[]
+
+    temp_dtw_diff_Wake_E2E3_6=[]
+    temp_dtw_diff_N1_E2E3_6=[]
+    temp_dtw_diff_N2_E2E3_6=[]
+    temp_dtw_diff_N3_E2E3_6=[]
+    temp_dtw_diff_REM_E2E3_6=[]
+
+
+    # 6E E1E4
+    
+    temp_cor_diff_Wake_E1E4_6=[]
+    temp_cor_diff_N1_E1E4_6=[]
+    temp_cor_diff_N2_E1E4_6=[]
+    temp_cor_diff_N3_E1E4_6=[]
+    temp_cor_diff_REM_E1E4_6=[]
+
+    temp_dtw_Wake_E1E4_6=[]
+    temp_dtw_N1_E1E4_6=[]
+    temp_dtw_N2_E1E4_6=[]
+    temp_dtw_N3_E1E4_6=[]
+    temp_dtw_REM_E1E4_6=[]
+
+    temp_dtw_diff_Wake_E1E4_6=[]
+    temp_dtw_diff_N1_E1E4_6=[]
+    temp_dtw_diff_N2_E1E4_6=[]
+    temp_dtw_diff_N3_E1E4_6=[]
+    temp_dtw_diff_REM_E1E4_6=[]
+
+
+    # 6E E2E4
+    
+    temp_cor_diff_Wake_E2E4_6=[]
+    temp_cor_diff_N1_E2E4_6=[]
+    temp_cor_diff_N2_E2E4_6=[]
+    temp_cor_diff_N3_E2E4_6=[]
+    temp_cor_diff_REM_E2E4_6=[]
+
+    temp_dtw_Wake_E2E4_6=[]
+    temp_dtw_N1_E2E4_6=[]
+    temp_dtw_N2_E2E4_6=[]
+    temp_dtw_N3_E2E4_6=[]
+    temp_dtw_REM_E2E4_6=[]
+
+    temp_dtw_diff_Wake_E2E4_6=[]
+    temp_dtw_diff_N1_E2E4_6=[]
+    temp_dtw_diff_N2_E2E4_6=[]
+    temp_dtw_diff_N3_E2E4_6=[]
+    temp_dtw_diff_REM_E2E4_6=[]
+
+    # 6E E3E4
+    
+    temp_cor_diff_Wake_E3E4_6=[]
+    temp_cor_diff_N1_E3E4_6=[]
+    temp_cor_diff_N2_E3E4_6=[]
+    temp_cor_diff_N3_E3E4_6=[]
+    temp_cor_diff_REM_E3E4_6=[]
+
+    temp_dtw_Wake_E3E4_6=[]
+    temp_dtw_N1_E3E4_6=[]
+    temp_dtw_N2_E3E4_6=[]
+    temp_dtw_N3_E3E4_6=[]
+    temp_dtw_REM_E3E4_6=[]
+
+    temp_dtw_diff_Wake_E3E4_6=[]
+    temp_dtw_diff_N1_E3E4_6=[]
+    temp_dtw_diff_N2_E3E4_6=[]
+    temp_dtw_diff_N3_E3E4_6=[]
+    temp_dtw_diff_REM_E3E4_6=[]
+
+
+    # 6E E1E5
+    
+    temp_cor_diff_Wake_E1E5_6=[]
+    temp_cor_diff_N1_E1E5_6=[]
+    temp_cor_diff_N2_E1E5_6=[]
+    temp_cor_diff_N3_E1E5_6=[]
+    temp_cor_diff_REM_E1E5_6=[]
+
+    temp_dtw_Wake_E1E5_6=[]
+    temp_dtw_N1_E1E5_6=[]
+    temp_dtw_N2_E1E5_6=[]
+    temp_dtw_N3_E1E5_6=[]
+    temp_dtw_REM_E1E5_6=[]
+
+    temp_dtw_diff_Wake_E1E5_6=[]
+    temp_dtw_diff_N1_E1E5_6=[]
+    temp_dtw_diff_N2_E1E5_6=[]
+    temp_dtw_diff_N3_E1E5_6=[]
+    temp_dtw_diff_REM_E1E5_6=[]
+
+    # 6E E2E5
+    
+    temp_cor_diff_Wake_E2E5_6=[]
+    temp_cor_diff_N1_E2E5_6=[]
+    temp_cor_diff_N2_E2E5_6=[]
+    temp_cor_diff_N3_E2E5_6=[]
+    temp_cor_diff_REM_E2E5_6=[]
+
+    temp_dtw_Wake_E2E5_6=[]
+    temp_dtw_N1_E2E5_6=[]
+    temp_dtw_N2_E2E5_6=[]
+    temp_dtw_N3_E2E5_6=[]
+    temp_dtw_REM_E2E5_6=[]
+
+    temp_dtw_diff_Wake_E2E5_6=[]
+    temp_dtw_diff_N1_E2E5_6=[]
+    temp_dtw_diff_N2_E2E5_6=[]
+    temp_dtw_diff_N3_E2E5_6=[]
+    temp_dtw_diff_REM_E2E5_6=[]
+
+    # 6E E3E5
+    
+    temp_cor_diff_Wake_E3E5_6=[]
+    temp_cor_diff_N1_E3E5_6=[]
+    temp_cor_diff_N2_E3E5_6=[]
+    temp_cor_diff_N3_E3E5_6=[]
+    temp_cor_diff_REM_E3E5_6=[]
+
+    temp_dtw_Wake_E3E5_6=[]
+    temp_dtw_N1_E3E5_6=[]
+    temp_dtw_N2_E3E5_6=[]
+    temp_dtw_N3_E3E5_6=[]
+    temp_dtw_REM_E3E5_6=[]
+
+    temp_dtw_diff_Wake_E3E5_6=[]
+    temp_dtw_diff_N1_E3E5_6=[]
+    temp_dtw_diff_N2_E3E5_6=[]
+    temp_dtw_diff_N3_E3E5_6=[]
+    temp_dtw_diff_REM_E3E5_6=[]
+
+    # 6E E4E5 
+    
+    temp_cor_diff_Wake_E4E5_6=[]
+    temp_cor_diff_N1_E4E5_6=[]
+    temp_cor_diff_N2_E4E5_6=[]
+    temp_cor_diff_N3_E4E5_6=[]
+    temp_cor_diff_REM_E4E5_6=[]
+
+    temp_dtw_Wake_E4E5_6=[]
+    temp_dtw_N1_E4E5_6=[]
+    temp_dtw_N2_E4E5_6=[]
+    temp_dtw_N3_E4E5_6=[]
+    temp_dtw_REM_E4E5_6=[]
+
+    temp_dtw_diff_Wake_E4E5_6=[]
+    temp_dtw_diff_N1_E4E5_6=[]
+    temp_dtw_diff_N2_E4E5_6=[]
+    temp_dtw_diff_N3_E4E5_6=[]
+    temp_dtw_diff_REM_E4E5_6=[]
+
+    # 6E E1E6
+    
+    temp_cor_diff_Wake_E1E6_6=[]
+    temp_cor_diff_N1_E1E6_6=[]
+    temp_cor_diff_N2_E1E6_6=[]
+    temp_cor_diff_N3_E1E6_6=[]
+    temp_cor_diff_REM_E1E6_6=[]
+
+    temp_dtw_Wake_E1E6_6=[]
+    temp_dtw_N1_E1E6_6=[]
+    temp_dtw_N2_E1E6_6=[]
+    temp_dtw_N3_E1E6_6=[]
+    temp_dtw_REM_E1E6_6=[]
+
+    temp_dtw_diff_Wake_E1E6_6=[]
+    temp_dtw_diff_N1_E1E6_6=[]
+    temp_dtw_diff_N2_E1E6_6=[]
+    temp_dtw_diff_N3_E1E6_6=[]
+    temp_dtw_diff_REM_E1E6_6=[]
+
+    # 6E E2E6
+
+    
+    temp_cor_diff_Wake_E2E6_6=[]
+    temp_cor_diff_N1_E2E6_6=[]
+    temp_cor_diff_N2_E2E6_6=[]
+    temp_cor_diff_N3_E2E6_6=[]
+    temp_cor_diff_REM_E2E6_6=[]
+
+    temp_dtw_Wake_E2E6_6=[]
+    temp_dtw_N1_E2E6_6=[]
+    temp_dtw_N2_E2E6_6=[]
+    temp_dtw_N3_E2E6_6=[]
+    temp_dtw_REM_E2E6_6=[]
+
+    temp_dtw_diff_Wake_E2E6_6=[]
+    temp_dtw_diff_N1_E2E6_6=[]
+    temp_dtw_diff_N2_E2E6_6=[]
+    temp_dtw_diff_N3_E2E6_6=[]
+    temp_dtw_diff_REM_E2E6_6=[]
+
+    # 6E E3E6
+
+    
+    temp_cor_diff_Wake_E3E6_6=[]
+    temp_cor_diff_N1_E3E6_6=[]
+    temp_cor_diff_N2_E3E6_6=[]
+    temp_cor_diff_N3_E3E6_6=[]
+    temp_cor_diff_REM_E3E6_6=[]
+
+    temp_dtw_Wake_E3E6_6=[]
+    temp_dtw_N1_E3E6_6=[]
+    temp_dtw_N2_E3E6_6=[]
+    temp_dtw_N3_E3E6_6=[]
+    temp_dtw_REM_E3E6_6=[]
+
+    temp_dtw_diff_Wake_E3E6_6=[]
+    temp_dtw_diff_N1_E3E6_6=[]
+    temp_dtw_diff_N2_E3E6_6=[]
+    temp_dtw_diff_N3_E3E6_6=[]
+    temp_dtw_diff_REM_E3E6_6=[]
+
+    # 6E E4E6
+    
+    temp_cor_diff_Wake_E4E6_6=[]
+    temp_cor_diff_N1_E4E6_6=[]
+    temp_cor_diff_N2_E4E6_6=[]
+    temp_cor_diff_N3_E4E6_6=[]
+    temp_cor_diff_REM_E4E6_6=[]
+
+    temp_dtw_Wake_E4E6_6=[]
+    temp_dtw_N1_E4E6_6=[]
+    temp_dtw_N2_E4E6_6=[]
+    temp_dtw_N3_E4E6_6=[]
+    temp_dtw_REM_E4E6_6=[]
+
+    temp_dtw_diff_Wake_E4E6_6=[]
+    temp_dtw_diff_N1_E4E6_6=[]
+    temp_dtw_diff_N2_E4E6_6=[]
+    temp_dtw_diff_N3_E4E6_6=[]
+    temp_dtw_diff_REM_E4E6_6=[]
+
+    # 6E E5E6
+    
+    temp_cor_diff_Wake_E5E6_6=[]
+    temp_cor_diff_N1_E5E6_6=[]
+    temp_cor_diff_N2_E5E6_6=[]
+    temp_cor_diff_N3_E5E6_6=[]
+    temp_cor_diff_REM_E5E6_6=[]
+
+    temp_dtw_Wake_E5E6_6=[]
+    temp_dtw_N1_E5E6_6=[]
+    temp_dtw_N2_E5E6_6=[]
+    temp_dtw_N3_E5E6_6=[]
+    temp_dtw_REM_E5E6_6=[]
+
+    temp_dtw_diff_Wake_E5E6_6=[]
+    temp_dtw_diff_N1_E5E6_6=[]
+    temp_dtw_diff_N2_E5E6_6=[]
+    temp_dtw_diff_N3_E5E6_6=[]
+    temp_dtw_diff_REM_E5E6_6=[]
+
+
     # List of folder paths
     main_folders = os.listdir(output_path)#["folder1", "folder2", "folder3"]  # Replace with your actual folder paths
     print('List of main folders unsorted')
@@ -1048,7 +1953,19 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
         #patientID=str(main_folder) 
         file_name=str(main_folder) 
         print('Folder') # Check which folder we are inside 
-        print(file_name )
+        print(file_name)
+
+        # Loading restructured time signal 
+        #file_name
+        path_name=f"{file_name}.EDF"
+        path_time_signal=os.path.join(path_folder,path_name)
+        print('path_time_signal')
+        print(path_time_signal)
+        signals, signal_headers, header = plib.highlevel.read_edf(path_time_signal)
+        time_signal=signals[0]
+        signal_header_interest=signal_headers[0]
+        fs=signal_header_interest['sample_frequency']
+        fs=int(fs)
 
         print('PatientID')
         # Skipping the first part of the filename to extract the real patientID 
@@ -1165,7 +2082,7 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
             print(k)
             correlation_structure =[]
             temporary_list =[]
-
+            temp_correlation_diff=[]
 
             ##### Correlation loop ################
 
@@ -1187,23 +2104,62 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                 print(correlation_matrix[0,1]) # Saving the relevant value from the (2,2) matrix
                 # The Pearson (product-moment) correlation coefficient is a measure of the linear relationship between two features.
                 # Pearson correlation coefficient can take on any real value in the range −1 ≤ r ≤ 1.
-                
+                            
                 # Saving the value in a temporary list 
                 temporary_list.append(correlation_matrix[0,1])
-                
+
+
+                # Differentiates the hypnodensities 
+                diff_hyp1=np.diff(Electrode1[:,j])
+                print(diff_hyp1.shape)
+                diff_hyp2=np.diff(Electrode2[:,j])
+                print(diff_hyp2.shape)
+
+                correlation_diff=np.corrcoef(diff_hyp1,diff_hyp2) # correlating the differentiated hypnodensities 
+                print('Correlation diff matrix inside loop')
+                print(correlation_diff[0,1]) # Saving the relevant value from the (2,2) matrix
+
+                temp_correlation_diff.append(correlation_diff[0,1])
+
+                            
             # Creating a 3D structure with correlation matrices 
             correlation_structure= np.stack(temporary_list,axis=0)
+            del temporary_list, diff_hyp1, diff_hyp2
 
             # Generating the correlation structure 
             print('Correlation structure!!!')
             print(correlation_structure)
             print(correlation_structure.shape)
 
+            # correlation diff
+            correlation_diff=np.stack(temp_correlation_diff,axis=0)
+            del temp_correlation_diff
+
+            print('Correlation diff')
+            print(correlation_diff)
+            print(correlation_diff.shape)
+
+           
+
+            #### Dynamic time warping ####
+
+            # Input: Electrode1, Electrode2, epoch_size_in_seconds
+            # Output: One value for dynamic timewarping between signals 
+            epoch_size_in_seconds_loop = epoch_size_in_seconds_numbers
+            epoch_size_in_seconds_loop=int(epoch_size_in_seconds_loop)
+            print('Epoch size in seconds for dynamic time warping')
+            print(epoch_size_in_seconds_loop)
+            dtw_values,dtw_diff_values=dynamic_time_warping(Electrode1,Electrode2,epoch_size_in_seconds_loop,time_signal,fs)
+
+            print('Dynamic time warping results - normal')
+            print(dtw_values)
+
+            print('Dynamic time warping results - differentiated')
+            print(dtw_diff_values)
+
             # Making sure not to save wrong electrodes 
             del Electrode1, Electrode2
             
-
-
 
             ######### Storing the correlation structures according to number of electrodes in the data ############
             
@@ -1234,6 +2190,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                 temp_correlation_N3_E1E2_2.append(correlation_structure[3])
                 temp_correlation_REM_E1E2_2.append(correlation_structure[4])
 
+                temp_cor_diff_Wake_E1E2_2.append(correlation_diff[0])
+                temp_cor_diff_N1_E1E2_2.append(correlation_diff[1])
+                temp_cor_diff_N2_E1E2_2.append(correlation_diff[2])
+                temp_cor_diff_N3_E1E2_2.append(correlation_diff[3])
+                temp_cor_diff_REM_E1E2_2.append(correlation_diff[4])
+
+                temp_dtw_Wake_E1E2_2.append(dtw_values[0])
+                temp_dtw_N1_E1E2_2.append(dtw_values[1])
+                temp_dtw_N2_E1E2_2.append(dtw_values[2])
+                temp_dtw_N3_E1E2_2.append(dtw_values[3])
+                temp_dtw_REM_E1E2_2.append(dtw_values[4])
+
+                temp_dtw_diff_Wake_E1E2_2.append(dtw_diff_values[0])
+                temp_dtw_diff_N1_E1E2_2.append(dtw_diff_values[1])
+                temp_dtw_diff_N2_E1E2_2.append(dtw_diff_values[2])
+                temp_dtw_diff_N3_E1E2_2.append(dtw_diff_values[3])
+                temp_dtw_diff_REM_E1E2_2.append(dtw_diff_values[4])
+
+
 
                 print('Electrode combination')
                 print(Electrode_combination_naming)
@@ -1241,11 +2216,26 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                 # Create a dictionary to store patient ID and corresponding information
                 patient_data_dict_E1E2_2 = {
                     'PatientID': temp_patient_id_E1E2_2,
-                    'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E2_2,
-                    'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E2_2,
-                    'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_2,
-                    'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_2,
-                    'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_2,
+                    'Wake_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E2_2,
+                    'N1_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E2_2,
+                    'N2_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_2,
+                    'N3_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_2,
+                    'REM_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_2,
+                    'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E2_2,
+                    'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E2_2,
+                    'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E2_2,
+                    'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E2_2,
+                    'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E2_2,
+                    'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E2_2,
+                    'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E2_2,
+                    'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E2_2,
+                    'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E2_2,
+                    'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E2_2,
+                    'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E2_2,
+                    'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E2_2,
+                    'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E2_2,
+                    'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E2_2,
+                    'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E2_2,
                 }
 
                 print('Patient dictionary E1E2_2 - two electrodes, one combination')
@@ -1272,18 +2262,51 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E2_3.append(correlation_structure[3])
                     temp_correlation_REM_E1E2_3.append(correlation_structure[4])
 
+                    temp_cor_diff_Wake_E1E2_3.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E2_3.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E2_3.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E2_3.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E2_3.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E2_3.append(dtw_values[0])
+                    temp_dtw_N1_E1E2_3.append(dtw_values[1])
+                    temp_dtw_N2_E1E2_3.append(dtw_values[2])
+                    temp_dtw_N3_E1E2_3.append(dtw_values[3])
+                    temp_dtw_REM_E1E2_3.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E2_3.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E2_3.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E2_3.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E2_3.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E2_3.append(dtw_diff_values[4])
+
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
                     # Create a dictionary to store patient ID and corresponding information
                     patient_data_dict_E1E2_3 = {
-                        'PatientID': temp_patient_id_E1E2_3,
-                        'Wake_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E2_3,
-                        'N1_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E2_3,
-                        'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_3,
-                        'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_3,
-                        'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_3,
+                    'PatientID': temp_patient_id_E1E2_2,
+                    'Wake_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_Wake_E1E2_3,
+                    'N1_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N1_E1E2_3,
+                    'N2_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_3,
+                    'N3_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_3,
+                    'REM_corr_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_3,
+                    'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E2_3,
+                    'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E2_3,
+                    'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E2_3,
+                    'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E2_3,
+                    'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E2_3,
+                    'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E2_3,
+                    'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E2_3,
+                    'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E2_3,
+                    'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E2_3,
+                    'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E2_3,
+                    'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E2_3,
+                    'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E2_3,
+                    'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E2_3,
+                    'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E2_3,
+                    'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E2_3,
                     }
 
                     print('Patient dictionary E1E2_3 - three electrodes, first combination')
@@ -1303,6 +2326,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E3_3.append(correlation_structure[3])
                     temp_correlation_REM_E1E3_3.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E1E3_3.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E3_3.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E3_3.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E3_3.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E3_3.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E3_3.append(dtw_values[0])
+                    temp_dtw_N1_E1E3_3.append(dtw_values[1])
+                    temp_dtw_N2_E1E3_3.append(dtw_values[2])
+                    temp_dtw_N3_E1E3_3.append(dtw_values[3])
+                    temp_dtw_REM_E1E3_3.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E3_3.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E3_3.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E3_3.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E3_3.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E3_3.append(dtw_diff_values[4])
+
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1315,6 +2357,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E3_3,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E3_3,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E3_3,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E3_3,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E3_3,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E3_3,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E3_3,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E3_3,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E3_3,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E3_3,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E3_3,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E3_3,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E3_3,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E3_3,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E3_3,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E3_3,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E3_3,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E3_3,
                     }
                     
                     print('Patient dictionary E1E3_3 - three electrodes, second combination')
@@ -1334,6 +2391,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E3_3.append(correlation_structure[3])
                     temp_correlation_REM_E2E3_3.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E2E3_3.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E3_3.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E3_3.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E3_3.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E3_3.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E2E3_3.append(dtw_values[0])
+                    temp_dtw_N1_E2E3_3.append(dtw_values[1])
+                    temp_dtw_N2_E2E3_3.append(dtw_values[2])
+                    temp_dtw_N3_E2E3_3.append(dtw_values[3])
+                    temp_dtw_REM_E2E3_3.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E3_3.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E3_3.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E3_3.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E3_3.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E3_3.append(dtw_diff_values[4])
+
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1346,6 +2422,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E3_3,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E3_3,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E3_3,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E3_3,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E3_3,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E3_3,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E3_3,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E3_3,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E3_3,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E3_3,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E3_3,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E3_3,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E3_3,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E3_3,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E3_3,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E3_3,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E3_3,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E3_3,
                     }
 
                     print('Patient dictionary E2E3_3 - three electrodes, third combination')
@@ -1373,6 +2464,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_REM_E1E2_4.append(correlation_structure[4])
 
 
+                    temp_cor_diff_Wake_E1E2_4.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E2_4.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E2_4.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E2_4.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E2_4.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E2_4.append(dtw_values[0])
+                    temp_dtw_N1_E1E2_4.append(dtw_values[1])
+                    temp_dtw_N2_E1E2_4.append(dtw_values[2])
+                    temp_dtw_N3_E1E2_4.append(dtw_values[3])
+                    temp_dtw_REM_E1E2_4.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E2_4.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E2_4.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E2_4.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E2_4.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E2_4.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1384,6 +2493,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_4,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_4,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_4,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E2_4,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E2_4,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E2_4,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E2_4,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E2_4,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E2_4,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E2_4,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E2_4,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E2_4,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E2_4,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E2_4,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E2_4,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E2_4,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E2_4,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E2_4,
                     }
 
                     print('Patient dictionary E1E2_4 - three electrodes, first combination')
@@ -1404,6 +2528,26 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_REM_E1E3_4.append(correlation_structure[4])
 
 
+                    
+                    temp_cor_diff_Wake_E1E3_4.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E3_4.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E3_4.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E3_4.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E3_4.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E3_4.append(dtw_values[0])
+                    temp_dtw_N1_E1E3_4.append(dtw_values[1])
+                    temp_dtw_N2_E1E3_4.append(dtw_values[2])
+                    temp_dtw_N3_E1E3_4.append(dtw_values[3])
+                    temp_dtw_REM_E1E3_4.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E3_4.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E3_4.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E3_4.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E3_4.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E3_4.append(dtw_diff_values[4])
+
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1415,6 +2559,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E3_4,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E3_4,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E3_4,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E3_4,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E3_4,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E3_4,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E3_4,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E3_4,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E3_4,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E3_4,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E3_4,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E3_4,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E3_4,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E3_4,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E3_4,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E3_4,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E3_4,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E3_4,
                     }
                     
                     print('Patient dictionary E1E3_4 - four electrodes, second combination')
@@ -1434,6 +2593,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E3_4.append(correlation_structure[3])
                     temp_correlation_REM_E2E3_4.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E2E3_4.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E3_4.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E3_4.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E3_4.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E3_4.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E2E3_4.append(dtw_values[0])
+                    temp_dtw_N1_E2E3_4.append(dtw_values[1])
+                    temp_dtw_N2_E2E3_4.append(dtw_values[2])
+                    temp_dtw_N3_E2E3_4.append(dtw_values[3])
+                    temp_dtw_REM_E2E3_4.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E3_4.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E3_4.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E3_4.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E3_4.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E3_4.append(dtw_diff_values[4])
+
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1446,6 +2624,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E3_4,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E3_4,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E3_4,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E3_4,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E3_4,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E3_4,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E3_4,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E3_4,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E3_4,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E3_4,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E3_4,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E3_4,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E3_4,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E3_4,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E3_4,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E3_4,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E3_4,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E3_4,
                     }
 
                     print('Patient dictionary E2E3_4 - four electrodes, third combination')
@@ -1467,6 +2660,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_REM_E1E4_4.append(correlation_structure[4])
 
 
+                    temp_cor_diff_Wake_E1E4_4.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E4_4.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E4_4.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E4_4.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E4_4.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E4_4.append(dtw_values[0])
+                    temp_dtw_N1_E1E4_4.append(dtw_values[1])
+                    temp_dtw_N2_E1E4_4.append(dtw_values[2])
+                    temp_dtw_N3_E1E4_4.append(dtw_values[3])
+                    temp_dtw_REM_E1E4_4.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E4_4.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E4_4.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E4_4.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E4_4.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E4_4.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1478,6 +2689,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E4_4,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E4_4,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E4_4,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E4_4,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E4_4,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E4_4,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E4_4,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E4_4,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E4_4,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E4_4,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E4_4,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E4_4,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E4_4,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E4_4,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E4_4,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E4_4,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E4_4,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E4_4,
                     }
 
                     print('Patient dictionary E1E4_4 - four electrodes, fourth combination')
@@ -1497,6 +2723,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E4_4.append(correlation_structure[3])
                     temp_correlation_REM_E2E4_4.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E2E4_4.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E4_4.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E4_4.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E4_4.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E4_4.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E2E4_4.append(dtw_values[0])
+                    temp_dtw_N1_E2E4_4.append(dtw_values[1])
+                    temp_dtw_N2_E2E4_4.append(dtw_values[2])
+                    temp_dtw_N3_E2E4_4.append(dtw_values[3])
+                    temp_dtw_REM_E2E4_4.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E4_4.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E4_4.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E4_4.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E4_4.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E4_4.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1508,6 +2753,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E4_4,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E4_4,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E4_4,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E4_4,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E4_4,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E4_4,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E4_4,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E4_4,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E4_4,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E4_4,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E4_4,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E4_4,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E4_4,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E4_4,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E4_4,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E4_4,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E4_4,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E4_4,
                     }
 
                     print('Patient dictionary E2E4_4 - four electrodes, fifth combination')
@@ -1528,6 +2788,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E4_4.append(correlation_structure[3])
                     temp_correlation_REM_E3E4_4.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E3E4_4.append(correlation_diff[0])
+                    temp_cor_diff_N1_E3E4_4.append(correlation_diff[1])
+                    temp_cor_diff_N2_E3E4_4.append(correlation_diff[2])
+                    temp_cor_diff_N3_E3E4_4.append(correlation_diff[3])
+                    temp_cor_diff_REM_E3E4_4.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E3E4_4.append(dtw_values[0])
+                    temp_dtw_N1_E3E4_4.append(dtw_values[1])
+                    temp_dtw_N2_E3E4_4.append(dtw_values[2])
+                    temp_dtw_N3_E3E4_4.append(dtw_values[3])
+                    temp_dtw_REM_E3E4_4.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E3E4_4.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E3E4_4.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E3E4_4.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E3E4_4.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E3E4_4.append(dtw_diff_values[4])
+
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1540,6 +2819,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E4_4,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E4_4,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E4_4,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E3E4_4,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E3E4_4,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E3E4_4,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E3E4_4,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E3E4_4,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E3E4_4,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E3E4_4,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E3E4_4,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E3E4_4,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E3E4_4,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E3E4_4,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E3E4_4,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E3E4_4,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E3E4_4,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E3E4_4,
                     }
 
                     print('Patient dictionary E3E4_4 - four electrodes, sixth combination')
@@ -1568,6 +2862,26 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_REM_E1E2_5.append(correlation_structure[4])
 
 
+                    
+                    temp_cor_diff_Wake_E1E2_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E2_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E2_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E2_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E2_5.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E2_5.append(dtw_values[0])
+                    temp_dtw_N1_E1E2_5.append(dtw_values[1])
+                    temp_dtw_N2_E1E2_5.append(dtw_values[2])
+                    temp_dtw_N3_E1E2_5.append(dtw_values[3])
+                    temp_dtw_REM_E1E2_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E2_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E2_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E2_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E2_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E2_5.append(dtw_diff_values[4])
+
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1579,6 +2893,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E2_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E2_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E2_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E2_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E2_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E2_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E2_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E2_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E2_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E2_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E2_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E2_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E2_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E2_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E2_5,
                     }
 
                     print('Patient dictionary E1E2_5 - five electrodes, first combination')
@@ -1598,6 +2927,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E3_5.append(correlation_structure[3])
                     temp_correlation_REM_E1E3_5.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E1E3_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E3_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E3_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E3_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E3_5.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E3_5.append(dtw_values[0])
+                    temp_dtw_N1_E1E3_5.append(dtw_values[1])
+                    temp_dtw_N2_E1E3_5.append(dtw_values[2])
+                    temp_dtw_N3_E1E3_5.append(dtw_values[3])
+                    temp_dtw_REM_E1E3_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E3_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E3_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E3_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E3_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E3_5.append(dtw_diff_values[4])
+
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1610,6 +2958,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E3_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E3_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E3_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E3_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E3_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E3_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E3_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E3_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E3_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E3_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E3_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E3_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E3_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E3_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E3_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E3_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E3_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E3_5,
                     }
                     
                     print('Patient dictionary E1E3_5 - five electrodes, second combination')
@@ -1629,6 +2992,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E3_5.append(correlation_structure[3])
                     temp_correlation_REM_E2E3_5.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E2E3_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E3_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E3_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E3_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E3_5.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E2E3_5.append(dtw_values[0])
+                    temp_dtw_N1_E2E3_5.append(dtw_values[1])
+                    temp_dtw_N2_E2E3_5.append(dtw_values[2])
+                    temp_dtw_N3_E2E3_5.append(dtw_values[3])
+                    temp_dtw_REM_E2E3_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E3_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E3_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E3_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E3_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E3_5.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1640,6 +3022,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E3_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E3_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E3_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E3_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E3_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E3_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E3_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E3_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E3_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E3_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E3_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E3_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E3_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E3_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E3_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E3_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E3_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E3_5,
                     }
 
                     print('Patient dictionary E2E3_5 - five electrodes, third combination')
@@ -1660,6 +3057,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E4_5.append(correlation_structure[3])
                     temp_correlation_REM_E1E4_5.append(correlation_structure[4])
 
+                    temp_cor_diff_Wake_E1E4_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E4_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E4_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E4_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E4_5.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E4_5.append(dtw_values[0])
+                    temp_dtw_N1_E1E4_5.append(dtw_values[1])
+                    temp_dtw_N2_E1E4_5.append(dtw_values[2])
+                    temp_dtw_N3_E1E4_5.append(dtw_values[3])
+                    temp_dtw_REM_E1E4_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E4_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E4_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E4_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E4_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E4_5.append(dtw_diff_values[4])
+
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1671,6 +3087,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E4_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E4_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E4_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E4_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E4_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E4_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E4_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E4_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E4_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E4_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E4_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E4_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E4_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E4_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E4_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E4_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E4_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E4_5,
                     }
 
                     print('Patient dictionary E1E4_5 - five electrodes, fourth combination')
@@ -1690,6 +3121,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E4_5.append(correlation_structure[3])
                     temp_correlation_REM_E2E4_5.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E2E4_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E4_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E4_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E4_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E4_5.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E2E4_5.append(dtw_values[0])
+                    temp_dtw_N1_E2E4_5.append(dtw_values[1])
+                    temp_dtw_N2_E2E4_5.append(dtw_values[2])
+                    temp_dtw_N3_E2E4_5.append(dtw_values[3])
+                    temp_dtw_REM_E2E4_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E4_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E4_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E4_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E4_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E4_5.append(dtw_diff_values[4])
+
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1702,6 +3152,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E4_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E4_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E4_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E4_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E4_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E4_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E4_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E4_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E4_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E4_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E4_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E4_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E4_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E4_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E4_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E4_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E4_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E4_5,
                     }
 
                     print('Patient dictionary E2E4_5 - five electrodes, fifth combination')
@@ -1722,6 +3187,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E4_5.append(correlation_structure[3])
                     temp_correlation_REM_E3E4_5.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E3E4_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E3E4_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E3E4_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E3E4_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E3E4_5.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E3E4_5.append(dtw_values[0])
+                    temp_dtw_N1_E3E4_5.append(dtw_values[1])
+                    temp_dtw_N2_E3E4_5.append(dtw_values[2])
+                    temp_dtw_N3_E3E4_5.append(dtw_values[3])
+                    temp_dtw_REM_E3E4_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E3E4_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E3E4_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E3E4_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E3E4_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E3E4_5.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1733,6 +3217,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E4_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E4_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E4_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E3E4_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E3E4_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E3E4_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E3E4_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E3E4_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E3E4_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E3E4_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E3E4_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E3E4_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E3E4_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E3E4_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E3E4_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E3E4_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E3E4_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E3E4_5,
                     }
 
                     print('Patient dictionary E3E4_5 - five electrodes, sixth combination')
@@ -1751,6 +3250,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E1E5_5.append(correlation_structure[2])
                     temp_correlation_N3_E1E5_5.append(correlation_structure[3])
                     temp_correlation_REM_E1E5_5.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E1E5_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E5_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E5_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E5_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E5_5.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E5_5.append(dtw_values[0])
+                    temp_dtw_N1_E1E5_5.append(dtw_values[1])
+                    temp_dtw_N2_E1E5_5.append(dtw_values[2])
+                    temp_dtw_N3_E1E5_5.append(dtw_values[3])
+                    temp_dtw_REM_E1E5_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E5_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E5_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E5_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E5_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E5_5.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1763,6 +3280,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E5_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E5_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E5_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E5_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E5_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E5_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E5_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E5_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E5_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E5_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E5_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E5_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E5_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E5_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E5_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E5_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E5_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E5_5,
                     }
 
                     print('Patient dictionary E1E5_5 - five electrodes, seventh combination')
@@ -1782,7 +3314,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E2E5_5.append(correlation_structure[2])
                     temp_correlation_N3_E2E5_5.append(correlation_structure[3])
                     temp_correlation_REM_E2E5_5.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E2E5_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E5_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E5_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E5_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E5_5.append(correlation_diff[4])
 
+                    temp_dtw_Wake_E2E5_5.append(dtw_values[0])
+                    temp_dtw_N1_E2E5_5.append(dtw_values[1])
+                    temp_dtw_N2_E2E5_5.append(dtw_values[2])
+                    temp_dtw_N3_E2E5_5.append(dtw_values[3])
+                    temp_dtw_REM_E2E5_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E5_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E5_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E5_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E5_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E5_5.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1795,6 +3344,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E5_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E5_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E5_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E5_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E5_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E5_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E5_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E5_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E5_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E5_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E5_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E5_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E5_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E5_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E5_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E5_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E5_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E5_5,
                     }
 
                     print('Patient dictionary E2E5_5 - five electrodes, 8th combination')
@@ -1814,6 +3378,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E5_5.append(correlation_structure[3])
                     temp_correlation_REM_E3E5_5.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E3E5_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E3E5_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E3E5_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E3E5_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E3E5_5.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E3E5_5.append(dtw_values[0])
+                    temp_dtw_N1_E3E5_5.append(dtw_values[1])
+                    temp_dtw_N2_E3E5_5.append(dtw_values[2])
+                    temp_dtw_N3_E3E5_5.append(dtw_values[3])
+                    temp_dtw_REM_E3E5_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E3E5_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E3E5_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E3E5_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E3E5_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E3E5_5.append(dtw_diff_values[4])
+
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1826,6 +3409,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E5_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E5_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E5_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E3E5_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E3E5_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E3E5_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E3E5_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E3E5_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E3E5_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E3E5_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E3E5_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E3E5_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E3E5_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E3E5_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E3E5_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E3E5_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E3E5_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E3E5_5,
                     }
 
                     print('Patient dictionary E3E5_5 - five electrodes, 9th combination')
@@ -1846,6 +3444,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E4E5_5.append(correlation_structure[3])
                     temp_correlation_REM_E4E5_5.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E4E5_5.append(correlation_diff[0])
+                    temp_cor_diff_N1_E4E5_5.append(correlation_diff[1])
+                    temp_cor_diff_N2_E4E5_5.append(correlation_diff[2])
+                    temp_cor_diff_N3_E4E5_5.append(correlation_diff[3])
+                    temp_cor_diff_REM_E4E5_5.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E4E5_5.append(dtw_values[0])
+                    temp_dtw_N1_E4E5_5.append(dtw_values[1])
+                    temp_dtw_N2_E4E5_5.append(dtw_values[2])
+                    temp_dtw_N3_E4E5_5.append(dtw_values[3])
+                    temp_dtw_REM_E4E5_5.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E4E5_5.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E4E5_5.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E4E5_5.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E4E5_5.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E4E5_5.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1857,6 +3474,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E4E5_5,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E4E5_5,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E4E5_5,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E4E5_5,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E4E5_5,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E4E5_5,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E4E5_5,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E4E5_5,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E4E5_5,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E4E5_5,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E4E5_5,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E4E5_5,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E4E5_5,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E4E5_5,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E4E5_5,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E4E5_5,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E4E5_5,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E4E5_5,
                     }
 
                     print('Patient dictionary E4E5_5 - five electrodes, 10th combination')
@@ -1882,6 +3514,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E1E2_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E2_6.append(correlation_structure[4])
 
+                    temp_cor_diff_Wake_E1E2_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E2_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E2_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E2_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E2_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E2_6.append(dtw_values[0])
+                    temp_dtw_N1_E1E2_6.append(dtw_values[1])
+                    temp_dtw_N2_E1E2_6.append(dtw_values[2])
+                    temp_dtw_N3_E1E2_6.append(dtw_values[3])
+                    temp_dtw_REM_E1E2_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E2_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E2_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E2_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E2_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E2_6.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -1893,6 +3543,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E2_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E2_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E2_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E2_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E2_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E2_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E2_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E2_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E2_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E2_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E2_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E2_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E2_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E2_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E2_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E2_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E2_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E2_6,
                     }
 
                     print('Patient dictionary E1E2_6 - six electrodes, first combination')
@@ -1911,6 +3576,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E1E3_6.append(correlation_structure[2])
                     temp_correlation_N3_E1E3_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E3_6.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E1E3_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E3_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E3_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E3_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E3_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E3_6.append(dtw_values[0])
+                    temp_dtw_N1_E1E3_6.append(dtw_values[1])
+                    temp_dtw_N2_E1E3_6.append(dtw_values[2])
+                    temp_dtw_N3_E1E3_6.append(dtw_values[3])
+                    temp_dtw_REM_E1E3_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E3_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E3_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E3_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E3_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E3_6.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1923,6 +3606,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E3_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E3_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E3_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E3_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E3_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E3_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E3_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E3_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E3_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E3_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E3_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E3_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E3_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E3_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E3_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E3_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E3_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E3_6,
                     }
                     
                     print('Patient dictionary E1E3_6 - six electrodes, second combination')
@@ -1941,6 +3639,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E2E3_6.append(correlation_structure[2])
                     temp_correlation_N3_E2E3_6.append(correlation_structure[3])
                     temp_correlation_REM_E2E3_6.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E2E3_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E3_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E3_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E3_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E3_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E2E3_6.append(dtw_values[0])
+                    temp_dtw_N1_E2E3_6.append(dtw_values[1])
+                    temp_dtw_N2_E2E3_6.append(dtw_values[2])
+                    temp_dtw_N3_E2E3_6.append(dtw_values[3])
+                    temp_dtw_REM_E2E3_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E3_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E3_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E3_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E3_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E3_6.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1953,6 +3669,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E3_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E3_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E3_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E3_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E3_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E3_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E3_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E3_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E3_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E3_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E3_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E3_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E3_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E3_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E3_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E3_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E3_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E3_6,
                     }
 
                     print('Patient dictionary E2E3_6 - six electrodes, third combination')
@@ -1972,6 +3703,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E1E4_6.append(correlation_structure[2])
                     temp_correlation_N3_E1E4_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E4_6.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E1E4_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E4_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E4_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E4_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E4_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E4_6.append(dtw_values[0])
+                    temp_dtw_N1_E1E4_6.append(dtw_values[1])
+                    temp_dtw_N2_E1E4_6.append(dtw_values[2])
+                    temp_dtw_N3_E1E4_6.append(dtw_values[3])
+                    temp_dtw_REM_E1E4_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E4_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E4_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E4_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E4_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E4_6.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -1984,6 +3733,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E4_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E4_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E4_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E4_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E4_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E4_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E4_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E4_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E4_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E4_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E4_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E4_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E4_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E4_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E4_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E4_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E4_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E4_6,
                     }
 
                     print('Patient dictionary E1E4_6 - six electrodes, fourth combination')
@@ -2002,6 +3766,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E2E4_6.append(correlation_structure[2])
                     temp_correlation_N3_E2E4_6.append(correlation_structure[3])
                     temp_correlation_REM_E2E4_6.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E2E4_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E4_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E4_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E4_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E4_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E2E4_6.append(dtw_values[0])
+                    temp_dtw_N1_E2E4_6.append(dtw_values[1])
+                    temp_dtw_N2_E2E4_6.append(dtw_values[2])
+                    temp_dtw_N3_E2E4_6.append(dtw_values[3])
+                    temp_dtw_REM_E2E4_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E4_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E4_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E4_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E4_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E4_6.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -2014,6 +3796,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E4_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E4_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E4_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E4_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E4_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E4_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E4_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E4_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E4_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E4_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E4_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E4_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E4_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E4_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E4_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E4_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E4_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E4_6,
                     }
 
                     print('Patient dictionary E2E4_6 - six electrodes, fifth combination')
@@ -2033,6 +3830,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E3E4_6.append(correlation_structure[2])
                     temp_correlation_N3_E3E4_6.append(correlation_structure[3])
                     temp_correlation_REM_E3E4_6.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E3E4_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E3E4_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E3E4_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E3E4_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E3E4_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E3E4_6.append(dtw_values[0])
+                    temp_dtw_N1_E3E4_6.append(dtw_values[1])
+                    temp_dtw_N2_E3E4_6.append(dtw_values[2])
+                    temp_dtw_N3_E3E4_6.append(dtw_values[3])
+                    temp_dtw_REM_E3E4_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E3E4_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E3E4_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E3E4_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E3E4_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E3E4_6.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -2045,6 +3860,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E4_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E4_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E4_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E3E4_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E3E4_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E3E4_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E3E4_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E3E4_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E3E4_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E3E4_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E3E4_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E3E4_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E3E4_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E3E4_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E3E4_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E3E4_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E3E4_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E3E4_6,
                     }
 
                     print('Patient dictionary E3E4_6 - six electrodes, sixth combination')
@@ -2063,6 +3893,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E1E5_6.append(correlation_structure[2])
                     temp_correlation_N3_E1E5_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E5_6.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E1E5_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E5_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E5_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E5_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E5_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E5_6.append(dtw_values[0])
+                    temp_dtw_N1_E1E5_6.append(dtw_values[1])
+                    temp_dtw_N2_E1E5_6.append(dtw_values[2])
+                    temp_dtw_N3_E1E5_6.append(dtw_values[3])
+                    temp_dtw_REM_E1E5_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E5_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E5_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E5_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E5_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E5_6.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -2075,6 +3923,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E5_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E5_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E5_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E5_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E5_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E5_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E5_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E5_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E5_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E5_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E5_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E5_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E5_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E5_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E5_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E5_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E5_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E5_6,
                     }
 
                     print('Patient dictionary E1E5_6 - six electrodes, seventh combination')
@@ -2095,6 +3958,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E5_6.append(correlation_structure[3])
                     temp_correlation_REM_E2E5_6.append(correlation_structure[4])
 
+                    temp_cor_diff_Wake_E2E5_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E5_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E5_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E5_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E5_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E2E5_6.append(dtw_values[0])
+                    temp_dtw_N1_E2E5_6.append(dtw_values[1])
+                    temp_dtw_N2_E2E5_6.append(dtw_values[2])
+                    temp_dtw_N3_E2E5_6.append(dtw_values[3])
+                    temp_dtw_REM_E2E5_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E5_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E5_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E5_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E5_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E5_6.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -2106,6 +3987,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E5_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E5_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E5_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E5_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E5_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E5_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E5_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E5_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E5_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E5_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E5_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E5_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E5_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E5_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E5_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E5_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E5_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E5_6,
                     }
 
                     print('Patient dictionary E2E5_6 - six electrodes, 8th combination')
@@ -2125,6 +4021,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E5_6.append(correlation_structure[3])
                     temp_correlation_REM_E3E5_6.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E3E5_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E3E5_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E3E5_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E3E5_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E3E5_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E3E5_6.append(dtw_values[0])
+                    temp_dtw_N1_E3E5_6.append(dtw_values[1])
+                    temp_dtw_N2_E3E5_6.append(dtw_values[2])
+                    temp_dtw_N3_E3E5_6.append(dtw_values[3])
+                    temp_dtw_REM_E3E5_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E3E5_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E3E5_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E3E5_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E3E5_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E3E5_6.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -2136,6 +4051,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E5_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E5_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E5_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E3E5_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E3E5_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E3E5_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E3E5_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E3E5_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E3E5_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E3E5_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E3E5_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E3E5_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E3E5_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E3E5_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E3E5_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E3E5_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E3E5_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E3E5_6,
                     }
 
                     print('Patient dictionary E3E5_6 - six electrodes, 9th combination')
@@ -2156,6 +4086,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E4E5_6.append(correlation_structure[3])
                     temp_correlation_REM_E4E5_6.append(correlation_structure[4])
 
+                    temp_cor_diff_Wake_E4E5_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E4E5_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E4E5_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E4E5_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E4E5_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E4E5_6.append(dtw_values[0])
+                    temp_dtw_N1_E4E5_6.append(dtw_values[1])
+                    temp_dtw_N2_E4E5_6.append(dtw_values[2])
+                    temp_dtw_N3_E4E5_6.append(dtw_values[3])
+                    temp_dtw_REM_E4E5_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E4E5_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E4E5_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E4E5_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E4E5_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E4E5_6.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -2167,6 +4115,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E4E5_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E4E5_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E4E5_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E4E5_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E4E5_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E4E5_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E4E5_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E4E5_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E4E5_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E4E5_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E4E5_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E4E5_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E4E5_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E4E5_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E4E5_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E4E5_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E4E5_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E4E5_6,
                     }
 
                     print('Patient dictionary E4E5_6 - six electrodes, 10th combination')
@@ -2186,6 +4149,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E1E6_6.append(correlation_structure[2])
                     temp_correlation_N3_E1E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E1E6_6.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E1E6_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E1E6_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E1E6_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E1E6_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E1E6_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E1E6_6.append(dtw_values[0])
+                    temp_dtw_N1_E1E6_6.append(dtw_values[1])
+                    temp_dtw_N2_E1E6_6.append(dtw_values[2])
+                    temp_dtw_N3_E1E6_6.append(dtw_values[3])
+                    temp_dtw_REM_E1E6_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E1E6_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E1E6_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E1E6_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E1E6_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E1E6_6.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -2198,6 +4179,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E1E6_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E1E6_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E1E6_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E1E6_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E1E6_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E1E6_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E1E6_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E1E6_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E1E6_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E1E6_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E1E6_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E1E6_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E1E6_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E1E6_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E1E6_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E1E6_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E1E6_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E1E6_6,
                     }
 
                     print('Patient dictionary E1E6_6 - six electrodes, 11th combination')
@@ -2218,6 +4214,25 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E2E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E2E6_6.append(correlation_structure[4])
 
+                    
+                    temp_cor_diff_Wake_E2E6_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E2E6_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E2E6_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E2E6_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E2E6_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E2E6_6.append(dtw_values[0])
+                    temp_dtw_N1_E2E6_6.append(dtw_values[1])
+                    temp_dtw_N2_E2E6_6.append(dtw_values[2])
+                    temp_dtw_N3_E2E6_6.append(dtw_values[3])
+                    temp_dtw_REM_E2E6_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E2E6_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E2E6_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E2E6_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E2E6_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E2E6_6.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -2229,6 +4244,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E2E6_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E2E6_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E2E6_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E2E6_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E2E6_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E2E6_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E2E6_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E2E6_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E2E6_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E2E6_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E2E6_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E2E6_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E2E6_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E2E6_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E2E6_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E2E6_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E2E6_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E2E6_6,
                     }
 
                     print('Patient dictionary E2E6_6 - six electrodes, 12th combination')
@@ -2249,6 +4279,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N3_E3E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E3E6_6.append(correlation_structure[4])
 
+                    temp_cor_diff_Wake_E3E6_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E3E6_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E3E6_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E3E6_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E3E6_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E3E6_6.append(dtw_values[0])
+                    temp_dtw_N1_E3E6_6.append(dtw_values[1])
+                    temp_dtw_N2_E3E6_6.append(dtw_values[2])
+                    temp_dtw_N3_E3E6_6.append(dtw_values[3])
+                    temp_dtw_REM_E3E6_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E3E6_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E3E6_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E3E6_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E3E6_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E3E6_6.append(dtw_diff_values[4])
+
                     print('Electrode combination')
                     print(Electrode_combination_naming)
 
@@ -2260,6 +4308,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E3E6_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E3E6_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E3E6_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E3E6_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E3E6_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E3E6_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E3E6_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E3E6_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E3E6_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E3E6_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E3E6_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E3E6_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E3E6_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E3E6_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E3E6_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E3E6_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E3E6_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E3E6_6,
                     }
 
                     print('Patient dictionary E3E6_6 - six electrodes, 13th combination')
@@ -2280,6 +4343,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E4E6_6.append(correlation_structure[2])
                     temp_correlation_N3_E4E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E4E6_6.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E4E6_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E4E6_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E4E6_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E4E6_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E4E6_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E4E6_6.append(dtw_values[0])
+                    temp_dtw_N1_E4E6_6.append(dtw_values[1])
+                    temp_dtw_N2_E4E6_6.append(dtw_values[2])
+                    temp_dtw_N3_E4E6_6.append(dtw_values[3])
+                    temp_dtw_REM_E4E6_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E4E6_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E4E6_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E4E6_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E4E6_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E4E6_6.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -2292,6 +4373,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E4E6_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E4E6_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E4E6_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E4E6_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E4E6_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E4E6_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E4E6_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E4E6_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E4E6_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E4E6_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E4E6_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E4E6_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E4E6_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E4E6_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E4E6_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E4E6_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E4E6_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E4E6_6,
                     }
 
                     print('Patient dictionary E4E6_6 - six electrodes, 14th combination')
@@ -2311,6 +4407,24 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                     temp_correlation_N2_E5E6_6.append(correlation_structure[2])
                     temp_correlation_N3_E5E6_6.append(correlation_structure[3])
                     temp_correlation_REM_E5E6_6.append(correlation_structure[4])
+                    
+                    temp_cor_diff_Wake_E5E6_6.append(correlation_diff[0])
+                    temp_cor_diff_N1_E5E6_6.append(correlation_diff[1])
+                    temp_cor_diff_N2_E5E6_6.append(correlation_diff[2])
+                    temp_cor_diff_N3_E5E6_6.append(correlation_diff[3])
+                    temp_cor_diff_REM_E5E6_6.append(correlation_diff[4])
+
+                    temp_dtw_Wake_E5E6_6.append(dtw_values[0])
+                    temp_dtw_N1_E5E6_6.append(dtw_values[1])
+                    temp_dtw_N2_E5E6_6.append(dtw_values[2])
+                    temp_dtw_N3_E5E6_6.append(dtw_values[3])
+                    temp_dtw_REM_E5E6_6.append(dtw_values[4])
+
+                    temp_dtw_diff_Wake_E5E6_6.append(dtw_diff_values[0])
+                    temp_dtw_diff_N1_E5E6_6.append(dtw_diff_values[1])
+                    temp_dtw_diff_N2_E5E6_6.append(dtw_diff_values[2])
+                    temp_dtw_diff_N3_E5E6_6.append(dtw_diff_values[3])
+                    temp_dtw_diff_REM_E5E6_6.append(dtw_diff_values[4])
 
                     print('Electrode combination')
                     print(Electrode_combination_naming)
@@ -2323,6 +4437,21 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
                         'N2_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N2_E5E6_6,
                         'N3_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_N3_E5E6_6,
                         'REM_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_correlation_REM_E5E6_6,
+                        'Wake_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_Wake_E5E6_6,
+                        'N1_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N1_E5E6_6,
+                        'N2_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N2_E5E6_6,
+                        'N3_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_N3_E5E6_6,
+                        'REM_corrdiff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_cor_diff_REM_E5E6_6,
+                        'Wake_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_Wake_E5E6_6,
+                        'N1_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N1_E5E6_6,
+                        'N2_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N2_E5E6_6,
+                        'N3_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_N3_E5E6_6,
+                        'REM_dwt_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_REM_E5E6_6,
+                        'Wake_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_Wake_E5E6_6,
+                        'N1_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N1_E5E6_6,
+                        'N2_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N2_E5E6_6,
+                        'N3_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_N3_E5E6_6,
+                        'REM_dwt_diff_'+str(Electrode_combination_naming)+'_'+str(epoch_size_in_seconds): temp_dtw_diff_REM_E5E6_6,
                     }
 
                     print('Patient dictionary E5E6_6 - six electrodes, 15th combination')
@@ -2355,6 +4484,7 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
     ############ 6 electrodes ##################################################
     # Merge15 is used because 15 combinations of electrodes are present, when there are 6 electrodes 
     if 'patient_data_dict_E1E2_6' in locals():
+        print('Found this 6E dict')
         print(patient_data_dict_E1E2_6)
         full_dict_6E = Merge15(patient_data_dict_E1E2_6,patient_data_dict_E1E3_6,patient_data_dict_E2E3_6,patient_data_dict_E1E4_6,patient_data_dict_E2E4_6,patient_data_dict_E3E4_6,patient_data_dict_E1E5_6,patient_data_dict_E2E5_6,patient_data_dict_E3E5_6,patient_data_dict_E4E5_6,patient_data_dict_E1E6_6,patient_data_dict_E2E6_6,patient_data_dict_E3E6_6,patient_data_dict_E4E6_6,patient_data_dict_E5E6_6)
         

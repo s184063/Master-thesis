@@ -676,7 +676,7 @@ def Usleep_2channels(edf_file_uploaded,make_folder_path_uploaded,epoch_size_in_s
     print(numbers_found)
 
     # Saving token - this should be changed every 12 hours 
-    os.environ ['USLEEP_API_TOKEN']='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3MTQ5NzM3ODksImlhdCI6MTcxNDkzMDU4OSwibmJmIjoxNzE0OTMwNTg5LCJpZGVudGl0eSI6ImZmYzUxYTJiYzc2MiJ9.tqKheV1gn14v3X-oQmXkXtESAzb_GLiCEf0xXBmmyyI'
+    os.environ ['USLEEP_API_TOKEN']='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3MTY4MDg4MjQsImlhdCI6MTcxNjc2NTYyNCwibmJmIjoxNzE2NzY1NjI0LCJpZGVudGl0eSI6ImZmYzUxYTJiYzc2MiJ9.7n4h9ccGQM1JMO74ZDze-ZYhuD3Q57wcDpgKs1Z5vr8'
 
     # Create an API object with API token stored in environment variable 
     api = usleep_api.USleepAPI(api_token=os.environ['USLEEP_API_TOKEN'])
@@ -885,7 +885,7 @@ def dynamic_time_warping(Electrode1_input,Electrode2_input,epoch_size_in_seconds
             else: 
                 print('Dynamic time warping - differentiated hypnodensities ')
                 alignment_diff = dtw(intervals_1hour_diff1, intervals_1hour_diff2, keep_internals=True)
-                #print(alignment_diff.normalizedDistance)
+                print(alignment_diff.normalizedDistance)
            
 
             temp_diff_dtw_innerloop.append(alignment_diff.normalizedDistance)
@@ -1969,7 +1969,8 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
 
         print('PatientID')
         # Skipping the first part of the filename to extract the real patientID 
-        patientID=file_name[30:] #restructuredfile_RBD_controls_STNF00006
+        patientID=file_name[23:] #restructuredfile_China_2003-psg
+        
         print(patientID)
         
         ############## Loading electrode names ###################
@@ -4490,12 +4491,12 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
         # Generating full data frame for the 3 electrode data 
         full_dataframe_6E=pd.DataFrame(full_dict_6E)
 
-        filename_6E=f"Correlation_6E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv"
-        RBD_output_path_6E=os.path.join('/scratch/users/s184063/RBD_controls_Features/', filename_6E)
+        filename_6E=f"Correlation_6E_"+str(epoch_size_in_seconds)+"_China_controls.csv"
+        RBD_output_path_6E=os.path.join('/scratch/users/s184063/China controls Features/', filename_6E)
 
         full_dataframe_6E.to_csv(RBD_output_path_6E, index=False) # change filename using os
         print(RBD_output_path_6E)
-        #full_dataframe_6E.to_csv(f"Correlation_6E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv", index=False) # change filename using os
+        #full_dataframe_6E.to_csv(f"Correlation_6E_"+str(epoch_size_in_seconds)+"_China_controls.csv", index=False) # change filename using os
         del patient_data_dict_E1E2_6,patient_data_dict_E1E3_6,patient_data_dict_E2E3_6,patient_data_dict_E1E4_6,patient_data_dict_E2E4_6,patient_data_dict_E3E4_6,patient_data_dict_E1E5_6,patient_data_dict_E2E5_6,patient_data_dict_E3E5_6,patient_data_dict_E4E5_6,patient_data_dict_E1E6_6,patient_data_dict_E2E6_6,patient_data_dict_E3E6_6,patient_data_dict_E4E6_6,patient_data_dict_E5E6_6
     
         print('6 electrode documents where packed')
@@ -4509,12 +4510,12 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
         # Generating full data frame for the 3 electrode data 
         full_dataframe_5E=pd.DataFrame(full_dict_5E)
         
-        filename_5E=f"Correlation_5E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv"
-        RBD_output_path_5E=os.path.join('/scratch/users/s184063/RBD_controls_Features/', filename_5E)
+        filename_5E=f"Correlation_5E_"+str(epoch_size_in_seconds)+"_China_controls.csv"
+        RBD_output_path_5E=os.path.join('/scratch/users/s184063/China controls Features/', filename_5E)
         print(RBD_output_path_5E)
         full_dataframe_5E.to_csv(RBD_output_path_5E, index=False) # change filename using os
         
-        #full_dataframe_5E.to_csv(f"Correlation_5E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv", index=False) # change filename using os
+        #full_dataframe_5E.to_csv(f"Correlation_5E_"+str(epoch_size_in_seconds)+"_China_controls.csv", index=False) # change filename using os
         del patient_data_dict_E1E2_5,patient_data_dict_E1E3_5,patient_data_dict_E2E3_5,patient_data_dict_E1E4_5,patient_data_dict_E2E4_5,patient_data_dict_E3E4_5,patient_data_dict_E1E5_5,patient_data_dict_E2E5_5,patient_data_dict_E3E5_5,patient_data_dict_E4E5_5
         print('5 electrode documents where packed')
     
@@ -4527,14 +4528,14 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
         # Generating full data frame for the 3 electrode data 
         full_dataframe_4E=pd.DataFrame(full_dict_4E)
         
-        filename_4E=f"Correlation_4E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv"
-        RBD_output_path_4E=os.path.join('/scratch/users/s184063/RBD_controls_Features/', filename_4E)
+        filename_4E=f"Correlation_4E_"+str(epoch_size_in_seconds)+"_China_controls.csv"
+        RBD_output_path_4E=os.path.join('/scratch/users/s184063/China controls Features/', filename_4E)
 
         print(RBD_output_path_4E)
         full_dataframe_4E.to_csv(RBD_output_path_4E, index=False) # change filename using os
     
         
-        #full_dataframe_4E.to_csv(f"Correlation_4E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv", index=False) # change filename using os
+        #full_dataframe_4E.to_csv(f"Correlation_4E_"+str(epoch_size_in_seconds)+"_China_controls.csv", index=False) # change filename using os
         
         del patient_data_dict_E1E2_4,patient_data_dict_E1E3_4,patient_data_dict_E2E3_4,patient_data_dict_E1E4_4,patient_data_dict_E2E4_4,patient_data_dict_E3E4_4
         print('4 electrode documents where packed')
@@ -4551,14 +4552,14 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
         # Generating full data frame for the 3 electrode data 
         full_dataframe_3E=pd.DataFrame(full_dict_3E)
         
-        filename_3E=f"Correlation_3E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv"
-        RBD_output_path_3E=os.path.join('/scratch/users/s184063/RBD_controls_Features/', filename_3E)
+        filename_3E=f"Correlation_3E_"+str(epoch_size_in_seconds)+"_China_controls.csv"
+        RBD_output_path_3E=os.path.join('/scratch/users/s184063/China controls Features/', filename_3E)
 
         print(RBD_output_path_3E)
         full_dataframe_3E.to_csv(RBD_output_path_3E, index=False) # change filename using os
         
         
-        #full_dataframe_3E.to_csv(f"Correlation_3E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv", index=False) # change filename using os
+        #full_dataframe_3E.to_csv(f"Correlation_3E_"+str(epoch_size_in_seconds)+"_China_controls.csv", index=False) # change filename using os
         del patient_data_dict_E1E2_3,patient_data_dict_E1E3_3,patient_data_dict_E2E3_3
         print('3 electrode documents where packed')
     ############################################################################
@@ -4572,14 +4573,14 @@ def correlation_multiple_electrodes (input_path_uploaded,epoch_size_in_seconds_u
         print(patient_data_dict_E1E2_2)
         full_dataframe_2E=pd.DataFrame(patient_data_dict_E1E2_2)
         
-        filename_2E=f"Correlation_2E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv"
-        RBD_output_path_2E=os.path.join('/scratch/users/s184063/RBD_controls_Features/', filename_2E)
+        filename_2E=f"Correlation_2E_"+str(epoch_size_in_seconds)+"_China_controls.csv"
+        RBD_output_path_2E=os.path.join('/scratch/users/s184063/China controls Features/', filename_2E)
 
         print(RBD_output_path_2E)
         full_dataframe_2E.to_csv(RBD_output_path_2E, index=False) # change filename using os
         
         
-        #full_dataframe_2E.to_csv(f"Correlation_2E_"+str(epoch_size_in_seconds)+"_RBD_controls.csv", index=False) # change filename using os
+        #full_dataframe_2E.to_csv(f"Correlation_2E_"+str(epoch_size_in_seconds)+"_China_controls.csv", index=False) # change filename using os
         ############################################################################
         del patient_data_dict_E1E2_2
         print('2 electrode documents where packed')
@@ -4610,7 +4611,7 @@ def hypnogram_average(input_path,Electrodes_input,folder_name):
 
     print('PatientID')
     # Skipping the first part of the filename to extract the real patientID 
-    patientID=file_name[30:] #restructuredfile_RBD_controls_STNF00006
+    patientID=file_name[23:] #restructuredfile_China_2003-psg
     print(patientID)
         
     # Loop through files in the folder 

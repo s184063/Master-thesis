@@ -54,6 +54,8 @@ from My_functions_script_France import extract_numbers_from_filename, extract_le
 input_path =r'/scratch/users/s184063/France restructure EDF all correct final/'
 #input_file=f'A0001_4 165907.EDF' # Easier later for namechange according to the patient ID 
 #input_file_path = os.path.join(input_path,input_file)
+
+#output_path = r'/scratch/users/s184063/France trial hypnograms/'
 output_path = r'/scratch/users/s184063/hypnograms_France_all_correct_final/' 
 #######################################################
 
@@ -291,16 +293,18 @@ Errors.to_csv('Errors_happened.csv')
 ##### Part 2 ###########################
 #### Load the hypnograms and do correlation between combination of pairs of electrodes ####
 
-epoch_size_in_seconds = [1, 3, 5, 15, 30]
+#epoch_size_in_seconds=[1,3,5,15,30]
+epoch_size_in_seconds = [15]
+time_signal_folder=r'/scratch/users/s184063/France restructure EDF all correct final/'
 
-# The path loaded in should be the one, where the hypnograms are stored 
 for epoch in epoch_size_in_seconds:
-    correlation_multiple_electrodes(output_path,epoch)
+    # The path loaded in should be the one, where the hypnograms are stored 
 
+    correlation_multiple_electrodes(output_path,epoch,time_signal_folder)
 # The Pearson (product-moment) correlation coefficient is a measure of the linear relationship between two features.
 # Pearson correlation coefficient can take on any real value in the range −1 ≤ r ≤ 1.
 #########################################
-
+'''
 
 ########### Part 3 #################
 # In this part of the code all CSV files with correlation features will be merged to one large CSV file and dataframe
@@ -459,7 +463,7 @@ plt.savefig('/scratch/users/s184063/France_Features/Correlation_matrix_France_NT
 
 
 #####Multiple linear regression ##########
-'''
+
 # Define the dependent variable and the independent variables.
 Y = df_all_results_FHC['Age'] # replace 'Y' with your actual column name for the dependent variable
 X = df_all_results_FHC.iloc[:,0] # differ this variable to select single features to compare with age 
@@ -475,10 +479,7 @@ results = model.fit()
 
 # Print the summary statistics of the regression model.
 print(results.summary())
-'''
 
-
-'''
 #### Standard statistics #####
 mean_list=[]
 std_list=[]
@@ -534,7 +535,6 @@ max_val.to_csv('/scratch/users/s184063/France_Features/Max values.csv')
 
 print(temp)
 
-'''
 
 #### Scatter plots ######
 
@@ -823,11 +823,12 @@ for d in range(len(E_combinations)):
     plt.clf()
     del boxplot_features
 
+
 ######histograms #######
 
 # for all features 
 #matplotlib.pyplot.figure(figsize=(8,6)) # Adjust these numbers as per your requirement.
-'''
+
 matplotlib.pyplot.subplot(2,3,1)
 sns.histplot(data=df_combined_C3M2O1M2.iloc[:,20])
 #matplotlib.pyplot.xticks(rotation=45, ha='right')

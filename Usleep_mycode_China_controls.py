@@ -43,20 +43,19 @@ import statsmodels.api as sm
 # Using sys function to import 'My_functions_script'
 sys.path.insert(0, '/home/users/s184063')
 # Import My_functions_script
-from My_functions_script_China import extract_numbers_from_filename, extract_letters_and_numbers, list_files_in_folder, split_string_by_length, Usleep_2channels, correlation_multiple_electrodes
+from My_functions_script_China_controls import extract_numbers_from_filename, extract_letters_and_numbers, list_files_in_folder, split_string_by_length, Usleep_2channels, correlation_multiple_electrodes
 
 ################################################################################################
 
 
 ####### Setting paths ##################################
 # File paths 
-input_path =r"/scratch/users/s184063/China restructured EDF patients correct/"
+input_path =r"/scratch/users/s184063/China restructured EDF controls correct/"
 #input_file=f'A0001_4 165907.EDF' # Easier later for namechange according to the patient ID 
 #input_file_path = os.path.join(input_path,input_file)
 
-output_path = r'/scratch/users/s184063/hypnograms_China_patients/' 
-
-#output_path = r'/scratch/users/s184063/hypnograms trial China patients/'
+#output_path=r'/scratch/users/s184063/hypnograms trial china controls/'
+output_path = r'/scratch/users/s184063/hypnograms_China_controls/' 
 
 #######################################################
 
@@ -65,7 +64,7 @@ output_path = r'/scratch/users/s184063/hypnograms_China_patients/'
 # They are saved in folders according to the patientID. 
 # Each file gets a name related to patientID, visitnumber,electrode combination and epoch size. 
 
-'''
+
 # Choose epoch size in seconds 
 epoch_size_in_seconds =[1, 3, 5, 15, 30]   
 
@@ -324,14 +323,14 @@ Errors.to_csv('Errors_happened.csv')
 #visitnumber_df=pd.DataFrame({'wsc_vst':visitnumber})
 #visitnumber_df.to_csv('Visit_number.csv')
 
-'''
+
 
 ##### Part 2 ###########################
 #### Load the hypnograms and do correlation between combination of pairs of electrodes ####
 
 #epoch_size_in_seconds=[1,3,5,15,30]
-epoch_size_in_seconds = [1]
-time_signal_folder=r'/scratch/users/s184063/China restructured EDF patients correct/'
+epoch_size_in_seconds = [5]
+time_signal_folder=r'/scratch/users/s184063/China restructured EDF controls correct/'
 
 for epoch in epoch_size_in_seconds:
     # The path loaded in should be the one, where the hypnograms are stored 
