@@ -4,12 +4,15 @@ from numpy import shape, vstack
 import pandas as pd
 import copy
 import matplotlib
+from matplotlib import pyplot
 import matplotlib.pyplot as plt
 # Load signal processing packages
 import scipy # Signal processing 
 from scipy.fft import fft, ifft, fftshift, ifftshift
 from scipy.signal import resample_poly, firwin, butter, bilinear, periodogram, welch, filtfilt, sosfiltfilt
 # For processing EDF files 
+import imblearn
+from imblearn.metrics import specificity_score
 import pyedflib 
 from pyedflib import highlevel # Extra packages for EDF
 import pyedflib as plib
@@ -17,8 +20,6 @@ import pyedflib as plib
 import pywt 
 from pywt import wavedec
 import sys
-import imblearn
-from imblearn.metrics import specificity_score
 import itertools 
 from itertools import combinations
 import xgboost
@@ -30,56 +31,56 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precisio
 from sklearn.metrics import classification_report
 from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay, auc
 from sklearn.inspection import permutation_importance
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-import ast
-
-# Using sys function to import 'My_functions_script'
-sys.path.insert(0, 'C:/Users/natas/Documents/Master thesis code')
 import random
 
+import seaborn as sns
+import ast
+# Using sys function to import 'My_functions_script'
+sys.path.insert(0, 'C:/Users/natas/Documents/Master thesis code')
+
 # Import My_functions_script
-from My_functions_script_RBD import list_files_in_folder, preprocessing, bandpass_frequency_band, inverse_wavelet_5_levels, relative_power_for_frequencyband, coherence_features, extract_numbers_from_filename, extract_letters_and_numbers, split_string_by_length
+from My_functions_script_China import list_files_in_folder, preprocessing, bandpass_frequency_band, inverse_wavelet_5_levels, relative_power_for_frequencyband, coherence_features, extract_numbers_from_filename, extract_letters_and_numbers, split_string_by_length
 
 ### Loading data ###########################
-#Loading data frame 
+df_fullnight=pd.read_csv('C:/Users/natas/Documents/Master thesis code/All features/China dataset/All_Coherence_fullnight_features_China_patientsandcontrols.csv') # full night
+df_1part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/All features/China dataset/All_Coherence_1part_features_China_patientsandcontrols.csv') # part 1 
+df_2part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/All features/China dataset/All_Coherence_2part_features_China_patientsandcontrols.csv') # part 2 
+df_3part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/All features/China dataset/All_Coherence_3part_features_China_patientsandcontrols.csv') # part 3
+df_4part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/All features/China dataset/All_Coherence_4part_features_China_patientsandcontrols.csv') # part 4
 
-# Coherence
-df_fullnight=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_fullnight_RBD_and_controls.csv')
-df_1part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_1partnight_RBDandcontrols.csv')
-df_2part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_2partnight_RBDandcontrols.csv')
-df_3part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_3partnight_RBDandcontrols.csv')
-df_4part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_4partnight_RBDandcontrols.csv')
 
 
 
 # Combining all coherence features 
 
 # Dropping the first patienID folder for most of the files in order to make a concatenation of all files 
-df_1part=df_1part.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
-df_2part=df_2part.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
-df_3part=df_3part.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
-df_4part=df_4part.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
-
+df_1part=df_1part.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
+df_2part=df_2part.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
+df_3part=df_3part.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
+df_4part=df_4part.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
 
 df_1part=df_1part.add_suffix('_1part')
 df_2part=df_2part.add_suffix('_2part')
 df_3part=df_3part.add_suffix('_3part')
 df_4part=df_4part.add_suffix('_4part')
 
+print(df_1part)
+
 
 # cropping dataframes
-df_fullnight_edited = df_fullnight.iloc[:,1:557]
-df_part1_edited=df_1part.iloc[:,1:557]
-df_part2_edited=df_2part.iloc[:,1:557]
-df_part3_edited=df_3part.iloc[:,1:557]
-df_part4_edited=df_4part.iloc[:,1:557]
+#print(df_1part)
+df_fullnight_edited = df_fullnight.iloc[:,1:556]
+df_part1_edited=df_1part.iloc[:,1:556]
+df_part2_edited=df_2part.iloc[:,1:556]
+df_part3_edited=df_3part.iloc[:,1:556]
+df_part4_edited=df_4part.iloc[:,1:556]
 
+
+print(df_part1_edited)
 
 # Combining the dataframes. Only one column contains patientID
 df_coherence=pd.concat([df_fullnight,df_part1_edited,df_part2_edited,df_part3_edited,df_part4_edited],axis=1)
-df_coherence.to_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_All_combined.csv')
+df_coherence.to_csv('C:/Users/natas/Documents/Master thesis code/All features/China dataset/Coherence_All_combined_China.csv')
 
 df_coherence_model=df_coherence # defining the dataset for a separate coherence model 
 print(df_coherence)
@@ -88,20 +89,20 @@ print(df_coherence)
 
 
 # Correlation 
-df_correlation=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Correlation Features/RBD/All_correlation_features_combined_RBDandcontrols.csv')
+df_correlation=pd.read_csv('C:/Users/natas/Documents/Master thesis code/All features/China dataset/All_Correlation_features_China_patientsandcontrols.csv')
 print(df_correlation)
 df_correlation_model=df_correlation # defining the dataset for a separate correlatiom model 
 
 
 ### All combined coherence and correlation ####
 
-df_coherence=df_coherence.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
+df_coherence=df_coherence.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
 length=df_coherence.shape[1]
 df_coherence_cropped=df_coherence.iloc[:,1:length]
 print(df_coherence_cropped)
 
 all_features=pd.concat([df_correlation,df_coherence_cropped],axis=1)
-all_features.to_csv('C:/Users/natas/Documents/Master thesis code/All features/RBD dataset/All_features_RBDandcontrols_coherence_and_correlation.csv')
+all_features.to_csv('C:/Users/natas/Documents/Master thesis code/All features/China dataset/Final_All_features_China_coherence_and_correlation.csv')
 
 print(all_features)
 
@@ -109,22 +110,20 @@ print(all_features)
 
 
 ############### Enable the model you want to run ################################
-#df_combined=df_correlation_model
+df_combined=df_correlation_model
 #df_combined=df_coherence_model
-df_combined=all_features
+#df_combined=all_features
 #################################################################################
 
+df_NT1=df_combined[df_combined['Dx'] == 'NT1']
 
-df_iRBD=df_combined[df_combined['Dianosis'] == 'I']
-#df_PD=df_combined[df_combined['Dianosis'] == 'P']
-#df_PD_D=df_combined[df_combined['Dianosis'] == 'D']
 
-df_patients=pd.concat([df_iRBD])#,df_PD,df_PD_D])
+df_patients=pd.concat([df_NT1])
 
 print('df patients')
 print(df_patients)
 
-df_controls=df_combined[df_combined['Dianosis'] == 'Control']
+df_controls=df_combined[df_combined['Dx'] == 'Control']
 
 print('df controls')
 print(df_controls)
@@ -142,13 +141,13 @@ df_shuffled = df_for_use.sample(frac=1).reset_index(drop=True)
 df_for_use=df_shuffled
 
 ####### Preparing X and Y ########################
-df_X=df_for_use.drop(['PatientID','Sex_F1_M2','Age','Dianosis'], axis=1)
+df_X=df_for_use.drop(['PatientID','Sex','Dx','Cohort'], axis=1)
 print(df_X)
 
 # Encoding the categorical columns for the X matrix
 
 # Encoding categorical columns (Dx, Sex, patientID and cohort)
-categorical_columns = df_for_use[['Sex_F1_M2','Dianosis']].columns.tolist()
+categorical_columns = df_for_use[['Sex','Dx']].columns.tolist()
 print('Categorical columns')
 print(categorical_columns)
 
@@ -171,10 +170,10 @@ one_hot_df = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out
 
 ########## Y_variable ##########################
 # Onehot data - encoded into 1 and 0 
-Y_variable=one_hot_df[['Dianosis_I']] # This is RBD labels
+Y_variable=one_hot_df[['Dx_NT1']] # This is RBD labels
 print(Y_variable)
 ###############################################
-one_hot_df=one_hot_df.drop(['Dianosis_I','Dianosis_Control'],axis=1)
+one_hot_df=one_hot_df.drop(['Dx_NT1','Dx_Control'],axis=1)
 print('One_hot_df')
 print(one_hot_df)
 
@@ -352,6 +351,7 @@ for i, (train_index, test_index) in enumerate(skf.split(X_matrix, Y_variable)):
     print('Specificity')
     print(specificity)
 
+
  
 
 
@@ -419,7 +419,7 @@ ax.fill_between(
 ax.set(
     xlabel="False Positive Rate",
     ylabel="True Positive Rate",
-    title=f"Mean ROC curve with variability\n(Positive label iRBD, dataset=Sleep stage synchronization features)",
+    title=f"Mean ROC curve with variability\n(Positive label NT1, dataset=Sleep stage synchronization features)",
 )
 ax.legend(loc="lower right")
 plt.show()
@@ -450,8 +450,9 @@ f1_score_std=np.std(f1_score_all)
 accuracy_mean=np.mean(accuracy_all)
 accuracy_std=np.std(accuracy_all)
 
+
 specificity_mean=np.mean(specificity_all)
-specificity_std=np.mean(specificity_all)
+specificity_std=np.std(specificity_all)
 
 
 print('All metrics')
@@ -472,6 +473,7 @@ print(specificity_mean)
 print(specificity_std)
 
 
+'''
 ##### Feature importance ##################
 
 # Stacking feature importance from each fold (5 folds)
@@ -488,7 +490,6 @@ importance_array=np.sum(importance_features,axis=1)
 print('Importance array')
 print(importance_array)
 print(importance_array.shape)
-print(np.sum(importance_array))
 
 
 sorted_features=sorted(importance_array,reverse=True)
@@ -725,7 +726,6 @@ print(beta_importance)
 
 
 
-
 #### gamma ###########
 
 # Extracting all coherence features with 'delta' in the name
@@ -752,7 +752,6 @@ print('List with indexes for categorized gamma features')
 gamma_coherence=np.stack(temp_idx_gamma_coherence,axis=0)
 
 # Indexing in the importance array to get the gamma coherence importance values and summing the values to one value for this category
-print(importance_array[gamma_coherence])
 gamma_importance=np.sum(importance_array[gamma_coherence])
 
 
@@ -1640,201 +1639,6 @@ del F3M2F4M1_importance, F3M2C3M2_importance, F3M2C4M1_importance,F3M2O2M1_impor
 
 
 
-
-
-
-######### Temporal features (sleep cycles) ###############
-
-temp_idx_part1_coherence=[]
-temp_idx_part2_coherence=[]
-temp_idx_part3_coherence=[]
-temp_idx_part4_coherence=[]
-
-#### part1 ##########
-
-# Extracting all coherence features with 'O1M2O2M1' in the name
-part1=df_coherence.filter(like='_1part', axis=1) 
-print(part1.shape[1])
-print(part1)
-
-
-# In this loop the indexes of the part1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(part1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=part1.columns[i]
-
-    # Using the feature names from 'part1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_part1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_part1_coherence.append(original_idx_part1)
-
-
-print('List with indexes for categorized part1 features')
-#print(temp_idx_O1M2O2M1_coherence)
-part1_coherence=np.stack(temp_idx_part1_coherence,axis=0)
-
-print(part1_coherence.shape[0])
-
-# Indexing in the importance array to get the part1 coherence importance values and summing the values to one value for this category
-part1_importance=np.sum(importance_array[part1_coherence])
-
-print(part1_importance)
-
-
-
-
-#### part2 ##########
-
-# Extracting all coherence features with 'O1M2O2M1' in the name
-part2=df_coherence.filter(like='_2part', axis=1) 
-print(part2.shape[1])
-print(part2)
-
-
-# In this loop the indexes of the part1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(part2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=part2.columns[i]
-
-    # Using the feature names from 'part1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_part2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_part2_coherence.append(original_idx_part2)
-
-
-print('List with indexes for categorized part1 features')
-#print(temp_idx_O1M2O2M1_coherence)
-part2_coherence=np.stack(temp_idx_part2_coherence,axis=0)
-
-print(part2_coherence.shape[0])
-
-# Indexing in the importance array to get the part1 coherence importance values and summing the values to one value for this category
-part2_importance=np.sum(importance_array[part2_coherence])
-
-print(part2_importance)
-
-
-
-#### part3 ##########
-
-# Extracting all coherence features with 'O1M2O2M1' in the name
-part3=df_coherence.filter(like='_3part', axis=1) 
-print(part3.shape[1])
-print(part3)
-
-
-# In this loop the indexes of the part1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(part3.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=part3.columns[i]
-
-    # Using the feature names from 'part1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_part3=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_part3_coherence.append(original_idx_part3)
-
-
-print('List with indexes for categorized part1 features')
-#print(temp_idx_O1M2O2M1_coherence)
-part3_coherence=np.stack(temp_idx_part3_coherence,axis=0)
-
-print(part3_coherence.shape[0])
-
-# Indexing in the importance array to get the part1 coherence importance values and summing the values to one value for this category
-part3_importance=np.sum(importance_array[part3_coherence])
-
-print(part3_importance)
-
-
-
-
-#### part4 ##########
-
-# Extracting all coherence features with 'O1M2O2M1' in the name
-part4=df_coherence.filter(like='_4part', axis=1) 
-print(part4.shape[1])
-print(part4)
-
-
-# In this loop the indexes of the part1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(part4.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=part4.columns[i]
-
-    # Using the feature names from 'part1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_part4=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_part4_coherence.append(original_idx_part4)
-
-
-print('List with indexes for categorized part1 features')
-#print(temp_idx_O1M2O2M1_coherence)
-part4_coherence=np.stack(temp_idx_part4_coherence,axis=0)
-
-print(part4_coherence.shape[0])
-
-# Indexing in the importance array to get the part1 coherence importance values and summing the values to one value for this category
-part4_importance=np.sum(importance_array[part4_coherence])
-
-print(part4_importance)
-
-
-
-
-### Gathering the frequency importance values in a df for plotting ########
-
-# Saving values gathered for delta, theta. alpha, beta and gamma
-print('list with features - frequencies')
-
-temporal_values_list=[part1_importance, part2_importance, part3_importance, part4_importance]
-
-features_temporal=np.stack(temporal_values_list)
-features_temporal=np.reshape(features_temporal,(1,4)) # reshape
-print(features_temporal)
-print(type(features_temporal))
-print(features_temporal.shape)
-
-# column names 
-temporal_columns=['Sleep cycle 1','Sleep cycle 2','Sleep cycle 3','Sleep cycle 4']
-print(type(temporal_columns))
-print(temporal_columns)
-
-
-# Creating dataframe with values for plotting 
-df_plt_temporal=pd.DataFrame(features_temporal, columns=temporal_columns)
-print(df_plt_temporal)
-
-
-boxplot_features=temporal_columns
-plt.suptitle('Sleep cycles feature importance',fontsize=20)
-plt.subplot(1, 1, 1) # Adjust these numbers as per your requirement.
-sns.barplot(data=df_plt_temporal,errorbar=None)
-plt.xticks(rotation=45, ha='right',fontsize=16)
-#plt.title('')
-plt.tight_layout()
-plt.show()   
-plt.clf()
-
-
-
-
-
-
-
-
-
-
-
-
-
 ########## Correlation feature plots ############################
 
 # Category plots 
@@ -2047,7 +1851,7 @@ print(df_plt_epochsize)
 
 
 boxplot_features=epoch_columns
-plt.suptitle('Sleep stage synchronization epoch size feature importance',fontsize=20)
+plt.suptitle('Correlation epoch size feature importance',fontsize=20)
 plt.subplot(1, 1, 1) # Adjust these numbers as per your requirement.
 sns.barplot(data=df_plt_epochsize,errorbar=None)
 plt.xticks(rotation=45, ha='right',fontsize=16)
@@ -2668,7 +2472,8 @@ print(df_plt_electrodes)
 
 
 boxplot_features=electrodes_columns
-plt.suptitle('Sleep stage synchronization electrodes',fontsize=20)# 1, 1) # Adjust these numbers as per your requirement.
+plt.suptitle('Correlation electrode feature importance',fontsize=20)
+plt.subplot(1, 1, 1) # Adjust these numbers as per your requirement.
 sns.barplot(data=df_plt_electrodes,errorbar=None)
 plt.xticks(rotation=45, ha='right',fontsize=16)
 #plt.title('')
@@ -3002,3 +2807,6 @@ plt.tight_layout()
 plt.show()   
 plt.clf()
 
+
+
+'''

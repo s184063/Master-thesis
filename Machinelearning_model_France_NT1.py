@@ -4,12 +4,15 @@ from numpy import shape, vstack
 import pandas as pd
 import copy
 import matplotlib
+from matplotlib import pyplot
 import matplotlib.pyplot as plt
 # Load signal processing packages
 import scipy # Signal processing 
 from scipy.fft import fft, ifft, fftshift, ifftshift
 from scipy.signal import resample_poly, firwin, butter, bilinear, periodogram, welch, filtfilt, sosfiltfilt
 # For processing EDF files 
+import imblearn
+from imblearn.metrics import specificity_score
 import pyedflib 
 from pyedflib import highlevel # Extra packages for EDF
 import pyedflib as plib
@@ -17,11 +20,8 @@ import pyedflib as plib
 import pywt 
 from pywt import wavedec
 import sys
-import seaborn as sns
 import itertools 
 from itertools import combinations
-import imblearn
-from imblearn.metrics import specificity_score
 import xgboost
 from xgboost import XGBClassifier
 import sklearn
@@ -31,53 +31,56 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precisio
 from sklearn.metrics import classification_report
 from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay, auc
 from sklearn.inspection import permutation_importance
-
-
-# Using sys function to import 'My_functions_script'
-sys.path.insert(0, 'C:/Users/natas/Documents/Master thesis code')
 import random
 
+import seaborn as sns
+import ast
+# Using sys function to import 'My_functions_script'
+sys.path.insert(0, 'C:/Users/natas/Documents/Master thesis code')
+
 # Import My_functions_script
-from My_functions_script_RBD import list_files_in_folder, preprocessing, bandpass_frequency_band, inverse_wavelet_5_levels, relative_power_for_frequencyband, coherence_features, extract_numbers_from_filename, extract_letters_and_numbers, split_string_by_length
+from My_functions_script_France import list_files_in_folder, preprocessing, bandpass_frequency_band, inverse_wavelet_5_levels, relative_power_for_frequencyband, coherence_features, extract_numbers_from_filename, extract_letters_and_numbers, split_string_by_length
 
 ### Loading data ###########################
-#Loading data frame 
+df_fullnight=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/France/NT1_and_controls_France.csv') # full night
+df_1part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/France/NT1_and_controls_1partnight_France.csv') # part 1 
+df_2part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/France/NT1_and_controls_2partnight_France.csv') # part 2 
+df_3part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/France/NT1_and_controls_3partnight_France.csv') # part 3
+df_4part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/France/NT1_and_controls_4partnight_France.csv') # part 4
 
-# Coherence
-df_fullnight=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_fullnight_RBD_and_controls.csv')
-df_1part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_1partnight_RBDandcontrols.csv')
-df_2part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_2partnight_RBDandcontrols.csv')
-df_3part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_3partnight_RBDandcontrols.csv')
-df_4part=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_features_combined_4partnight_RBDandcontrols.csv')
 
 
 
 # Combining all coherence features 
 
 # Dropping the first patienID folder for most of the files in order to make a concatenation of all files 
-df_1part=df_1part.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
-df_2part=df_2part.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
-df_3part=df_3part.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
-df_4part=df_4part.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
+df_1part=df_1part.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
+df_2part=df_2part.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
+df_3part=df_3part.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
+df_4part=df_4part.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
 
 df_1part=df_1part.add_suffix('_1part')
 df_2part=df_2part.add_suffix('_2part')
 df_3part=df_3part.add_suffix('_3part')
 df_4part=df_4part.add_suffix('_4part')
 
+print(df_1part)
+
 
 # cropping dataframes
 #print(df_1part)
-df_fullnight_edited = df_fullnight.iloc[:,1:557]
-df_part1_edited=df_1part.iloc[:,1:557]
-df_part2_edited=df_2part.iloc[:,1:557]
-df_part3_edited=df_3part.iloc[:,1:557]
-df_part4_edited=df_4part.iloc[:,1:557]
+df_fullnight_edited = df_fullnight.iloc[:,1:122]
+df_part1_edited=df_1part.iloc[:,1:122]
+df_part2_edited=df_2part.iloc[:,1:122]
+df_part3_edited=df_3part.iloc[:,1:122]
+df_part4_edited=df_4part.iloc[:,1:122]
 
+
+print(df_part1_edited)
 
 # Combining the dataframes. Only one column contains patientID
 df_coherence=pd.concat([df_fullnight,df_part1_edited,df_part2_edited,df_part3_edited,df_part4_edited],axis=1)
-df_coherence.to_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/RBD controls/Coherence_All_combined.csv')
+df_coherence.to_csv('C:/Users/natas/Documents/Master thesis code/Coherence features/France/Coherence_All_combined.csv')
 
 df_coherence_model=df_coherence # defining the dataset for a separate coherence model 
 print(df_coherence)
@@ -86,20 +89,20 @@ print(df_coherence)
 
 
 # Correlation 
-df_correlation=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Correlation Features/RBD/All_correlation_features_combined_RBDandcontrols.csv')
+df_correlation=pd.read_csv('C:/Users/natas/Documents/Master thesis code/Correlation Features/France/All_Correlation_features_France.csv')
 print(df_correlation)
 df_correlation_model=df_correlation # defining the dataset for a separate correlatiom model 
 
 
 ### All combined coherence and correlation ####
 
-df_coherence=df_coherence.drop(['PatientID','Dianosis','Sex_F1_M2','Age'],axis=1)
+df_coherence=df_coherence.drop(['PatientID','Dx','Sex','Cohort'],axis=1)
 length=df_coherence.shape[1]
 df_coherence_cropped=df_coherence.iloc[:,1:length]
 print(df_coherence_cropped)
 
 all_features=pd.concat([df_correlation,df_coherence_cropped],axis=1)
-all_features.to_csv('C:/Users/natas/Documents/Master thesis code/All features/RBD dataset/All_features_RBDandcontrols_coherence_and_correlation.csv')
+all_features.to_csv('C:/Users/natas/Documents/Master thesis code/All features/France dataset/All_features_France_coherence_and_correlation.csv')
 
 print(all_features)
 
@@ -112,16 +115,15 @@ df_combined=df_correlation_model
 #df_combined=all_features
 #################################################################################
 
-df_iRBD=df_combined[df_combined['Dianosis'] == 'I']
-#df_PD=df_combined[df_combined['Dianosis'] == 'P']
-#df_PD_D=df_combined[df_combined['Dianosis'] == 'D']
+df_NT1=df_combined[df_combined['Dx'] == 'NT1']
 
-df_patients=pd.concat([df_iRBD])#,df_PD,df_PD_D])
+
+df_patients=pd.concat([df_NT1])
 
 print('df patients')
 print(df_patients)
 
-df_controls=df_combined[df_combined['Dianosis'] == 'Control']
+df_controls=df_combined[df_combined['Dx'] == 'Control']
 
 print('df controls')
 print(df_controls)
@@ -131,24 +133,21 @@ df_combined=pd.concat([df_patients,df_controls])
 df_for_use=copy.deepcopy(df_combined)
 ############################################
 
-
 df_shuffled = df_for_use.sample(frac=1).reset_index(drop=True)
 df_for_use=df_shuffled
 
 ####### Preparing X and Y ########################
-df_X=df_for_use.drop(['PatientID','Sex_F1_M2','Age','Dianosis'], axis=1)
+df_shuffled = df_for_use.sample(frac=1).reset_index(drop=True)
+df_for_use=df_shuffled
+
+####### Preparing X and Y ########################
+df_X=df_for_use.drop(['PatientID','Sex','Dx','Cohort'], axis=1)
 print(df_X)
-
-
-# Creating values 0 = value, 1 = NaN
-df_X_baseline=1*np.isnan(df_X)
-print(df_X_baseline)
-
 
 # Encoding the categorical columns for the X matrix
 
 # Encoding categorical columns (Dx, Sex, patientID and cohort)
-categorical_columns = df_for_use[['Sex_F1_M2','Dianosis']].columns.tolist()
+categorical_columns = df_for_use[['Sex','Dx']].columns.tolist()
 print('Categorical columns')
 print(categorical_columns)
 
@@ -159,24 +158,28 @@ encoder = OneHotEncoder(sparse_output=False)
 # Apply one-hot encoding to the categorical columns
 one_hot_encoded = encoder.fit_transform(df_for_use[categorical_columns])
 
+
 #Create a DataFrame with the one-hot encoded columns
 #We use get_feature_names_out() to get the column names for the encoded data
 one_hot_df = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out(categorical_columns))
 
-print(one_hot_df)
+#print(one_hot_df)
+#female=one_hot_df['Sex_F1_M2_2']
+#print(sum(female))
+
 
 ########## Y_variable ##########################
 # Onehot data - encoded into 1 and 0 
-Y_variable=one_hot_df[['Dianosis_I']] # This is RBD labels
+Y_variable=one_hot_df[['Dx_NT1']] # This is RBD labels
 print(Y_variable)
-
 ###############################################
-one_hot_df=one_hot_df.drop(['Dianosis_I','Dianosis_Control'],axis=1)
+one_hot_df=one_hot_df.drop(['Dx_NT1','Dx_Control'],axis=1)
 print('One_hot_df')
 print(one_hot_df)
 
 # Concatenate the one-hot encoded dataframe with the original dataframe
-X_matrix = pd.concat([df_X_baseline, one_hot_df], axis=1)
+# Concatenate the one-hot encoded dataframe with the original dataframe
+X_matrix = pd.concat([df_X, one_hot_df], axis=1)
 
 # Cropping X_matrix to not include the indexes 
 datalength = df_combined.shape[1]
@@ -184,6 +187,7 @@ X_matrix=X_matrix.iloc[:,1:datalength]
 print('Dataframe')
 print(X_matrix)
 print(type(X_matrix))
+
 
 X_matrix_df=X_matrix
 
@@ -203,6 +207,7 @@ print(Y_variable)
 
 
 ######################## Running the model #################################################
+
 # create model (classifier) instance 
 classifier = XGBClassifier(n_estimators=2, max_depth=2, learning_rate=0.5, objective='binary:logistic')
 
@@ -226,6 +231,7 @@ tprs = []
 aucs = []
 mean_fpr = np.linspace(0, 1, 100)
 temp_all_importance=[]
+
 
 # Defining figure 
 fig, ax = plt.subplots(figsize=(6, 6))
@@ -255,43 +261,40 @@ for i, (train_index, test_index) in enumerate(skf.split(X_matrix, Y_variable)):
     for i, importance in enumerate(importances):
         #print(f"Feature {i}: {importance}")
 
+        
         temp_column_name.append(importance)
 
         #if importance > 0:
         #    # Indexing in X to find the name of the features 
         #    column_name = X_matrix_df.columns[i]
-
-        #   temp_column_name.append(column_name)
-
-    print('Important features')
-    print(temp_column_name)
+        #
+        #    temp_column_name.append(column_name)
+            
 
     print('Important features')
     print(len(temp_column_name))
     # This variable should be saved and stacked outside of the fold !!!!
     temp_all_importance.append(temp_column_name)
-
-
-    '''
+    
     ### Permutation on the test set #######
-    result = permutation_importance(
-        classifier, X_matrix[test_index], Y_variable[test_index], n_repeats=10, random_state=42, n_jobs=2
-    )
+    #result = permutation_importance(
+    #    classifier, X_matrix[test_index], Y_variable[test_index], n_repeats=10, random_state=42, n_jobs=2
+    #)
 
-    sorted_importances_idx = result.importances_mean.argsort()
-    importances = pd.DataFrame(
-        result.importances[sorted_importances_idx].T,
-        columns=X_matrix_df.columns[sorted_importances_idx],
-    )
-    print('Pertumation test set')
-    print(importances)
-    ax = importances.plot.box(vert=False, whis=10)
-    ax.set_title("Permutation Importances (test set), RBD model")
-    ax.axvline(x=0, color="k", linestyle="--")
-    ax.set_xlabel("Decrease in accuracy score")
-    ax.figure.tight_layout()
-    plt.show()
-    '''
+    #sorted_importances_idx = result.importances_mean.argsort()
+    #importances = pd.DataFrame(
+    #    result.importances[sorted_importances_idx].T,
+    #    columns=X_matrix_df.columns[sorted_importances_idx],
+    #)
+    #print('Pertumation test set')
+    #print(importances)
+    #ax = importances.plot.box(vert=False, whis=10)
+    #ax.set_title("Permutation Importances (test set), RBD model")
+    #ax.axvline(x=0, color="k", linestyle="--")
+    #ax.set_xlabel("Decrease in accuracy score")
+    #ax.figure.tight_layout()
+    #plt.show()
+    
     ###########################################################################
 
 
@@ -348,23 +351,24 @@ for i, (train_index, test_index) in enumerate(skf.split(X_matrix, Y_variable)):
     print('Specificity')
     print(specificity)
 
+
  
 
 
     ##### Plotting Precision and Recall curve ############
 
     # Does not work, because the indexes are np.array, but the function wants a df i think 
-    '''
+    
     # Presicion / recall curve
     
-    display = PrecisionRecallDisplay.from_estimator(
-        classifier, X_matrix[test_index], Y_variable[test_index], name="BostedDecisionTree", plot_chance_level=True
-    )
-    _ = display.ax_.set_title("2-class Precision-Recall curve, RBD model")
+    #display = PrecisionRecallDisplay.from_estimator(
+    #    classifier, X_matrix[test_index], Y_variable[test_index], name="BostedDecisionTree", plot_chance_level=True
+    #)
+    #_ = display.ax_.set_title("2-class Precision-Recall curve, RBD model")
 
     # To display the plot
-    plt.show()
-    ''' 
+    #plt.show()
+     
 
     # Plotting ROC curve 
     viz = RocCurveDisplay.from_estimator(
@@ -382,7 +386,7 @@ for i, (train_index, test_index) in enumerate(skf.split(X_matrix, Y_variable)):
     tprs.append(interp_tpr)
     aucs.append(viz.roc_auc)
 
-    
+
 
 
 
@@ -415,10 +419,11 @@ ax.fill_between(
 ax.set(
     xlabel="False Positive Rate",
     ylabel="True Positive Rate",
-    title=f"Mean ROC curve with variability\n(Positive label iRBD, dataset=Baseline Sleep stage synchronization features)",
+    title=f"Mean ROC curve with variability\n(Positive label NT1, dataset=Sleep stage synchronization features)",
 )
 ax.legend(loc="lower right")
 plt.show()
+plt.clf()
 
 
 #### Average performance metrics #########
@@ -445,6 +450,7 @@ f1_score_std=np.std(f1_score_all)
 accuracy_mean=np.mean(accuracy_all)
 accuracy_std=np.std(accuracy_all)
 
+
 specificity_mean=np.mean(specificity_all)
 specificity_std=np.std(specificity_all)
 
@@ -468,6 +474,8 @@ print(specificity_std)
 
 
 
+
+'''
 ##### Feature importance ##################
 
 # Stacking feature importance from each fold (5 folds)
@@ -484,7 +492,6 @@ importance_array=np.sum(importance_features,axis=1)
 print('Importance array')
 print(importance_array)
 print(importance_array.shape)
-print(np.sum(importance_array))
 
 
 sorted_features=sorted(importance_array,reverse=True)
@@ -595,6 +602,17 @@ print(delta.shape[1])
 print(delta.shape)
 print(delta)
 
+for i in range(delta.shape[1]):
+    
+    # Indexing in delta category df and getting feature names 
+    idx=delta.columns[i]
+
+    print(idx)
+
+    print(X_matrix_df[idx])
+
+    
+
 
 # In this loop the indexes of the delta matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
 for i in range(delta.shape[1]):
@@ -602,22 +620,26 @@ for i in range(delta.shape[1]):
     # Indexing in delta category df and getting feature names 
     idx=delta.columns[i]
 
+
+
     # Using the feature names from 'delta' category dataframe as indexes to the extract the original indexes from X_matrix_df
     # This is done to get the indexes for each feature in the 'importance_array' 
     original_idx_delta=X_matrix_df.columns.get_loc(idx)
+    print(original_idx_delta)
+    
 
     temp_idx_delta_coherence.append(original_idx_delta)
 
 
 print('List with indexes for categorized delta features')
 #
-print(temp_idx_delta_coherence)
+#print(temp_idx_delta_coherence)
 delta_coherence=np.stack(temp_idx_delta_coherence,axis=0)
+
+print(delta_coherence.shape)
+print(importance_array.shape)
 print(delta_coherence)
 
-print(delta_coherence.shape[0])
-print(delta_coherence.shape)
-print(importance_array.shape[0])
 
 # Indexing in the importance array to get the delta coherence importance values and summing the values to one value for this category
 delta_importance=np.sum(importance_array[delta_coherence])
@@ -721,7 +743,6 @@ print(beta_importance)
 
 
 
-
 #### gamma ###########
 
 # Extracting all coherence features with 'delta' in the name
@@ -748,7 +769,6 @@ print('List with indexes for categorized gamma features')
 gamma_coherence=np.stack(temp_idx_gamma_coherence,axis=0)
 
 # Indexing in the importance array to get the gamma coherence importance values and summing the values to one value for this category
-print(importance_array[gamma_coherence])
 gamma_importance=np.sum(importance_array[gamma_coherence])
 
 
@@ -843,7 +863,7 @@ print(wake_importance)
 
 # Extracting all coherence features with 'N1' in the name
 N1=df_coherence.filter(like='N1', axis=1) 
-print(N1.shape[1])
+print(N1.shape[0])
 print(N1)
 
 
@@ -880,7 +900,7 @@ print(N1_importance)
 
 # Extracting all coherence features with 'N2' in the name
 N2=df_coherence.filter(like='N2', axis=1) 
-print(N2.shape[1])
+print(N2.shape[0])
 print(N2)
 
 
@@ -916,7 +936,7 @@ print(N2_importance)
 
 # Extracting all coherence features with 'N3' in the name
 N3=df_coherence.filter(like='N3', axis=1) 
-print(N3.shape[1])
+print(N3.shape[0])
 print(N3)
 
 
@@ -951,7 +971,7 @@ print(N3_importance)
 
 # Extracting all coherence features with 'REM' in the name
 REM=df_coherence.filter(like='REM', axis=1) 
-print(REM.shape[1])
+print(REM.shape[0])
 print(REM)
 
 
@@ -1016,363 +1036,20 @@ plt.show()
 plt.clf()
 
 
-# Category 3) 15 combinations of electrodes = 15 barplots 
+
+# Category 3) 3 combinations of electrodes = 3 barplots 
 
 # All electrode combinations: 
 
-# F3M2F4M1 (done)
-# F3M2C3M2 (done)
-# F3M2C4M1 (done)
-# F3M2O2M1 (done)
-# F3M2O1M2 (done)
-# F4M1C3M2 (done)
-# F4M1C4M1 (done)
-# F4M1O2M1 (done)
-# F4M1O1M2 (done)
 # C3M2C4M1 (done)
-# C3M2O1M2 (done)
 # C3M2O2M1 (done)
 # C4M1O2M1 (done)
-# C4M1O1M2 (done)
-# O1M2O2M1 (done)
 
 
-temp_idx_F3M2F4M1_coherence=[]
-temp_idx_F3M2C3M2_coherence=[]
-temp_idx_F3M2C4M1_coherence=[]
-temp_idx_F3M2O2M1_coherence=[]
-temp_idx_F3M2O1M2_coherence=[]
-temp_idx_F4M1C3M2_coherence=[]
-temp_idx_F4M1C4M1_coherence=[]
-temp_idx_F4M1O2M1_coherence=[]
-temp_idx_F4M1O1M2_coherence=[]
+
 temp_idx_C3M2C4M1_coherence=[]
-temp_idx_C3M2O1M2_coherence=[]
 temp_idx_C3M2O2M1_coherence=[]
 temp_idx_C4M1O2M1_coherence=[]
-temp_idx_C4M1O1M2_coherence=[]
-temp_idx_O1M2O2M1_coherence=[]
-
-#### F3M2F4M1 ##########
-
-# Extracting all coherence features with 'F3M2F4M1' in the name
-F3M2F4M1=df_coherence.filter(like='F3M2F4M1', axis=1) 
-print(F3M2F4M1.shape[1])
-print(F3M2F4M1)
-
-
-# In this loop the indexes of the F3M2F4M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2F4M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2F4M1.columns[i]
-
-    # Using the feature names from 'F3M2F4M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2F4M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2F4M1_coherence.append(original_idx_F3M2F4M1)
-
-
-print('List with indexes for categorized F3M2F4M1 features')
-#print(temp_idx_F3M2F4M1_coherence)
-F3M2F4M1_coherence=np.stack(temp_idx_F3M2F4M1_coherence,axis=0)
-
-print(F3M2F4M1_coherence.shape[0])
-
-# Indexing in the importance array to get the F3M2F4M1 coherence importance values and summing the values to one value for this category
-F3M2F4M1_importance=np.sum(importance_array[F3M2F4M1_coherence])
-
-print(F3M2F4M1_importance)
-
-
-
-
-
-#### F3M2C3M2 ##########
-
-# Extracting all coherence features with 'F3M2C3M2' in the name
-F3M2C3M2=df_coherence.filter(like='F3M2C3M2', axis=1) 
-print(F3M2C3M2.shape[1])
-print(F3M2C3M2)
-
-
-# In this loop the indexes of the F3M2C3M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2C3M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2C3M2.columns[i]
-
-    # Using the feature names from 'F3M2C3M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2C3M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2C3M2_coherence.append(original_idx_F3M2C3M2)
-
-
-print('List with indexes for categorized F3M2C3M2 features')
-#print(temp_idx_F3M2C3M2_coherence)
-F3M2C3M2_coherence=np.stack(temp_idx_F3M2C3M2_coherence,axis=0)
-
-print(F3M2C3M2_coherence.shape[0])
-
-# Indexing in the importance array to get the F3M2C3M2 coherence importance values and summing the values to one value for this category
-F3M2C3M2_importance=np.sum(importance_array[F3M2C3M2_coherence])
-
-print(F3M2C3M2_importance)
-
-
-
-
-
-#### F3M2C4M1 ##########
-
-# Extracting all coherence features with 'F3M2C4M1' in the name
-F3M2C4M1=df_coherence.filter(like='F3M2C4M1', axis=1) 
-print(F3M2C4M1.shape[1])
-print(F3M2C4M1)
-
-
-# In this loop the indexes of the F3M2C4M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2C4M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2C4M1.columns[i]
-
-    # Using the feature names from 'F3M2C4M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2C4M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2C4M1_coherence.append(original_idx_F3M2C4M1)
-
-
-print('List with indexes for categorized F3M2C4M1 features')
-#print(temp_idx_F3M2C4M1_coherence)
-F3M2C4M1_coherence=np.stack(temp_idx_F3M2C4M1_coherence,axis=0)
-
-print(F3M2C4M1_coherence.shape[0])
-
-# Indexing in the importance array to get the F3M2C4M1 coherence importance values and summing the values to one value for this category
-F3M2C4M1_importance=np.sum(importance_array[F3M2C4M1_coherence])
-
-print(F3M2C4M1_importance)
-
-
-
-
-
-
-#### F3M2O2M1 ##########
-
-# Extracting all coherence features with 'F3M2O2M1' in the name
-F3M2O2M1=df_coherence.filter(like='F3M2O2M1', axis=1) 
-print(F3M2O2M1.shape[1])
-print(F3M2O2M1)
-
-
-# In this loop the indexes of the F3M2O2M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2O2M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2O2M1.columns[i]
-
-    # Using the feature names from 'F3M2O2M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2O2M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2O2M1_coherence.append(original_idx_F3M2O2M1)
-
-
-print('List with indexes for categorized F3M2O2M1 features')
-#print(temp_idx_F3M2O2M1_coherence)
-F3M2O2M1_coherence=np.stack(temp_idx_F3M2O2M1_coherence,axis=0)
-
-print(F3M2O2M1_coherence.shape[0])
-
-# Indexing in the importance array to get the F3M2O2M1 coherence importance values and summing the values to one value for this category
-F3M2O2M1_importance=np.sum(importance_array[F3M2O2M1_coherence])
-
-print(F3M2O2M1_importance)
-
-
-
-
-
-
-#### F3M2O1M2 ##########
-
-# Extracting all coherence features with 'F3M2O1M2' in the name
-F3M2O1M2=df_coherence.filter(like='F3M2O1M2', axis=1) 
-print(F3M2O1M2.shape[1])
-print(F3M2O1M2)
-
-
-# In this loop the indexes of the F3M2O1M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2O1M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2O1M2.columns[i]
-
-    # Using the feature names from 'F3M2O1M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2O1M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2O1M2_coherence.append(original_idx_F3M2O1M2)
-
-
-print('List with indexes for categorized F3M2O1M2 features')
-#print(temp_idx_F3M2O1M2_coherence)
-F3M2O1M2_coherence=np.stack(temp_idx_F3M2O1M2_coherence,axis=0)
-
-print(F3M2O1M2_coherence.shape[0])
-
-# Indexing in the importance array to get the F3M2O1M2 coherence importance values and summing the values to one value for this category
-F3M2O1M2_importance=np.sum(importance_array[F3M2O1M2_coherence])
-
-print(F3M2O1M2_importance)
-
-
-
-
-#### F4M1C3M2 ##########
-
-# Extracting all coherence features with 'F4M1C3M2' in the name
-F4M1C3M2=df_coherence.filter(like='F4M1C3M2', axis=1) 
-print(F4M1C3M2.shape[1])
-print(F4M1C3M2)
-
-
-# In this loop the indexes of the F4M1C3M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F4M1C3M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F4M1C3M2.columns[i]
-
-    # Using the feature names from 'F4M1C3M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F4M1C3M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F4M1C3M2_coherence.append(original_idx_F4M1C3M2)
-
-
-print('List with indexes for categorized F4M1C3M2 features')
-#print(temp_idx_F4M1C3M2_coherence)
-F4M1C3M2_coherence=np.stack(temp_idx_F4M1C3M2_coherence,axis=0)
-
-print(F4M1C3M2_coherence.shape[0])
-
-# Indexing in the importance array to get the F4M1C3M2 coherence importance values and summing the values to one value for this category
-F4M1C3M2_importance=np.sum(importance_array[F4M1C3M2_coherence])
-
-print(F4M1C3M2_importance)
-
-
-
-
-
-#### F4M1C4M1 ##########
-
-# Extracting all coherence features with 'F4M1C4M1' in the name
-F4M1C4M1=df_coherence.filter(like='F4M1C4M1', axis=1) 
-print(F4M1C4M1.shape[1])
-print(F4M1C4M1)
-
-
-# In this loop the indexes of the F4M1C4M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F4M1C4M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F4M1C4M1.columns[i]
-
-    # Using the feature names from 'F4M1C4M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F4M1C4M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F4M1C4M1_coherence.append(original_idx_F4M1C4M1)
-
-
-print('List with indexes for categorized F4M1C4M1 features')
-#print(temp_idx_F4M1C4M1_coherence)
-F4M1C4M1_coherence=np.stack(temp_idx_F4M1C4M1_coherence,axis=0)
-
-print(F4M1C4M1_coherence.shape[0])
-
-# Indexing in the importance array to get the F4M1C4M1 coherence importance values and summing the values to one value for this category
-F4M1C4M1_importance=np.sum(importance_array[F4M1C4M1_coherence])
-
-print(F4M1C4M1_importance)
-
-
-
-
-
-#### F4M1O2M1 ##########
-
-# Extracting all coherence features with 'F4M1O2M1' in the name
-F4M1O2M1=df_coherence.filter(like='F4M1O2M1', axis=1) 
-print(F4M1O2M1.shape[1])
-print(F4M1O2M1)
-
-
-# In this loop the indexes of the F4M1O2M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F4M1O2M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F4M1O2M1.columns[i]
-
-    # Using the feature names from 'F4M1O2M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F4M1O2M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F4M1O2M1_coherence.append(original_idx_F4M1O2M1)
-
-
-print('List with indexes for categorized F4M1O2M1 features')
-#print(temp_idx_F4M1O2M1_coherence)
-F4M1O2M1_coherence=np.stack(temp_idx_F4M1O2M1_coherence,axis=0)
-
-print(F4M1O2M1_coherence.shape[0])
-
-# Indexing in the importance array to get the F4M1O2M1 coherence importance values and summing the values to one value for this category
-F4M1O2M1_importance=np.sum(importance_array[F4M1O2M1_coherence])
-
-print(F4M1O2M1_importance)
-
-
-
-
-
-#### F4M1O1M2 ##########
-
-# Extracting all coherence features with 'F4M1O1M2' in the name
-F4M1O1M2=df_coherence.filter(like='F4M1O1M2', axis=1) 
-print(F4M1O1M2.shape[1])
-print(F4M1O1M2)
-
-
-# In this loop the indexes of the F4M1O1M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F4M1O1M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F4M1O1M2.columns[i]
-
-    # Using the feature names from 'F4M1O1M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F4M1O1M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F4M1O1M2_coherence.append(original_idx_F4M1O1M2)
-
-
-print('List with indexes for categorized F4M1O1M2 features')
-#print(temp_idx_F4M1O1M2_coherence)
-F4M1O1M2_coherence=np.stack(temp_idx_F4M1O1M2_coherence,axis=0)
-
-print(F4M1O1M2_coherence.shape[0])
-
-# Indexing in the importance array to get the F4M1O1M2 coherence importance values and summing the values to one value for this category
-F4M1O1M2_importance=np.sum(importance_array[F4M1O1M2_coherence])
-
-print(F4M1O1M2_importance)
 
 
 
@@ -1381,7 +1058,7 @@ print(F4M1O1M2_importance)
 
 # Extracting all coherence features with 'C3M2C4M1' in the name
 C3M2C4M1=df_coherence.filter(like='C3M2C4M1', axis=1) 
-print(C3M2C4M1.shape[1])
+print(C3M2C4M1.shape[0])
 print(C3M2C4M1)
 
 
@@ -1412,47 +1089,13 @@ print(C3M2C4M1_importance)
 
 
 
-#### C3M2O1M2 ##########
-
-# Extracting all coherence features with 'C3M2O1M2' in the name
-C3M2O1M2=df_coherence.filter(like='C3M2O1M2', axis=1) 
-print(C3M2O1M2.shape[1])
-print(C3M2O1M2)
-
-
-# In this loop the indexes of the C3M2O1M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(C3M2O1M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=C3M2O1M2.columns[i]
-
-    # Using the feature names from 'C3M2O1M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_C3M2O1M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_C3M2O1M2_coherence.append(original_idx_C3M2O1M2)
-
-
-print('List with indexes for categorized C3M2O1M2 features')
-#print(temp_idx_C3M2O1M2_coherence)
-C3M2O1M2_coherence=np.stack(temp_idx_C3M2O1M2_coherence,axis=0)
-
-print(C3M2O1M2_coherence.shape[0])
-
-# Indexing in the importance array to get the C3M2O1M2 coherence importance values and summing the values to one value for this category
-C3M2O1M2_importance=np.sum(importance_array[C3M2O1M2_coherence])
-
-print(C3M2O1M2_importance)
-
-
-
 
 
 #### C3M2O2M1 ##########
 
 # Extracting all coherence features with 'C3M2O2M1' in the name
 C3M2O2M1=df_coherence.filter(like='C3M2O2M1', axis=1) 
-print(C3M2O2M1.shape[1])
+print(C3M2O2M1.shape[0])
 print(C3M2O2M1)
 
 
@@ -1489,7 +1132,7 @@ print(C3M2O2M1_importance)
 
 # Extracting all coherence features with 'C4M1O2M1' in the name
 C4M1O2M1=df_coherence.filter(like='C4M1O2M1', axis=1) 
-print(C4M1O2M1.shape[1])
+print(C4M1O2M1.shape[0])
 print(C4M1O2M1)
 
 
@@ -1522,78 +1165,6 @@ print(C4M1O2M1_importance)
 
 
 
-#### C4M1O1M2 ##########
-
-# Extracting all coherence features with 'C4M1O1M2' in the name
-C4M1O1M2=df_coherence.filter(like='C4M1O1M2', axis=1) 
-print(C4M1O1M2.shape[1])
-print(C4M1O1M2)
-
-
-# In this loop the indexes of the C4M1O1M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(C4M1O1M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=C4M1O1M2.columns[i]
-
-    # Using the feature names from 'C4M1O1M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_C4M1O1M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_C4M1O1M2_coherence.append(original_idx_C4M1O1M2)
-
-
-print('List with indexes for categorized C4M1O1M2 features')
-#print(temp_idx_C4M1O1M2_coherence)
-C4M1O1M2_coherence=np.stack(temp_idx_C4M1O1M2_coherence,axis=0)
-
-print(C4M1O1M2_coherence.shape[0])
-
-# Indexing in the importance array to get the C4M1O1M2 coherence importance values and summing the values to one value for this category
-C4M1O1M2_importance=np.sum(importance_array[C4M1O1M2_coherence])
-
-print(C4M1O1M2_importance)
-
-
-
-
-
-
-#### O1M2O2M1 ##########
-
-# Extracting all coherence features with 'O1M2O2M1' in the name
-O1M2O2M1=df_coherence.filter(like='O1M2O2M1', axis=1) 
-print(O1M2O2M1.shape[1])
-print(O1M2O2M1)
-
-
-# In this loop the indexes of the O1M2O2M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(O1M2O2M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=O1M2O2M1.columns[i]
-
-    # Using the feature names from 'O1M2O2M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_O1M2O2M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_O1M2O2M1_coherence.append(original_idx_O1M2O2M1)
-
-
-print('List with indexes for categorized O1M2O2M1 features')
-#print(temp_idx_O1M2O2M1_coherence)
-O1M2O2M1_coherence=np.stack(temp_idx_O1M2O2M1_coherence,axis=0)
-
-print(O1M2O2M1_coherence.shape[0])
-
-# Indexing in the importance array to get the O1M2O2M1 coherence importance values and summing the values to one value for this category
-O1M2O2M1_importance=np.sum(importance_array[O1M2O2M1_coherence])
-
-print(O1M2O2M1_importance)
-
-
-
-
 
 
 ### Gathering the frequency importance values in a df for plotting ########
@@ -1601,9 +1172,9 @@ print(O1M2O2M1_importance)
 # Saving values gathered for electrodes
 print('list with features - electrodes')
 
-electrodes_values_list=[F3M2F4M1_importance, F3M2C3M2_importance, F3M2C4M1_importance,F3M2O2M1_importance,F3M2O1M2_importance,F4M1C3M2_importance,F4M1C4M1_importance,F4M1O2M1_importance, F4M1O1M2_importance,C3M2C4M1_importance, C3M2O1M2_importance, C3M2O2M1_importance, C4M1O2M1_importance,C4M1O1M2_importance,O1M2O2M1_importance]
+electrodes_values_list=[C3M2C4M1_importance, C3M2O2M1_importance, C4M1O2M1_importance]
 features_electrodes=np.stack(electrodes_values_list)
-features_electrodes=np.reshape(features_electrodes,(1,15)) # reshape
+features_electrodes=np.reshape(features_electrodes,(1,3)) # reshape
 print(features_electrodes)
 print(type(features_electrodes))
 print(features_electrodes.shape)
@@ -1612,7 +1183,7 @@ print(features_electrodes.shape)
 
 
 # column names 
-electrodes_columns=['F3M2F4M1','F3M2C3M2','F3M2C4M1','F3M2O2M1','F3M2O1M2','F4M1C3M2','F4M1C4M1','F4M1O2M1','F4M1O1M2','C3M2C4M1','C3M2O1M2','C3M2O2M1','C4M1O2M1','C4M1O1M2','O1M2O2M1']
+electrodes_columns=['C3M2C4M1','C3M2O2M1','C4M1O2M1']
 print(type(electrodes_columns))
 #print(electrodes_columns)
 
@@ -1632,9 +1203,7 @@ plt.tight_layout()
 plt.show()   
 plt.clf()
 
-del F3M2F4M1_importance, F3M2C3M2_importance, F3M2C4M1_importance,F3M2O2M1_importance,F3M2O1M2_importance,F4M1C3M2_importance,F4M1C4M1_importance,F4M1O2M1_importance, F4M1O1M2_importance,C3M2C4M1_importance, C3M2O1M2_importance, C3M2O2M1_importance, C4M1O2M1_importance,C4M1O1M2_importance,O1M2O2M1_importance
-
-
+del C3M2C4M1_importance, C3M2O2M1_importance, C4M1O2M1_importance
 
 ########## Correlation feature plots ############################
 
@@ -1653,7 +1222,7 @@ temp_idx_epocssize_30_correlation=[]
 
 # Extracting all coherence features with 'Epoch 1s' in the name
 epocssize_1=df_correlation.filter(like='epocssize_1_', axis=1) 
-print(epocssize_1.shape[1])
+print(epocssize_1.shape[0])
 print(epocssize_1)
 
 
@@ -1688,7 +1257,7 @@ print(epocssize_1_importance)
 
 # Extracting all coherence features with 'Epoch 3s' in the name
 epocssize_3=df_correlation.filter(like='epocssize_3_', axis=1) 
-print(epocssize_3.shape[1])
+print(epocssize_3.shape[0])
 print(epocssize_3)
 
 
@@ -1722,7 +1291,7 @@ print(epocssize_3_importance)
 
 # Extracting all coherence features with 'Epoch 1s' in the name
 epocssize_5=df_correlation.filter(like='epocssize_5', axis=1) 
-print(epocssize_5.shape[1])
+print(epocssize_5.shape[0])
 print(epocssize_5)
 
 
@@ -1756,7 +1325,7 @@ print(epocssize_5_importance)
 
 # Extracting all coherence features with 'Epoch 15s' in the name
 epocssize_15=df_correlation.filter(like='epocssize_15', axis=1) 
-print(epocssize_15.shape[1])
+print(epocssize_15.shape[0])
 print(epocssize_15)
 
 
@@ -1790,7 +1359,7 @@ print(epocssize_15_importance)
 
 # Extracting all coherence features with 'Epoch 30s' in the name
 epocssize_30=df_correlation.filter(like='epocssize_30', axis=1) 
-print(epocssize_30.shape[1])
+print(epocssize_30.shape[0])
 print(epocssize_30)
 
 
@@ -1848,7 +1417,7 @@ print(df_plt_epochsize)
 
 
 boxplot_features=epoch_columns
-plt.suptitle('Sleep stage synchronization epoch size feature importance',fontsize=20)
+plt.suptitle('Correlation epoch size feature importance',fontsize=20)
 plt.subplot(1, 1, 1) # Adjust these numbers as per your requirement.
 sns.barplot(data=df_plt_epochsize,errorbar=None)
 plt.xticks(rotation=45, ha='right',fontsize=16)
@@ -1862,364 +1431,20 @@ plt.clf()
 
 
 
-# Category 2) 15 combinations of electrodes = 15 barplots 
+# Category 2) 3 combinations of electrodes = 3 barplots 
 
 # All electrode combinations: 
 
-# F3M2F4M1 (done)
-# F3M2C3M2 (done)
-# F3M2C4M1 (done)
-# F3M2O2M1 (done)
-# F3M2O1M2 (done)
-# F4M1C3M2 (done)
-# F4M1C4M1 (done)
-# F4M1O2M1 (done)
-# F4M1O1M2 (done)
+
 # C3M2C4M1 (done)
-# C3M2O1M2 (done)
 # C3M2O2M1 (done)
 # C4M1O2M1 (done)
-# C4M1O1M2 (done)
-# O1M2O2M1 (done)
 
 
-temp_idx_F3M2F4M1_correlation=[]
-temp_idx_F3M2C3M2_correlation=[]
-temp_idx_F3M2C4M1_correlation=[]
-temp_idx_F3M2O2M1_correlation=[]
-temp_idx_F3M2O1M2_correlation=[]
-temp_idx_F4M1C3M2_correlation=[]
-temp_idx_F4M1C4M1_correlation=[]
-temp_idx_F4M1O2M1_correlation=[]
-temp_idx_F4M1O1M2_correlation=[]
+
 temp_idx_C3M2C4M1_correlation=[]
-temp_idx_C3M2O1M2_correlation=[]
 temp_idx_C3M2O2M1_correlation=[]
 temp_idx_C4M1O2M1_correlation=[]
-temp_idx_C4M1O1M2_correlation=[]
-temp_idx_O1M2O2M1_correlation=[]
-
-#### F3M2F4M1 ##########
-
-# Extracting all correlation features with 'F3M2F4M1' in the name
-F3M2F4M1=df_correlation.filter(like='F3M2F4M1', axis=1) 
-print(F3M2F4M1.shape[1])
-print(F3M2F4M1)
-
-
-# In this loop the indexes of the F3M2F4M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2F4M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2F4M1.columns[i]
-
-    # Using the feature names from 'F3M2F4M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2F4M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2F4M1_correlation.append(original_idx_F3M2F4M1)
-
-
-print('List with indexes for categorized F3M2F4M1 features')
-#print(temp_idx_F3M2F4M1_correlation)
-F3M2F4M1_correlation=np.stack(temp_idx_F3M2F4M1_coherence,axis=0)
-
-print(F3M2F4M1_correlation.shape[0])
-
-# Indexing in the importance array to get the F3M2F4M1 correlation importance values and summing the values to one value for this category
-F3M2F4M1_importance=np.sum(importance_array[F3M2F4M1_correlation])
-
-print(F3M2F4M1_importance)
-
-
-
-
-
-#### F3M2C3M2 ##########
-
-# Extracting all correlation features with 'F3M2C3M2' in the name
-F3M2C3M2=df_correlation.filter(like='F3M2C3M2', axis=1) 
-print(F3M2C3M2.shape[1])
-print(F3M2C3M2)
-
-
-# In this loop the indexes of the F3M2C3M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2C3M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2C3M2.columns[i]
-
-    # Using the feature names from 'F3M2C3M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2C3M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2C3M2_correlation.append(original_idx_F3M2C3M2)
-
-
-print('List with indexes for categorized F3M2C3M2 features')
-#print(temp_idx_F3M2C3M2_coherence)
-F3M2C3M2_correlation=np.stack(temp_idx_F3M2C3M2_correlation,axis=0)
-
-print(F3M2C3M2_correlation.shape[0])
-
-# Indexing in the importance array to get the F3M2C3M2 correlation importance values and summing the values to one value for this category
-F3M2C3M2_importance=np.sum(importance_array[F3M2C3M2_correlation])
-
-print(F3M2C3M2_importance)
-
-
-
-
-
-#### F3M2C4M1 ##########
-
-# Extracting all correlation features with 'F3M2C4M1' in the name
-F3M2C4M1=df_correlation.filter(like='F3M2C4M1', axis=1) 
-print(F3M2C4M1.shape[1])
-print(F3M2C4M1)
-
-
-# In this loop the indexes of the F3M2C4M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2C4M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2C4M1.columns[i]
-
-    # Using the feature names from 'F3M2C4M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2C4M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2C4M1_correlation.append(original_idx_F3M2C4M1)
-
-
-print('List with indexes for categorized F3M2C4M1 features')
-#print(temp_idx_F3M2C4M1_coherence)
-F3M2C4M1_correlation=np.stack(temp_idx_F3M2C4M1_correlation,axis=0)
-
-print(F3M2C4M1_correlation.shape[0])
-
-# Indexing in the importance array to get the F3M2C4M1 correlation importance values and summing the values to one value for this category
-F3M2C4M1_importance=np.sum(importance_array[F3M2C4M1_correlation])
-
-print(F3M2C4M1_importance)
-
-
-
-
-
-
-#### F3M2O2M1 ##########
-
-# Extracting all correlation features with 'F3M2O2M1' in the name
-F3M2O2M1=df_correlation.filter(like='F3M2O2M1', axis=1) 
-print(F3M2O2M1.shape[1])
-print(F3M2O2M1)
-
-
-# In this loop the indexes of the F3M2O2M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2O2M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2O2M1.columns[i]
-
-    # Using the feature names from 'F3M2O2M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2O2M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2O2M1_correlation.append(original_idx_F3M2O2M1)
-
-
-print('List with indexes for categorized F3M2O2M1 features')
-#print(temp_idx_F3M2O2M1_correlation)
-F3M2O2M1_correlation=np.stack(temp_idx_F3M2O2M1_correlation,axis=0)
-
-print(F3M2O2M1_correlation.shape[0])
-
-# Indexing in the importance array to get the F3M2O2M1 correlation importance values and summing the values to one value for this category
-F3M2O2M1_importance=np.sum(importance_array[F3M2O2M1_correlation])
-
-print(F3M2O2M1_importance)
-
-
-
-
-
-
-#### F3M2O1M2 ##########
-
-# Extracting all correlation features with 'F3M2O1M2' in the name
-F3M2O1M2=df_correlation.filter(like='F3M2O1M2', axis=1) 
-print(F3M2O1M2.shape[1])
-print(F3M2O1M2)
-
-
-# In this loop the indexes of the F3M2O1M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F3M2O1M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F3M2O1M2.columns[i]
-
-    # Using the feature names from 'F3M2O1M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F3M2O1M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F3M2O1M2_correlation.append(original_idx_F3M2O1M2)
-
-
-print('List with indexes for categorized F3M2O1M2 features')
-#print(temp_idx_F3M2O1M2_correlation)
-F3M2O1M2_correlation=np.stack(temp_idx_F3M2O1M2_correlation,axis=0)
-
-print(F3M2O1M2_correlation.shape[0])
-
-# Indexing in the importance array to get the F3M2O1M2 correlation importance values and summing the values to one value for this category
-F3M2O1M2_importance=np.sum(importance_array[F3M2O1M2_correlation])
-
-print(F3M2O1M2_importance)
-
-
-
-
-#### F4M1C3M2 ##########
-
-# Extracting all correlation features with 'F4M1C3M2' in the name
-F4M1C3M2=df_correlation.filter(like='F4M1C3M2', axis=1) 
-print(F4M1C3M2.shape[1])
-print(F4M1C3M2)
-
-
-# In this loop the indexes of the F4M1C3M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F4M1C3M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F4M1C3M2.columns[i]
-
-    # Using the feature names from 'F4M1C3M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F4M1C3M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F4M1C3M2_correlation.append(original_idx_F4M1C3M2)
-
-
-print('List with indexes for categorized F4M1C3M2 features')
-#print(temp_idx_F4M1C3M2_correlation)
-F4M1C3M2_correlation=np.stack(temp_idx_F4M1C3M2_correlation,axis=0)
-
-print(F4M1C3M2_correlation.shape[0])
-
-# Indexing in the importance array to get the F4M1C3M2 correlation importance values and summing the values to one value for this category
-F4M1C3M2_importance=np.sum(importance_array[F4M1C3M2_correlation])
-
-print(F4M1C3M2_importance)
-
-
-
-
-
-#### F4M1C4M1 ##########
-
-# Extracting all correlation features with 'F4M1C4M1' in the name
-F4M1C4M1=df_correlation.filter(like='F4M1C4M1', axis=1) 
-print(F4M1C4M1.shape[1])
-print(F4M1C4M1)
-
-
-# In this loop the indexes of the F4M1C4M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F4M1C4M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F4M1C4M1.columns[i]
-
-    # Using the feature names from 'F4M1C4M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F4M1C4M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F4M1C4M1_correlation.append(original_idx_F4M1C4M1)
-
-
-print('List with indexes for categorized F4M1C4M1 features')
-#print(temp_idx_F4M1C4M1_correlation)
-F4M1C4M1_correlation=np.stack(temp_idx_F4M1C4M1_correlation,axis=0)
-
-print(F4M1C4M1_correlation.shape[0])
-
-# Indexing in the importance array to get the F4M1C4M1 correlation importance values and summing the values to one value for this category
-F4M1C4M1_importance=np.sum(importance_array[F4M1C4M1_correlation])
-
-print(F4M1C4M1_importance)
-
-
-
-
-
-#### F4M1O2M1 ##########
-
-# Extracting all correlation features with 'F4M1O2M1' in the name
-F4M1O2M1=df_correlation.filter(like='F4M1O2M1', axis=1) 
-print(F4M1O2M1.shape[1])
-print(F4M1O2M1)
-
-
-# In this loop the indexes of the F4M1O2M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F4M1O2M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F4M1O2M1.columns[i]
-
-    # Using the feature names from 'F4M1O2M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F4M1O2M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F4M1O2M1_correlation.append(original_idx_F4M1O2M1)
-
-
-print('List with indexes for categorized F4M1O2M1 features')
-#print(temp_idx_F4M1O2M1_correlation)
-F4M1O2M1_correlation=np.stack(temp_idx_F4M1O2M1_correlation,axis=0)
-
-print(F4M1O2M1_correlation.shape[0])
-
-# Indexing in the importance array to get the F4M1O2M1 correlation importance values and summing the values to one value for this category
-F4M1O2M1_importance=np.sum(importance_array[F4M1O2M1_correlation])
-
-print(F4M1O2M1_importance)
-
-
-
-
-
-#### F4M1O1M2 ##########
-
-# Extracting all correlation features with 'F4M1O1M2' in the name
-F4M1O1M2=df_correlation.filter(like='F4M1O1M2', axis=1) 
-print(F4M1O1M2.shape[1])
-print(F4M1O1M2)
-
-
-# In this loop the indexes of the F4M1O1M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(F4M1O1M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=F4M1O1M2.columns[i]
-
-    # Using the feature names from 'F4M1O1M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_F4M1O1M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_F4M1O1M2_correlation.append(original_idx_F4M1O1M2)
-
-
-print('List with indexes for categorized F4M1O1M2 features')
-#print(temp_idx_F4M1O1M2_correlation)
-F4M1O1M2_correlation=np.stack(temp_idx_F4M1O1M2_correlation,axis=0)
-
-print(F4M1O1M2_correlation.shape[0])
-
-# Indexing in the importance array to get the F4M1O1M2 correlation importance values and summing the values to one value for this category
-F4M1O1M2_importance=np.sum(importance_array[F4M1O1M2_correlation])
-
-print(F4M1O1M2_importance)
-
 
 
 
@@ -2254,42 +1479,6 @@ print(C3M2C4M1_correlation.shape[0])
 C3M2C4M1_importance=np.sum(importance_array[C3M2C4M1_correlation])
 
 print(C3M2C4M1_importance)
-
-
-
-
-#### C3M2O1M2 ##########
-
-# Extracting all correlation features with 'C3M2O1M2' in the name
-C3M2O1M2=df_correlation.filter(like='C3M2O1M2', axis=1) 
-print(C3M2O1M2.shape[1])
-print(C3M2O1M2)
-
-
-# In this loop the indexes of the C3M2O1M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(C3M2O1M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=C3M2O1M2.columns[i]
-
-    # Using the feature names from 'C3M2O1M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_C3M2O1M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_C3M2O1M2_correlation.append(original_idx_C3M2O1M2)
-
-
-print('List with indexes for categorized C3M2O1M2 features')
-#print(temp_idx_C3M2O1M2_correlation)
-C3M2O1M2_correlation=np.stack(temp_idx_C3M2O1M2_correlation,axis=0)
-
-print(C3M2O1M2_correlation.shape[0])
-
-# Indexing in the importance array to get the C3M2O1M2 correlation importance values and summing the values to one value for this category
-C3M2O1M2_importance=np.sum(importance_array[C3M2O1M2_correlation])
-
-print(C3M2O1M2_importance)
-
 
 
 
@@ -2366,90 +1555,14 @@ print(C4M1O2M1_importance)
 
 
 
-
-
-#### C4M1O1M2 ##########
-
-# Extracting all correlation features with 'C4M1O1M2' in the name
-C4M1O1M2=df_correlation.filter(like='C4M1O1M2', axis=1) 
-print(C4M1O1M2.shape[1])
-print(C4M1O1M2)
-
-
-# In this loop the indexes of the C4M1O1M2 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(C4M1O1M2.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=C4M1O1M2.columns[i]
-
-    # Using the feature names from 'C4M1O1M2' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_C4M1O1M2=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_C4M1O1M2_correlation.append(original_idx_C4M1O1M2)
-
-
-print('List with indexes for categorized C4M1O1M2 features')
-#print(temp_idx_C4M1O1M2_correlation)
-C4M1O1M2_correlation=np.stack(temp_idx_C4M1O1M2_correlation,axis=0)
-
-print(C4M1O1M2_correlation.shape[0])
-
-# Indexing in the importance array to get the C4M1O1M2 correlation importance values and summing the values to one value for this category
-C4M1O1M2_importance=np.sum(importance_array[C4M1O1M2_correlation])
-
-print(C4M1O1M2_importance)
-
-
-
-
-
-
-#### O1M2O2M1 ##########
-
-# Extracting all correlation features with 'O1M2O2M1' in the name
-O1M2O2M1=df_correlation.filter(like='O1M2O2M1', axis=1) 
-print(O1M2O2M1.shape[1])
-print(O1M2O2M1)
-
-
-# In this loop the indexes of the O1M2O2M1 matrix and the original X_matrix_df are matched to find the indexes that should be used for extracting the importance values 
-for i in range(O1M2O2M1.shape[1]):
-    
-    # Indexing in wake category df and getting feature names 
-    idx=O1M2O2M1.columns[i]
-
-    # Using the feature names from 'O1M2O2M1' category dataframe as indexes to the extract the original indexes from X_matrix_df
-    # This is done to get the indexes for each feature in the 'importance_array' 
-    original_idx_O1M2O2M1=X_matrix_df.columns.get_loc(idx)
-
-    temp_idx_O1M2O2M1_correlation.append(original_idx_O1M2O2M1)
-
-
-print('List with indexes for categorized O1M2O2M1 features')
-#print(temp_idx_O1M2O2M1_correlation)
-O1M2O2M1_correlation=np.stack(temp_idx_O1M2O2M1_correlation,axis=0)
-
-print(O1M2O2M1_correlation.shape[0])
-
-# Indexing in the importance array to get the O1M2O2M1 correlation importance values and summing the values to one value for this category
-O1M2O2M1_importance=np.sum(importance_array[O1M2O2M1_correlation])
-
-print(O1M2O2M1_importance)
-
-
-
-
-
-
 ### Gathering the frequency importance values in a df for plotting ########
 
 # Saving values gathered for electrodes
 print('list with features - electrodes')
 
-electrodes_values_list=[F3M2F4M1_importance, F3M2C3M2_importance, F3M2C4M1_importance,F3M2O2M1_importance,F3M2O1M2_importance,F4M1C3M2_importance,F4M1C4M1_importance,F4M1O2M1_importance, F4M1O1M2_importance,C3M2C4M1_importance, C3M2O1M2_importance, C3M2O2M1_importance, C4M1O2M1_importance,C4M1O1M2_importance,O1M2O2M1_importance]
+electrodes_values_list=[C3M2C4M1_importance, C3M2O2M1_importance, C4M1O2M1_importance]
 features_electrodes=np.stack(electrodes_values_list)
-features_electrodes=np.reshape(features_electrodes,(1,15)) # reshape
+features_electrodes=np.reshape(features_electrodes,(1,3)) # reshape
 print(features_electrodes)
 print(type(features_electrodes))
 print(features_electrodes.shape)
@@ -2458,7 +1571,7 @@ print(features_electrodes.shape)
 
 
 # column names 
-electrodes_columns=['F3M2F4M1','F3M2C3M2','F3M2C4M1','F3M2O2M1','F3M2O1M2','F4M1C3M2','F4M1C4M1','F4M1O2M1','F4M1O1M2','C3M2C4M1','C3M2O1M2','C3M2O2M1','C4M1O2M1','C4M1O1M2','O1M2O2M1']
+electrodes_columns=['C3M2C4M1','C3M2O2M1','C4M1O2M1']
 print(type(electrodes_columns))
 print(electrodes_columns)
 
@@ -2469,7 +1582,8 @@ print(df_plt_electrodes)
 
 
 boxplot_features=electrodes_columns
-plt.suptitle('Sleep stage synchronization electrodes',fontsize=20)# 1, 1) # Adjust these numbers as per your requirement.
+plt.suptitle('Correlation electrode feature importance',fontsize=20)
+plt.subplot(1, 1, 1) # Adjust these numbers as per your requirement.
 sns.barplot(data=df_plt_electrodes,errorbar=None)
 plt.xticks(rotation=45, ha='right',fontsize=16)
 #plt.title('')
@@ -2489,7 +1603,7 @@ temp_corr_search=[]
 
 # Because of some challenges with the name for this specific category it is done in a more complicated way
 
-Electrodes=['F3M2','F4M1','C3M2','C4M1','O1M2','O2M1']
+Electrodes=['C3M2','C4M1','O2M1']
 
 # Making array to loop over for all electrode combinations 
 iterable=Electrodes
@@ -2628,7 +1742,7 @@ print(corr_importance)
 
 # Extracting all coherence features with 'Epoch 1s' in the name
 diff_corr=df_correlation.filter(like='_corrdiff_', axis=1) 
-print(diff_corr.shape[1])
+print(diff_corr.shape[0])
 print(diff_corr)
 
 temp_idx_diff_corr_correlation=[]
@@ -2803,3 +1917,4 @@ plt.tight_layout()
 plt.show()   
 plt.clf()
 
+'''
