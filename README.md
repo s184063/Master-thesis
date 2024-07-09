@@ -1,9 +1,9 @@
 This code was made by Natasja Bonde Andersen in the period 10th of January - 10th of July 2024. 
 The codes cannot be used without permission from the author (08-07-2024). 
 Codes for 5 datasets can be found in this repository (France, China patients, China controls, RBD patients and RBD controls). 
-The china controls and RBD controls separately from the china patients and RBD patient datasets.
+The china controls and RBD controls was handled separately from the china patients and RBD patient datasets.
 
-One type of code exists for each of the dataset. This was due to different names in the patient IDs. Despite from the patients naming the codes are identical. 
+One type of code exists for each of the dataset. This was due to different names in the patient IDs. Despite from the filenaming the codes are identical. 
 The codes should be used in the following order for each dataset: 
 
 1) The 'My_functions_scripts' covers several functions used per dataset in all other codes. 
@@ -15,6 +15,7 @@ These are functions developed for many purposes. This code is loaded in the top 
 1.e) My_functions_script_RBD_controls
 
 2) First the data were restructured using the code:
+All datasets should have the same name of the electrodes used. All electrodes was given a proper name and was referenced it needed. New EDF files containing only the EEG signals were saved. 
 2.a) Restructure_data_China
 2.b) Restructure_data_China_controls
 2.c) Restructure_data_France
